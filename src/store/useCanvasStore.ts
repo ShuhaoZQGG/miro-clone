@@ -67,11 +67,18 @@ export const useCanvasStore = create<CanvasState>()(
     })),
     
     updateElement: (id, updates) => set((state) => ({
-      elements: state.elements.map(element =>
-        element.id === id 
-          ? { ...element, ...updates, updatedAt: new Date().toISOString() }
-          : element
-      )
+      elements: state.elements.map(element => {
+        if (element.id !== id) return element
+        
+        // Type-safe element update with proper validation
+        const updatedElement = {
+          ...element,
+          ...updates,
+          updatedAt: new Date().toISOString()
+        } as CanvasElement
+        
+        return updatedElement
+      })
     })),
     
     removeElement: (id) => set((state) => ({

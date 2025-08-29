@@ -33,7 +33,7 @@ export class CanvasEngine {
   private selectedElementIds: string[] = []
   private panBoundaries: PanBoundaries | null = null
   private zoomLimits: ZoomLimits = { min: 0.1, max: 10 }
-  private isVirtualizationEnabled = false
+  private virtualizationEnabled = false
   private isPanningActive = false
   private isSpacePressed = false
   private lastFrameTime = 0
@@ -50,15 +50,15 @@ export class CanvasEngine {
 
   constructor(container: HTMLElement) {
     this.container = container
-    this.initializeCanvas()
+    this.canvas = this.initializeCanvas()
     this.setupEventListeners()
     this.startFrameRateMonitoring()
   }
 
-  private initializeCanvas(): void {
+  private initializeCanvas(): fabric.Canvas {
     const rect = this.container.getBoundingClientRect()
     
-    this.canvas = new fabric.Canvas(null, {
+    const canvas = new fabric.Canvas(null, {
       width: rect.width,
       height: rect.height,
       selection: true,
@@ -67,9 +67,12 @@ export class CanvasEngine {
     })
     
     // Append canvas to container
-    if (this.canvas.wrapperEl) {
-      this.container.appendChild(this.canvas.wrapperEl)
+    const canvasEl = canvas.getElement()
+    if (canvasEl) {
+      this.container.appendChild(canvasEl)
     }
+    
+    return canvas
   }
 
   private setupEventListeners(): void {
@@ -86,9 +89,12 @@ export class CanvasEngine {
     document.addEventListener('keyup', this.handleKeyUp.bind(this))
     
     // Touch events
-    this.canvas.wrapperEl?.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false })
-    this.canvas.wrapperEl?.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false })
-    this.canvas.wrapperEl?.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false })
+    const canvasEl = this.canvas.getElement()
+    if (canvasEl) {
+      canvasEl.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false })
+      canvasEl.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false })
+      canvasEl.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false })
+    }
     
     // Resize observer
     const resizeObserver = new ResizeObserver(this.handleResize.bind(this))
@@ -442,6 +448,10 @@ export class CanvasEngine {
   }
 
   // Getters
+  getCanvas(): fabric.Canvas {
+    return this.canvas
+  }
+
   getCamera(): Camera {
     return { ...this.camera }
   }
@@ -471,7 +481,7 @@ export class CanvasEngine {
   }
 
   isVirtualizationEnabled(): boolean {
-    return this.isVirtualizationEnabled
+    return this.virtualizationEnabled
   }
 
   getFrameRate(): number {
@@ -492,12 +502,12 @@ export class CanvasEngine {
   }
 
   enableVirtualization(enabled: boolean): void {
-    this.isVirtualizationEnabled = enabled
+    this.virtualizationEnabled = enabled
   }
 
   // Performance optimization
   cullElements(elements: CanvasElement[]): CanvasElement[] {
-    if (!this.isVirtualizationEnabled) {
+    if (!this.virtualizationEnabled) {
       return elements
     }
     

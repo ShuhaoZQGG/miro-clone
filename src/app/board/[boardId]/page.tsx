@@ -1,16 +1,15 @@
-'use client'
-
 import { Whiteboard } from '@/components/Whiteboard'
 import { Suspense } from 'react'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 interface BoardPageProps {
-  params: {
+  params: Promise<{
     boardId: string
-  }
+  }>
 }
 
-export default function BoardPage({ params }: BoardPageProps) {
+export default async function BoardPage({ params }: BoardPageProps) {
+  const { boardId } = await params
   return (
     <div className="h-screen w-screen overflow-hidden bg-gray-50">
       <Suspense 
@@ -23,7 +22,7 @@ export default function BoardPage({ params }: BoardPageProps) {
           </div>
         }
       >
-        <Whiteboard boardId={params.boardId} />
+        <Whiteboard boardId={boardId} />
       </Suspense>
     </div>
   )

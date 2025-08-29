@@ -342,7 +342,7 @@ describe('AuthService', () => {
     it('should initiate Google OAuth flow', () => {
       const originalLocation = window.location
       delete (window as any).location
-      window.location = { href: '' } as Location
+      window.location = { href: '' } as any
 
       authService.initiateGoogleOAuth()
 
@@ -351,7 +351,7 @@ describe('AuthService', () => {
       expect(window.location.href).toContain('redirect_uri=')
       expect(window.location.href).toContain('scope=email+profile')
 
-      window.location = originalLocation
+      window.location = originalLocation as any
     })
 
     it('should handle OAuth callback with authorization code', async () => {
