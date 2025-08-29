@@ -4,6 +4,9 @@ import {
   StickyNoteElement, 
   ShapeElement, 
   TextElement,
+  ConnectorElement,
+  FreehandElement,
+  ImageElement,
   Position, 
   Size 
 } from '@/types'
@@ -30,6 +33,28 @@ interface TextContent {
   fontWeight?: string
   color?: string
   textAlign?: 'left' | 'center' | 'right'
+}
+
+interface ConnectorOptions {
+  style?: 'straight' | 'curved' | 'stepped'
+  stroke?: string
+  strokeWidth?: number
+  strokeDasharray?: string
+  arrowStart?: boolean
+  arrowEnd?: boolean
+  startElementId?: string
+  endElementId?: string
+}
+
+interface FreehandOptions {
+  brushSize?: number
+  color?: string
+  opacity?: number
+}
+
+interface ImageOptions {
+  size?: Size
+  alt?: string
 }
 
 export class ElementManager {
@@ -516,5 +541,254 @@ export class ElementManager {
    */
   getElementsCount(): number {
     return this.elements.length
+  }
+
+  /**
+   * Creates a connector element
+   */
+  createConnector(
+    startPoint: Position,
+    endPoint: Position,
+    options: ConnectorOptions = {}
+  ): ConnectorElement {
+    const id = `connector-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    const connector: ConnectorElement = {
+      id,
+      type: 'connector',
+      boardId: this.boardId,
+      position: {
+        x: Math.min(startPoint.x, endPoint.x),
+        y: Math.min(startPoint.y, endPoint.y)
+      },
+      size: {
+        width: Math.abs(endPoint.x - startPoint.x),
+        height: Math.abs(endPoint.y - startPoint.y)
+      },
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      connection: {
+        startElementId: options.startElementId,
+        endElementId: options.endElementId,
+        startPoint,
+        endPoint,
+        style: options.style || 'straight'
+      },
+      style: {
+        stroke: options.stroke || '#000000',
+        strokeWidth: options.strokeWidth || 2,
+        strokeDasharray: options.strokeDasharray,
+        arrowStart: options.arrowStart || false,
+        arrowEnd: options.arrowEnd !== undefined ? options.arrowEnd : true
+      }
+    }
+
+    this.elements.push(connector)
+    this.createConnectorFabricObject(connector)
+    
+    return connector
+  }
+
+  /**
+   * Creates a freehand drawing element
+   */
+  createFreehand(
+    points: Position[],
+    options: FreehandOptions = {}
+  ): FreehandElement {
+    const id = `freehand-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    // Calculate bounds
+    const minX = Math.min(...points.map(p => p.x))
+    const minY = Math.min(...points.map(p => p.y))
+    const maxX = Math.max(...points.map(p => p.x))
+    const maxY = Math.max(...points.map(p => p.y))
+    
+    const freehand: FreehandElement = {
+      id,
+      type: 'freehand',
+      boardId: this.boardId,
+      position: { x: minX, y: minY },
+      size: {
+        width: maxX - minX,
+        height: maxY - minY
+      },
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      path: {
+        points,
+        brushSize: options.brushSize || 2,
+        color: options.color || '#000000',
+        opacity: options.opacity || 1
+      }
+    }
+
+    this.elements.push(freehand)
+    this.createFreehandFabricObject(freehand)
+    
+    return freehand
+  }
+
+  /**
+   * Creates an image element
+   */
+  createImage(
+    position: Position,
+    url: string,
+    originalSize: Size,
+    options: ImageOptions = {}
+  ): ImageElement {
+    const id = `image-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    // Calculate size maintaining aspect ratio if needed
+    let size = options.size || originalSize
+    if (options.size && options.size.height === 0) {
+      const ratio = originalSize.height / originalSize.width
+      size = {
+        width: options.size.width,
+        height: options.size.width * ratio
+      }
+    }
+    
+    const image: ImageElement = {
+      id,
+      type: 'image',
+      boardId: this.boardId,
+      position,
+      size,
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      content: {
+        url,
+        alt: options.alt,
+        originalSize
+      }
+    }
+
+    this.elements.push(image)
+    this.createImageFabricObject(image)
+    
+    return image
+  }
+
+  /**
+   * Creates Fabric object for connector
+   */
+  private createConnectorFabricObject(connector: ConnectorElement): void {
+    try {
+      const { startPoint, endPoint, style } = connector.connection
+      
+      // Create path string based on connector style
+      let pathString = ''
+      if (style === 'curved') {
+        const cp1x = startPoint.x + (endPoint.x - startPoint.x) / 3
+        const cp1y = startPoint.y
+        const cp2x = startPoint.x + (endPoint.x - startPoint.x) * 2 / 3
+        const cp2y = endPoint.y
+        pathString = `M ${startPoint.x} ${startPoint.y} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endPoint.x} ${endPoint.y}`
+      } else if (style === 'stepped') {
+        const midX = (startPoint.x + endPoint.x) / 2
+        pathString = `M ${startPoint.x} ${startPoint.y} L ${midX} ${startPoint.y} L ${midX} ${endPoint.y} L ${endPoint.x} ${endPoint.y}`
+      } else {
+        pathString = `M ${startPoint.x} ${startPoint.y} L ${endPoint.x} ${endPoint.y}`
+      }
+      
+      const path = new fabric.Path(pathString, {
+        stroke: connector.style.stroke,
+        strokeWidth: connector.style.strokeWidth,
+        strokeDashArray: connector.style.strokeDasharray ? connector.style.strokeDasharray.split(',').map(Number) : undefined,
+        fill: '',
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+        lockRotation: true
+      })
+      
+      // Add arrow heads if needed
+      if (connector.style.arrowEnd || connector.style.arrowStart) {
+        // This would need a more complex implementation with arrow heads
+        // For now, we'll just use the path
+      }
+      
+      ;(path as any).elementId = connector.id
+      this.canvas.add(path)
+    } catch (error) {
+      console.warn('Failed to create connector Fabric object:', error)
+    }
+  }
+
+  /**
+   * Creates Fabric object for freehand drawing
+   */
+  private createFreehandFabricObject(freehand: FreehandElement): void {
+    try {
+      const { points, brushSize, color, opacity } = freehand.path
+      
+      // Create path string from points
+      let pathString = ''
+      points.forEach((point, index) => {
+        if (index === 0) {
+          pathString += `M ${point.x} ${point.y}`
+        } else {
+          pathString += ` L ${point.x} ${point.y}`
+        }
+      })
+      
+      const path = new fabric.Path(pathString, {
+        stroke: color,
+        strokeWidth: brushSize,
+        fill: '',
+        opacity,
+        strokeLineCap: 'round',
+        strokeLineJoin: 'round',
+        selectable: true,
+        hasControls: true,
+        hasBorders: true
+      })
+      
+      ;(path as any).elementId = freehand.id
+      this.canvas.add(path)
+    } catch (error) {
+      console.warn('Failed to create freehand Fabric object:', error)
+    }
+  }
+
+  /**
+   * Creates Fabric object for image
+   */
+  private createImageFabricObject(image: ImageElement): void {
+    try {
+      fabric.Image.fromURL(image.content.url, (fabricImage) => {
+        fabricImage.set({
+          left: image.position.x,
+          top: image.position.y,
+          width: image.size.width,
+          height: image.size.height,
+          selectable: true,
+          hasControls: true,
+          hasBorders: true
+        })
+        
+        ;(fabricImage as any).elementId = image.id
+        this.canvas.add(fabricImage)
+      })
+    } catch (error) {
+      console.warn('Failed to create image Fabric object:', error)
+    }
   }
 }

@@ -130,7 +130,6 @@ export class CanvasEngine {
 
   private handleMouseMove(opt: any): void {
     if (this.isPanningActive) {
-      const pointer = this.canvas.getPointer(opt.e)
       const delta = {
         x: opt.e.movementX || 0,
         y: opt.e.movementY || 0
@@ -188,10 +187,7 @@ export class CanvasEngine {
       const distanceDelta = currentDistance - this.lastTouchDistance
       const zoomDelta = distanceDelta > 0 ? 0.1 : -0.1
       
-      const center = {
-        x: (evt.touches[0].clientX + evt.touches[1].clientX) / 2,
-        y: (evt.touches[0].clientY + evt.touches[1].clientY) / 2
-      }
+      // Zoom delta calculation
       
       this.zoomBy(1 + zoomDelta)
       this.lastTouchDistance = currentDistance

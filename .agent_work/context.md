@@ -1,5 +1,8 @@
 # Project Vision
-continue working on the miro board clone project: addressing issues in Review.md, after addressing the existing issue, pay attention that those issues could just be caused by unfinished code, continue building more features
+continue working on the miro board proejct to finish all the remaining features
+
+# Current Cycle: 5
+# Branch: cycle-4-20250829-172213
 
 # Agent Chain Progress
 - [ ] Architecture Planning
@@ -9,3 +12,5 @@ continue working on the miro board clone project: addressing issues in Review.md
 
 # Agent Handoffs
 Each agent will update this file with their outputs and findings.
+See CYCLE_HANDOFF.md for detailed phase-to-phase handoffs.
+See NEXT_CYCLE_TASKS.md for accumulated tasks.

@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, useState, MouseEvent, KeyboardEvent } f
 import { CanvasEngine } from '@/lib/canvas-engine'
 import { ElementManager } from '@/lib/element-manager'
 import { useCanvasStore } from '@/store/useCanvasStore'
-import { Position, Size, Tool } from '@/types'
+import { Position, Tool } from '@/types'
 
 interface UseCanvasOptions {
   boardId: string
@@ -11,13 +11,7 @@ interface UseCanvasOptions {
   onSelectionChange?: (selectedIds: string[]) => void
 }
 
-interface CanvasHandlers {
-  handleMouseDown: (event: MouseEvent) => void
-  handleMouseMove: (event: MouseEvent) => void
-  handleMouseUp: (event: MouseEvent) => void
-  handleKeyDown: (event: KeyboardEvent) => void
-  handleKeyUp: (event: KeyboardEvent) => void
-}
+// Removed unused interface CanvasHandlers
 
 export const useCanvas = (options: UseCanvasOptions) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -30,11 +24,8 @@ export const useCanvas = (options: UseCanvasOptions) => {
     camera,
     elements,
     selectedElementIds,
-    isGridVisible,
-    snapToGrid,
     updateCamera,
     addElement,
-    updateElement,
     setSelectedElements,
     clearSelection
   } = useCanvasStore()
@@ -51,11 +42,11 @@ export const useCanvas = (options: UseCanvasOptions) => {
       elementManagerRef.current = elementManager
       
       // Set up canvas event listeners
-      canvasEngine.on('pan', ({ position, delta }) => {
+      canvasEngine.on('pan', ({ position }) => {
         updateCamera({ x: position.x, y: position.y })
       })
       
-      canvasEngine.on('zoom', ({ zoom, center }) => {
+      canvasEngine.on('zoom', ({ zoom }) => {
         updateCamera({ zoom })
       })
       
@@ -73,7 +64,7 @@ export const useCanvas = (options: UseCanvasOptions) => {
         canvasEngineRef.current.dispose()
       }
     }
-  }, [isInitialized, options.boardId, updateCamera])
+  }, [isInitialized, options.boardId, updateCamera, camera.x, camera.y, camera.zoom])
 
   // Sync camera changes to canvas engine
   useEffect(() => {
@@ -170,16 +161,12 @@ export const useCanvas = (options: UseCanvasOptions) => {
     // Update cursor position for collaboration
     const rect = containerRef.current?.getBoundingClientRect()
     if (rect) {
-      const position = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
-      }
-      
       // This would emit cursor position to collaboration system
+      // Implementation would go here
     }
   }, [])
 
-  const handleMouseUp = useCallback((event: MouseEvent) => {
+  const handleMouseUp = useCallback((_event: MouseEvent) => {
     // Handle mouse up for different tools
   }, [])
 
@@ -232,7 +219,7 @@ export const useCanvas = (options: UseCanvasOptions) => {
     }
   }, [selectedElementIds, clearSelection, elements, setSelectedElements])
 
-  const handleKeyUp = useCallback((event: KeyboardEvent) => {
+  const handleKeyUp = useCallback((_event: KeyboardEvent) => {
     // Handle key up events
   }, [])
 
@@ -261,7 +248,7 @@ export const useCanvas = (options: UseCanvasOptions) => {
     }
   }, [elements])
 
-  const exportCanvas = useCallback(async (format: 'png' | 'jpg' | 'svg' = 'png') => {
+  const exportCanvas = useCallback(async (_format: 'png' | 'jpg' | 'svg' = 'png') => {
     if (!canvasEngineRef.current) return null
     
     // This would implement canvas export functionality

@@ -33,6 +33,28 @@ jest.mock('fabric', () => ({
       addWithUpdate: jest.fn(),
       canvas: null,
     })),
+    Path: jest.fn().mockImplementation(() => ({
+      set: jest.fn().mockReturnThis(),
+      setCoords: jest.fn(),
+      on: jest.fn(),
+      toObject: jest.fn().mockReturnValue({}),
+      canvas: null,
+    })),
+    Line: jest.fn().mockImplementation(() => ({
+      set: jest.fn().mockReturnThis(),
+      setCoords: jest.fn(),
+      on: jest.fn(),
+      toObject: jest.fn().mockReturnValue({}),
+      canvas: null,
+    })),
+    Image: jest.fn().mockImplementation(() => ({
+      set: jest.fn().mockReturnThis(),
+      setCoords: jest.fn(),
+      on: jest.fn(),
+      toObject: jest.fn().mockReturnValue({}),
+      canvas: null,
+      setSrc: jest.fn((src, callback) => callback && callback()),
+    })),
     Canvas: jest.fn().mockImplementation(() => ({
       add: jest.fn(),
       remove: jest.fn(),
@@ -508,6 +530,204 @@ describe('ElementManager - Element Creation', () => {
       }
       
       expect(elementManager.getElements()).toHaveLength(initialElementCount + 50)
+    })
+  })
+
+  describe('createConnector', () => {
+    it('should create a connector with default properties', () => {
+      const startPoint = { x: 100, y: 100 }
+      const endPoint = { x: 200, y: 200 }
+      
+      const connector = elementManager.createConnector(startPoint, endPoint)
+      
+      expect(connector).toBeDefined()
+      expect(connector.type).toBe('connector')
+      expect(connector.connection.startPoint).toEqual(startPoint)
+      expect(connector.connection.endPoint).toEqual(endPoint)
+      expect(connector.connection.style).toBe('straight')
+      expect(connector.style.stroke).toBe('#000000')
+      expect(connector.style.strokeWidth).toBe(2)
+      expect(connector.style.arrowEnd).toBe(true)
+      expect(connector.boardId).toBe('board-123')
+    })
+
+    it('should create a connector with custom style', () => {
+      const startPoint = { x: 50, y: 50 }
+      const endPoint = { x: 150, y: 150 }
+      const style = {
+        stroke: '#FF0000',
+        strokeWidth: 3,
+        strokeDasharray: '5,5',
+        arrowStart: true,
+        arrowEnd: false
+      }
+      
+      const connector = elementManager.createConnector(startPoint, endPoint, {
+        style: 'curved',
+        ...style
+      })
+      
+      expect(connector.connection.style).toBe('curved')
+      expect(connector.style).toMatchObject(style)
+    })
+
+    it('should connect to existing elements', () => {
+      const rect = elementManager.createRectangle({ x: 100, y: 100 })
+      const circle = elementManager.createCircle({ x: 300, y: 300 })
+      
+      const connector = elementManager.createConnector(
+        { x: 150, y: 150 },
+        { x: 350, y: 350 },
+        {
+          startElementId: rect.id,
+          endElementId: circle.id
+        }
+      )
+      
+      expect(connector.connection.startElementId).toBe(rect.id)
+      expect(connector.connection.endElementId).toBe(circle.id)
+    })
+  })
+
+  describe('createFreehand', () => {
+    it('should create a freehand drawing with default properties', () => {
+      const points = [
+        { x: 100, y: 100 },
+        { x: 110, y: 105 },
+        { x: 120, y: 110 },
+        { x: 130, y: 108 }
+      ]
+      
+      const freehand = elementManager.createFreehand(points)
+      
+      expect(freehand).toBeDefined()
+      expect(freehand.type).toBe('freehand')
+      expect(freehand.path.points).toEqual(points)
+      expect(freehand.path.brushSize).toBe(2)
+      expect(freehand.path.color).toBe('#000000')
+      expect(freehand.path.opacity).toBe(1)
+      expect(freehand.boardId).toBe('board-123')
+    })
+
+    it('should create a freehand drawing with custom style', () => {
+      const points = [
+        { x: 50, y: 50 },
+        { x: 60, y: 55 },
+        { x: 70, y: 60 }
+      ]
+      const options = {
+        brushSize: 5,
+        color: '#FF5500',
+        opacity: 0.8
+      }
+      
+      const freehand = elementManager.createFreehand(points, options)
+      
+      expect(freehand.path.brushSize).toBe(5)
+      expect(freehand.path.color).toBe('#FF5500')
+      expect(freehand.path.opacity).toBe(0.8)
+    })
+
+    it('should calculate correct bounds for freehand drawing', () => {
+      const points = [
+        { x: 100, y: 200 },
+        { x: 150, y: 100 },
+        { x: 200, y: 250 },
+        { x: 50, y: 150 }
+      ]
+      
+      const freehand = elementManager.createFreehand(points)
+      
+      // Bounds should encompass all points
+      expect(freehand.position.x).toBe(50) // Min x
+      expect(freehand.position.y).toBe(100) // Min y
+      expect(freehand.size.width).toBe(150) // Max x - Min x
+      expect(freehand.size.height).toBe(150) // Max y - Min y
+    })
+  })
+
+  describe('createImage', () => {
+    it('should create an image element with default properties', () => {
+      const position = { x: 100, y: 100 }
+      const url = 'https://example.com/image.jpg'
+      const originalSize = { width: 800, height: 600 }
+      
+      const image = elementManager.createImage(position, url, originalSize)
+      
+      expect(image).toBeDefined()
+      expect(image.type).toBe('image')
+      expect(image.position).toEqual(position)
+      expect(image.content.url).toBe(url)
+      expect(image.content.originalSize).toEqual(originalSize)
+      expect(image.boardId).toBe('board-123')
+      expect(image.rotation).toBe(0)
+      expect(image.isVisible).toBe(true)
+    })
+
+    it('should create an image with custom size and alt text', () => {
+      const position = { x: 50, y: 50 }
+      const url = 'https://example.com/photo.png'
+      const originalSize = { width: 1920, height: 1080 }
+      const customSize = { width: 400, height: 225 }
+      const alt = 'A beautiful landscape'
+      
+      const image = elementManager.createImage(position, url, originalSize, {
+        size: customSize,
+        alt
+      })
+      
+      expect(image.size).toEqual(customSize)
+      expect(image.content.alt).toBe(alt)
+    })
+
+    it('should maintain aspect ratio when resizing', () => {
+      const position = { x: 0, y: 0 }
+      const url = 'https://example.com/image.jpg'
+      const originalSize = { width: 1000, height: 500 } // 2:1 ratio
+      const customWidth = 400
+      
+      const image = elementManager.createImage(position, url, originalSize, {
+        size: { width: customWidth, height: 0 } // Height 0 means maintain ratio
+      })
+      
+      expect(image.size.width).toBe(400)
+      expect(image.size.height).toBe(200) // Maintains 2:1 ratio
+    })
+  })
+
+  describe('Fabric.js Integration for New Elements', () => {
+    it('should create corresponding Fabric objects for connectors', () => {
+      const { fabric } = require('fabric')
+      
+      elementManager.createConnector({ x: 100, y: 100 }, { x: 200, y: 200 })
+      
+      expect(fabric.Path || fabric.Line).toBeDefined()
+    })
+
+    it('should create corresponding Fabric objects for freehand', () => {
+      const { fabric } = require('fabric')
+      
+      const points = [
+        { x: 100, y: 100 },
+        { x: 110, y: 105 },
+        { x: 120, y: 110 }
+      ]
+      
+      elementManager.createFreehand(points)
+      
+      expect(fabric.Path).toBeDefined()
+    })
+
+    it('should create corresponding Fabric objects for images', () => {
+      const { fabric } = require('fabric')
+      
+      elementManager.createImage(
+        { x: 100, y: 100 },
+        'https://example.com/image.jpg',
+        { width: 800, height: 600 }
+      )
+      
+      expect(fabric.Image).toBeDefined()
     })
   })
 })

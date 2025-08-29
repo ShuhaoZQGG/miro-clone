@@ -1,5 +1,5 @@
 import { CanvasEngine } from '@/lib/canvas-engine'
-import { Position, Camera, CanvasState, CanvasElement } from '@/types'
+import { Position, CanvasElement } from '@/types'
 
 // Mock fabric.js
 const mockCanvas = {
