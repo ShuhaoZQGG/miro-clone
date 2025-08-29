@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useState, MouseEvent, KeyboardEvent } from 'react'
 import { CanvasEngine } from '@/lib/canvas-engine'
 import { ElementManager } from '@/lib/element-manager'
 import { useCanvasStore } from '@/store/useCanvasStore'
@@ -12,11 +12,11 @@ interface UseCanvasOptions {
 }
 
 interface CanvasHandlers {
-  handleMouseDown: (event: React.MouseEvent) => void
-  handleMouseMove: (event: React.MouseMove) => void
-  handleMouseUp: (event: React.MouseEvent) => void
-  handleKeyDown: (event: React.KeyboardEvent) => void
-  handleKeyUp: (event: React.KeyboardEvent) => void
+  handleMouseDown: (event: MouseEvent) => void
+  handleMouseMove: (event: MouseEvent) => void
+  handleMouseUp: (event: MouseEvent) => void
+  handleKeyDown: (event: KeyboardEvent) => void
+  handleKeyUp: (event: KeyboardEvent) => void
 }
 
 export const useCanvas = (options: UseCanvasOptions) => {
@@ -45,7 +45,7 @@ export const useCanvas = (options: UseCanvasOptions) => {
 
     try {
       const canvasEngine = new CanvasEngine(containerRef.current)
-      const elementManager = new ElementManager(canvasEngine.canvas, options.boardId)
+      const elementManager = new ElementManager(canvasEngine.getCanvas(), options.boardId)
       
       canvasEngineRef.current = canvasEngine
       elementManagerRef.current = elementManager
@@ -137,7 +137,7 @@ export const useCanvas = (options: UseCanvasOptions) => {
     }
   }, [addElement, setSelectedElements, options])
 
-  const handleMouseDown = useCallback((event: React.MouseEvent) => {
+  const handleMouseDown = useCallback((event: MouseEvent) => {
     if (!canvasEngineRef.current) return
     
     const rect = containerRef.current?.getBoundingClientRect()
@@ -163,7 +163,7 @@ export const useCanvas = (options: UseCanvasOptions) => {
     }
   }, [tool, createElementAtPosition])
 
-  const handleMouseMove = useCallback((event: React.MouseEvent) => {
+  const handleMouseMove = useCallback((event: MouseEvent) => {
     // Handle mouse move for different tools (drag, resize, etc.)
     if (!canvasEngineRef.current) return
     
@@ -179,11 +179,11 @@ export const useCanvas = (options: UseCanvasOptions) => {
     }
   }, [])
 
-  const handleMouseUp = useCallback((event: React.MouseEvent) => {
+  const handleMouseUp = useCallback((event: MouseEvent) => {
     // Handle mouse up for different tools
   }, [])
 
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (!canvasEngineRef.current) return
     
     // Handle keyboard shortcuts
@@ -232,7 +232,7 @@ export const useCanvas = (options: UseCanvasOptions) => {
     }
   }, [selectedElementIds, clearSelection, elements, setSelectedElements])
 
-  const handleKeyUp = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyUp = useCallback((event: KeyboardEvent) => {
     // Handle key up events
   }, [])
 

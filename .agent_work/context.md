@@ -1,5 +1,5 @@
 # Project Vision
-build a clone of miro board: https://miro.com/
+continue working on the miro board clone project: addressing issues in Review.md, after addressing the existing issue, pay attention that those issues could just be caused by unfinished code, continue building more features
 
 # Agent Chain Progress
 - [ ] Architecture Planning
