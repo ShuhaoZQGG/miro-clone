@@ -1,0 +1,216 @@
+'use client'
+
+import React, { useState } from 'react'
+import { useCanvasStore } from '@/store/useCanvasStore'
+import { Button } from './ui/Button'
+import { Tooltip } from './ui/Tooltip'
+import { 
+  ZoomInIcon, 
+  ZoomOutIcon, 
+  FitScreenIcon,
+  ExportIcon,
+  GridIcon,
+  UndoIcon,
+  RedoIcon,
+  ShareIcon
+} from './ui/Icons'
+import { clsx } from 'clsx'
+
+interface ToolbarProps {
+  onZoomIn: () => void
+  onZoomOut: () => void
+  onResetZoom: () => void
+  onFitToScreen: () => void
+  onExport: (format: 'png' | 'jpg' | 'svg') => Promise<string | null>
+  className?: string
+}
+
+export const Toolbar: React.FC<ToolbarProps> = ({
+  onZoomIn,
+  onZoomOut,
+  onResetZoom,
+  onFitToScreen,
+  onExport,
+  className
+}) => {
+  const { 
+    camera, 
+    isGridVisible, 
+    toggleGrid,
+    elements,
+    selectedElementIds,
+    isConnected
+  } = useCanvasStore()
+  
+  const [isExporting, setIsExporting] = useState(false)
+
+  const handleExport = async (format: 'png' | 'jpg' | 'svg' = 'png') => {
+    setIsExporting(true)
+    try {
+      const dataUrl = await onExport(format)
+      if (dataUrl) {
+        // Create download link
+        const link = document.createElement('a')
+        link.download = `whiteboard.${format}`
+        link.href = dataUrl
+        link.click()
+      }
+    } catch (error) {
+      console.error('Export failed:', error)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const zoomPercentage = Math.round(camera.zoom * 100)
+
+  return (
+    <div className={clsx(
+      'absolute top-4 left-1/2 transform -translate-x-1/2 z-40',
+      'flex items-center gap-2 bg-white shadow-lg rounded-lg border p-2',
+      className
+    )}>
+      {/* Undo/Redo */}
+      <div className="flex items-center gap-1">
+        <Tooltip content="Undo (Ctrl+Z)">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled // TODO: Implement undo/redo
+          >
+            <UndoIcon className="w-4 h-4" />
+          </Button>
+        </Tooltip>
+        
+        <Tooltip content="Redo (Ctrl+Y)">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled // TODO: Implement undo/redo
+          >
+            <RedoIcon className="w-4 h-4" />
+          </Button>
+        </Tooltip>
+        
+        <div className="w-px h-6 bg-gray-200 mx-1" />
+      </div>
+
+      {/* Zoom Controls */}
+      <div className="flex items-center gap-1">
+        <Tooltip content="Zoom out (Ctrl+-)">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onZoomOut}
+            disabled={camera.zoom <= 0.1}
+          >
+            <ZoomOutIcon className="w-4 h-4" />
+          </Button>
+        </Tooltip>
+        
+        <Tooltip content="Reset zoom (Ctrl+0)">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onResetZoom}
+            className="min-w-16 text-sm font-mono"
+          >
+            {zoomPercentage}%
+          </Button>
+        </Tooltip>
+        
+        <Tooltip content="Zoom in (Ctrl++)">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onZoomIn}
+            disabled={camera.zoom >= 10}
+          >
+            <ZoomInIcon className="w-4 h-4" />
+          </Button>
+        </Tooltip>
+        
+        <div className="w-px h-6 bg-gray-200 mx-1" />
+      </div>
+
+      {/* View Controls */}
+      <div className="flex items-center gap-1">
+        <Tooltip content="Fit to screen">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onFitToScreen}
+            disabled={elements.length === 0}
+          >
+            <FitScreenIcon className="w-4 h-4" />
+          </Button>
+        </Tooltip>
+        
+        <Tooltip content="Toggle grid">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleGrid}
+            className={clsx(
+              isGridVisible && 'bg-blue-50 text-blue-600'
+            )}
+          >
+            <GridIcon className="w-4 h-4" />
+          </Button>
+        </Tooltip>
+        
+        <div className="w-px h-6 bg-gray-200 mx-1" />
+      </div>
+
+      {/* Export */}
+      <div className="flex items-center gap-1">
+        <Tooltip content="Export as PNG">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleExport('png')}
+            disabled={isExporting || elements.length === 0}
+          >
+            <ExportIcon className="w-4 h-4" />
+          </Button>
+        </Tooltip>
+        
+        <div className="w-px h-6 bg-gray-200 mx-1" />
+      </div>
+
+      {/* Collaboration Status */}
+      <div className="flex items-center gap-2">
+        <Tooltip content={isConnected ? 'Connected' : 'Disconnected'}>
+          <div className={clsx(
+            'w-2 h-2 rounded-full',
+            isConnected ? 'bg-green-500' : 'bg-red-500'
+          )} />
+        </Tooltip>
+        
+        <Tooltip content="Share board">
+          <Button
+            variant="ghost"
+            size="sm"
+          >
+            <ShareIcon className="w-4 h-4" />
+          </Button>
+        </Tooltip>
+      </div>
+
+      {/* Selection Info */}
+      {selectedElementIds.length > 0 && (
+        <>
+          <div className="w-px h-6 bg-gray-200 mx-1" />
+          <div className="text-sm text-gray-600 px-2">
+            {selectedElementIds.length} selected
+          </div>
+        </>
+      )}
+
+      {/* Element Count */}
+      <div className="text-xs text-gray-400 px-2">
+        {elements.length} elements
+      </div>
+    </div>
+  )
+}
