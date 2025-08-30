@@ -69,7 +69,8 @@ describe('Canvas Full-Screen Tests', () => {
       dispose: jest.fn(),
       getCamera: jest.fn(() => ({ x: 0, y: 0, zoom: 1 })),
       setViewportSize: jest.fn(),
-      handleResize: jest.fn()
+      handleResize: jest.fn(),
+      getCanvasSize: jest.fn(() => ({ width: 1920, height: 1080 }))
     } as any
 
     ;(CanvasEngine as jest.Mock).mockImplementation(() => mockCanvasEngine)
