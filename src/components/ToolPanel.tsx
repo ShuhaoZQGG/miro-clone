@@ -52,6 +52,7 @@ export const ToolPanel: React.FC = () => {
               )}
               aria-label={toolConfig.label}
               title={toolConfig.label}
+              data-testid={`tool-${toolConfig.type}`}
             >
               <toolConfig.icon className="w-5 h-5" />
             </Button>
