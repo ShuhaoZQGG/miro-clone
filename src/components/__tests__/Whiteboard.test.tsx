@@ -1,11 +1,11 @@
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { Whiteboard } from '../Whiteboard'
 
 // Mock the canvas engine
 jest.mock('@/lib/canvas-engine', () => ({
-  CanvasEngine: jest.fn().mockImplementation((container) => ({
+  CanvasEngine: jest.fn().mockImplementation(() => ({
     getCanvas: jest.fn(() => ({
       getElement: jest.fn(() => {
         const canvas = document.createElement('canvas')

@@ -149,7 +149,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should add sticky note to canvas', () => {
       const position = { x: 10, y: 20 }
-      const stickyNote = elementManager.createStickyNote(position)
+      elementManager.createStickyNote(position)
 
       expect(mockCanvas.add).toHaveBeenCalled()
       expect(mockCanvas.renderAll).toHaveBeenCalled()

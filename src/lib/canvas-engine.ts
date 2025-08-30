@@ -663,6 +663,583 @@ export class CanvasEngine {
     }
   }
 
+  // Smooth Interaction Methods
+  private dragState: {
+    elementId: string | null
+    startPosition: Position | null
+    lastPosition: Position | null
+    velocity: Position
+  } = {
+    elementId: null,
+    startPosition: null,
+    lastPosition: null,
+    velocity: { x: 0, y: 0 }
+  }
+
+  private resizeState: {
+    elementId: string | null
+    handle: string | null
+    originalSize: Size | null
+    aspectRatioLocked: boolean
+  } = {
+    elementId: null,
+    handle: null,
+    originalSize: null,
+    aspectRatioLocked: false
+  }
+
+  private creationState: {
+    type: string | null
+    preview: any | null
+    startPosition: Position | null
+  } = {
+    type: null,
+    preview: null,
+    startPosition: null
+  }
+
+  private animationState: {
+    activeAnimations: Map<string, number>
+  } = {
+    activeAnimations: new Map()
+  }
+
+  private performanceStats = {
+    frameCount: 0,
+    frameTimeSum: 0,
+    minFPS: 60,
+    maxFPS: 60,
+    lastUpdateTime: 0
+  }
+
+  private renderQuality: 'high' | 'reduced' = 'high'
+
+  getCurrentFPS(): number {
+    return this.currentFrameRate
+  }
+
+  startAnimation(): void {
+    this.startRenderLoop()
+  }
+
+  createElement(type: string, options: any): CanvasElement {
+    let fabricObject: fabric.Object | null = null
+    
+    switch (type) {
+      case 'rectangle':
+        fabricObject = new fabric.Rect({
+          left: options.x || 0,
+          top: options.y || 0,
+          width: options.width || 100,
+          height: options.height || 100,
+          fill: options.fill || '#000000',
+          stroke: options.stroke || '#000000',
+          strokeWidth: options.strokeWidth || 1
+        })
+        break
+      case 'circle':
+        fabricObject = new fabric.Circle({
+          left: options.x || 0,
+          top: options.y || 0,
+          radius: options.radius || 50,
+          fill: options.fill || '#000000',
+          stroke: options.stroke || '#000000',
+          strokeWidth: options.strokeWidth || 1
+        })
+        break
+      case 'line':
+        fabricObject = new fabric.Line(
+          [options.x1 || 0, options.y1 || 0, options.x2 || 100, options.y2 || 100],
+          {
+            stroke: options.stroke || '#000000',
+            strokeWidth: options.strokeWidth || 1
+          }
+        )
+        break
+    }
+    
+    if (fabricObject) {
+      this.canvas.add(fabricObject)
+      this.scheduleRender()
+      
+      const element: CanvasElement = {
+        id: `element-${Date.now()}-${Math.random()}`,
+        type: type as any,
+        position: { x: options.x || 0, y: options.y || 0 },
+        size: { width: options.width || 100, height: options.height || 100 },
+        style: {},
+        data: fabricObject
+      }
+      
+      this.elements.push(element)
+      return element
+    }
+    
+    throw new Error(`Unknown element type: ${type}`)
+  }
+
+  startDrag(elementId: string, position: Position): void {
+    this.dragState = {
+      elementId,
+      startPosition: { ...position },
+      lastPosition: { ...position },
+      velocity: { x: 0, y: 0 }
+    }
+  }
+
+  updateDrag(position: Position): void {
+    if (!this.dragState.elementId || !this.dragState.lastPosition) return
+    
+    const delta = {
+      x: position.x - this.dragState.lastPosition.x,
+      y: position.y - this.dragState.lastPosition.y
+    }
+    
+    // Update velocity for momentum
+    this.dragState.velocity = {
+      x: delta.x * 0.8 + this.dragState.velocity.x * 0.2,
+      y: delta.y * 0.8 + this.dragState.velocity.y * 0.2
+    }
+    
+    this.dragState.lastPosition = { ...position }
+    
+    // Throttle updates for performance
+    this.scheduleRender()
+  }
+
+  endDrag(): void {
+    // Apply momentum if velocity is significant
+    if (this.dragState.velocity.x !== 0 || this.dragState.velocity.y !== 0) {
+      this.applyDragMomentum()
+    }
+    
+    this.dragState = {
+      elementId: null,
+      startPosition: null,
+      lastPosition: null,
+      velocity: { x: 0, y: 0 }
+    }
+  }
+
+  private applyDragMomentum(): void {
+    const deceleration = 0.95
+    const minVelocity = 0.5
+    
+    const animate = () => {
+      if (!this.dragState.elementId) return
+      
+      // Apply velocity
+      this.dragState.velocity.x *= deceleration
+      this.dragState.velocity.y *= deceleration
+      
+      // Stop if velocity is too small
+      if (Math.abs(this.dragState.velocity.x) < minVelocity && 
+          Math.abs(this.dragState.velocity.y) < minVelocity) {
+        this.dragState.velocity = { x: 0, y: 0 }
+        return
+      }
+      
+      // Update position
+      const element = this.elements.find(e => e.id === this.dragState.elementId)
+      if (element) {
+        element.position.x += this.dragState.velocity.x
+        element.position.y += this.dragState.velocity.y
+        this.scheduleRender()
+      }
+      
+      requestAnimationFrame(animate)
+    }
+    
+    requestAnimationFrame(animate)
+  }
+
+  updateElementPosition(elementId: string, position: Position): void {
+    const element = this.elements.find(e => e.id === elementId)
+    if (element) {
+      element.position = { ...position }
+      if (element.data) {
+        element.data.set({ left: position.x, top: position.y })
+        element.data.setCoords()
+      }
+      this.scheduleRender()
+    }
+  }
+
+  getElementPosition(elementId: string): Position {
+    const element = this.elements.find(e => e.id === elementId)
+    return element ? { ...element.position } : { x: 0, y: 0 }
+  }
+
+  startResize(elementId: string, handle: string): void {
+    const element = this.elements.find(e => e.id === elementId)
+    if (element) {
+      this.resizeState = {
+        elementId,
+        handle,
+        originalSize: { ...element.size },
+        aspectRatioLocked: false
+      }
+    }
+  }
+
+  updateResize(size: Size): void {
+    if (!this.resizeState.elementId) return
+    
+    const element = this.elements.find(e => e.id === this.resizeState.elementId)
+    if (element) {
+      if (this.resizeState.aspectRatioLocked && this.resizeState.originalSize) {
+        const aspectRatio = this.resizeState.originalSize.width / this.resizeState.originalSize.height
+        if (this.resizeState.handle?.includes('right')) {
+          size.height = size.width / aspectRatio
+        } else {
+          size.width = size.height * aspectRatio
+        }
+      }
+      
+      element.size = { ...size }
+      if (element.data) {
+        element.data.set({ width: size.width, height: size.height })
+        element.data.setCoords()
+      }
+      this.scheduleRender()
+    }
+  }
+
+  getElementSize(elementId: string): Size {
+    const element = this.elements.find(e => e.id === elementId)
+    return element ? { ...element.size } : { width: 0, height: 0 }
+  }
+
+  setAspectRatioLocked(elementId: string, locked: boolean): void {
+    if (this.resizeState.elementId === elementId) {
+      this.resizeState.aspectRatioLocked = locked
+    }
+  }
+
+  animateResize(elementId: string, options: {
+    width: number
+    height: number
+    duration: number
+    easing?: string
+  }): void {
+    const element = this.elements.find(e => e.id === elementId)
+    if (!element) return
+    
+    const startSize = { ...element.size }
+    const deltaSize = {
+      width: options.width - startSize.width,
+      height: options.height - startSize.height
+    }
+    const startTime = performance.now()
+    
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / options.duration, 1)
+      
+      // Apply easing
+      let easedProgress = progress
+      if (options.easing === 'ease-out') {
+        easedProgress = 1 - Math.pow(1 - progress, 3)
+      }
+      
+      const currentSize = {
+        width: startSize.width + deltaSize.width * easedProgress,
+        height: startSize.height + deltaSize.height * easedProgress
+      }
+      
+      element.size = currentSize
+      if (element.data) {
+        element.data.set({ width: currentSize.width, height: currentSize.height })
+        element.data.setCoords()
+      }
+      this.scheduleRender()
+      
+      if (progress < 1) {
+        this.animationState.activeAnimations.set(elementId, requestAnimationFrame(animate))
+      } else {
+        this.animationState.activeAnimations.delete(elementId)
+      }
+    }
+    
+    // Cancel any existing animation for this element
+    const existingAnimation = this.animationState.activeAnimations.get(elementId)
+    if (existingAnimation) {
+      cancelAnimationFrame(existingAnimation)
+    }
+    
+    this.animationState.activeAnimations.set(elementId, requestAnimationFrame(animate))
+  }
+
+  getElementScale(elementId: string): number {
+    const element = this.elements.find(e => e.id === elementId)
+    if (element && element.data) {
+      return element.data.scaleX || 1
+    }
+    return 1
+  }
+
+  createElementAnimated(type: string, position: Position, options: any): CanvasElement {
+    const element = this.createElement(type, { ...options, x: position.x, y: position.y })
+    
+    // Start with scale 0
+    if (element.data) {
+      element.data.set({ scaleX: 0, scaleY: 0 })
+    }
+    
+    // Animate to scale 1
+    const duration = options.animationDuration || 300
+    const startTime = performance.now()
+    
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // Bounce easing
+      const easedProgress = 1 - Math.pow(1 - progress, 3)
+      
+      if (element.data) {
+        element.data.set({ scaleX: easedProgress, scaleY: easedProgress })
+        element.data.setCoords()
+      }
+      this.scheduleRender()
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+    
+    requestAnimationFrame(animate)
+    return element
+  }
+
+  startElementCreation(type: string): void {
+    this.creationState.type = type
+    this.creationState.preview = null
+    this.creationState.startPosition = null
+  }
+
+  updateCreationPreview(position: Position): void {
+    if (!this.creationState.type) return
+    
+    if (!this.creationState.preview) {
+      // Create ghost preview
+      const options = {
+        x: position.x,
+        y: position.y,
+        fill: 'rgba(0, 0, 0, 0.2)',
+        stroke: 'rgba(0, 0, 0, 0.5)',
+        strokeWidth: 2
+      }
+      
+      switch (this.creationState.type) {
+        case 'rectangle':
+          this.creationState.preview = new fabric.Rect({
+            left: position.x,
+            top: position.y,
+            width: 0,
+            height: 0,
+            ...options
+          })
+          break
+        case 'circle':
+          this.creationState.preview = new fabric.Circle({
+            left: position.x,
+            top: position.y,
+            radius: 0,
+            ...options
+          })
+          break
+      }
+      
+      if (this.creationState.preview) {
+        this.canvas.add(this.creationState.preview)
+      }
+    } else {
+      // Update preview position
+      this.creationState.preview.set({ left: position.x, top: position.y })
+      this.creationState.preview.setCoords()
+    }
+    
+    this.scheduleRender()
+  }
+
+  getCreationPreview(): any {
+    if (!this.creationState.preview) return null
+    
+    return {
+      position: {
+        x: this.creationState.preview.left || 0,
+        y: this.creationState.preview.top || 0
+      },
+      opacity: this.creationState.preview.opacity || 0.5,
+      width: this.creationState.preview.width || 0,
+      height: this.creationState.preview.height || 0
+    }
+  }
+
+  finishElementCreation(): CanvasElement | null {
+    if (!this.creationState.preview) return null
+    
+    // Remove preview
+    this.canvas.remove(this.creationState.preview)
+    
+    // Create actual element
+    const element = this.createElement(this.creationState.type!, {
+      x: this.creationState.preview.left,
+      y: this.creationState.preview.top,
+      width: this.creationState.preview.width || 100,
+      height: this.creationState.preview.height || 100
+    })
+    
+    // Reset state
+    this.creationState = {
+      type: null,
+      preview: null,
+      startPosition: null
+    }
+    
+    return element
+  }
+
+  startDragCreation(type: string, startPosition: Position): void {
+    this.creationState = {
+      type,
+      preview: null,
+      startPosition: { ...startPosition }
+    }
+  }
+
+  updateDragCreation(position: Position): void {
+    if (!this.creationState.type || !this.creationState.startPosition) return
+    
+    const width = Math.abs(position.x - this.creationState.startPosition.x)
+    const height = Math.abs(position.y - this.creationState.startPosition.y)
+    const left = Math.min(position.x, this.creationState.startPosition.x)
+    const top = Math.min(position.y, this.creationState.startPosition.y)
+    
+    if (!this.creationState.preview) {
+      // Create preview
+      const options = {
+        left,
+        top,
+        width,
+        height,
+        fill: 'rgba(0, 0, 0, 0.2)',
+        stroke: 'rgba(0, 0, 0, 0.5)',
+        strokeWidth: 2
+      }
+      
+      switch (this.creationState.type) {
+        case 'rectangle':
+          this.creationState.preview = new fabric.Rect(options)
+          break
+        case 'circle':
+          const radius = Math.min(width, height) / 2
+          this.creationState.preview = new fabric.Circle({
+            ...options,
+            radius
+          })
+          break
+      }
+      
+      if (this.creationState.preview) {
+        this.canvas.add(this.creationState.preview)
+      }
+    } else {
+      // Update preview
+      this.creationState.preview.set({ left, top, width, height })
+      if (this.creationState.type === 'circle') {
+        const radius = Math.min(width, height) / 2
+        this.creationState.preview.set({ radius })
+      }
+      this.creationState.preview.setCoords()
+    }
+    
+    this.scheduleRender()
+  }
+
+  finishDragCreation(): CanvasElement | null {
+    return this.finishElementCreation()
+  }
+
+  startPan(_position: Position): void {
+    this.isPanningActive = true
+  }
+
+  updatePan(_position: Position): void {
+    // Pan logic already implemented in handleMouseMove
+  }
+
+  startPinchZoom(touches: Position[]): void {
+    if (touches.length === 2) {
+      const dx = touches[1].x - touches[0].x
+      const dy = touches[1].y - touches[0].y
+      this.lastTouchDistance = Math.sqrt(dx * dx + dy * dy)
+      this.touchStartPoints = [...touches]
+    }
+  }
+
+  updatePinchZoom(touches: Position[]): void {
+    if (touches.length === 2 && this.lastTouchDistance > 0) {
+      const dx = touches[1].x - touches[0].x
+      const dy = touches[1].y - touches[0].y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      
+      const scale = distance / this.lastTouchDistance
+      const centerX = (touches[0].x + touches[1].x) / 2
+      const centerY = (touches[0].y + touches[1].y) / 2
+      
+      this.zoomToPoint({ x: centerX, y: centerY }, this.camera.zoom * scale)
+      
+      this.lastTouchDistance = distance
+    }
+  }
+
+  updateFrameStats(): void {
+    const now = performance.now()
+    if (this.performanceStats.lastUpdateTime > 0) {
+      const frameTime = now - this.performanceStats.lastUpdateTime
+      const fps = 1000 / frameTime
+      
+      this.performanceStats.frameCount++
+      this.performanceStats.frameTimeSum += frameTime
+      this.performanceStats.minFPS = Math.min(this.performanceStats.minFPS, fps)
+      this.performanceStats.maxFPS = Math.max(this.performanceStats.maxFPS, fps)
+      
+      // Auto-adjust quality if FPS drops
+      if (fps < 30 && this.renderQuality === 'high') {
+        this.renderQuality = 'reduced'
+        this.canvas.renderOnAddRemove = false
+        this.canvas.skipOffscreen = true
+      } else if (fps > 50 && this.renderQuality === 'reduced') {
+        this.renderQuality = 'high'
+        this.canvas.renderOnAddRemove = true
+        this.canvas.skipOffscreen = false
+      }
+    }
+    this.performanceStats.lastUpdateTime = now
+  }
+
+  getPerformanceStats(): {
+    averageFPS: number
+    minFPS: number
+    maxFPS: number
+  } {
+    const averageFPS = this.performanceStats.frameCount > 0
+      ? 1000 / (this.performanceStats.frameTimeSum / this.performanceStats.frameCount)
+      : 60
+    
+    return {
+      averageFPS,
+      minFPS: this.performanceStats.minFPS,
+      maxFPS: this.performanceStats.maxFPS
+    }
+  }
+
+  getRenderQuality(): 'high' | 'reduced' {
+    return this.renderQuality
+  }
+
   // Cleanup
   private isDisposed = false
   
@@ -770,21 +1347,21 @@ export class CanvasEngine {
           if (upperCanvasEl && upperParent && upperCanvasEl.parentNode === upperParent) {
             try {
               upperParent.removeChild(upperCanvasEl)
-            } catch (e) {
+            } catch {
               // Element already removed, ignore
             }
           }
           if (lowerCanvasEl && lowerParent && lowerCanvasEl.parentNode === lowerParent) {
             try {
               lowerParent.removeChild(lowerCanvasEl)
-            } catch (e) {
+            } catch {
               // Element already removed, ignore
             }
           }
           if (wrapperEl && wrapperParent && wrapperEl.parentNode === wrapperParent) {
             try {
               wrapperParent.removeChild(wrapperEl)
-            } catch (e) {
+            } catch {
               // Element already removed, ignore
             }
           }
