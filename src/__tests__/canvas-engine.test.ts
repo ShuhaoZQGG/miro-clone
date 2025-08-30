@@ -31,8 +31,12 @@ describe('CanvasEngine', () => {
     mockContainer.style.height = '600px'
     document.body.appendChild(mockContainer)
 
-    canvasEngine = new CanvasEngine(mockContainer)
+    // Clear mocks before creating engine to capture initialization calls
     jest.clearAllMocks()
+    canvasEngine = new CanvasEngine(mockContainer)
+    
+    // Start the render loop by triggering first RAF
+    rafMock.step()
   })
 
   afterEach(() => {
@@ -79,12 +83,18 @@ describe('CanvasEngine', () => {
     it('should pan to absolute position', () => {
       const newPosition: Position = { x: 100, y: 150 }
       
+      // Clear any initial calls from setup
+      mockCanvas.renderAll.mockClear()
+      
       canvasEngine.panTo(newPosition)
       
       const camera = canvasEngine.getCamera()
       expect(camera.x).toBe(100)
       expect(camera.y).toBe(150)
       expect(mockCanvas.absolutePan).toHaveBeenCalledWith({ x: -100, y: -150 })
+      
+      // Trigger the scheduled render
+      rafMock.step()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
     })
 
@@ -92,12 +102,18 @@ describe('CanvasEngine', () => {
       const initialCamera = canvasEngine.getCamera()
       const panDelta: Position = { x: 50, y: -30 }
       
+      // Clear any initial calls from setup
+      mockCanvas.renderAll.mockClear()
+      
       canvasEngine.panBy(panDelta)
       
       const camera = canvasEngine.getCamera()
       expect(camera.x).toBe(initialCamera.x + 50)
       expect(camera.y).toBe(initialCamera.y - 30)
       expect(mockCanvas.relativePan).toHaveBeenCalledWith(panDelta)
+      
+      // Trigger the scheduled render
+      rafMock.step()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
     })
 
@@ -150,9 +166,15 @@ describe('CanvasEngine', () => {
 
   describe('Camera Controls - Zoom', () => {
     it('should zoom to specific level', () => {
+      // Clear any initial calls from setup
+      mockCanvas.renderAll.mockClear()
+      
       canvasEngine.zoomTo(1.5)
       
       expect(mockCanvas.setZoom).toHaveBeenCalledWith(1.5)
+      
+      // Trigger the scheduled render
+      rafMock.step()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
       expect(canvasEngine.getCamera().zoom).toBe(1.5)
     })
@@ -235,20 +257,31 @@ describe('CanvasEngine', () => {
 
   describe('Mouse/Touch Interaction Handling', () => {
     it('should handle mouse wheel zoom', () => {
+      // Mock getPointer to return specific coordinates
+      mockCanvas.getPointer.mockReturnValue({ x: 400, y: 300 })
+      
       const wheelEvent = {
-        deltaY: -100,
-        pointer: { x: 400, y: 300 },
-        e: { preventDefault: jest.fn() }
+        e: { 
+          deltaY: -100,
+          preventDefault: jest.fn(),
+          stopPropagation: jest.fn()
+        }
       }
       
       // Simulate wheel event
-      const wheelHandler = mockCanvas.on.mock.calls.find(
+      const wheelHandlerCall = mockCanvas.on.mock.calls.find(
         call => call[0] === 'mouse:wheel'
-      )[1]
+      )
       
+      if (!wheelHandlerCall) {
+        throw new Error('mouse:wheel handler not found')
+      }
+      
+      const wheelHandler = wheelHandlerCall[1]
       wheelHandler(wheelEvent)
       
       expect(wheelEvent.e.preventDefault).toHaveBeenCalled()
+      expect(wheelEvent.e.stopPropagation).toHaveBeenCalled()
       // Should zoom in (negative deltaY means zoom in)
       expect(mockCanvas.setZoom).toHaveBeenCalled()
     })
@@ -377,7 +410,8 @@ describe('CanvasEngine', () => {
     })
 
     it('should throttle render calls during rapid interactions', () => {
-      const renderSpy = jest.spyOn(canvasEngine, 'render')
+      // Mock renderAll directly since render() calls canvas.renderAll()
+      mockCanvas.renderAll.mockClear()
       
       // Rapidly trigger multiple renders
       for (let i = 0; i < 10; i++) {
@@ -388,7 +422,7 @@ describe('CanvasEngine', () => {
       rafMock.step(16)
       
       // Should throttle to avoid excessive renders (one per frame)
-      expect(renderSpy).toHaveBeenCalledTimes(1)
+      expect(mockCanvas.renderAll).toHaveBeenCalledTimes(1)
     })
 
     it('should maintain 60fps during smooth animations', async () => {
