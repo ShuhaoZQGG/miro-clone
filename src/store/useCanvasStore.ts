@@ -45,7 +45,7 @@ interface CanvasState {
 }
 
 export const useCanvasStore = create<CanvasState>()(
-  subscribeWithSelector((set, get) => ({
+  subscribeWithSelector((set, _get) => ({
     // Initial state
     elements: [],
     selectedElementIds: [],

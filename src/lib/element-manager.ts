@@ -3,7 +3,11 @@ import {
   CanvasElement, 
   StickyNoteElement, 
   ShapeElement, 
+  LineElement,
   TextElement,
+  ConnectorElement,
+  FreehandElement,
+  ImageElement,
   Position, 
   Size 
 } from '@/types'
@@ -23,6 +27,12 @@ interface ShapeStyle {
   opacity?: number
 }
 
+interface LineStyle {
+  stroke?: string
+  strokeWidth?: number
+  strokeDasharray?: string
+}
+
 interface TextContent {
   text?: string
   fontSize?: number
@@ -30,6 +40,28 @@ interface TextContent {
   fontWeight?: string
   color?: string
   textAlign?: 'left' | 'center' | 'right'
+}
+
+interface ConnectorOptions {
+  style?: 'straight' | 'curved' | 'stepped'
+  stroke?: string
+  strokeWidth?: number
+  strokeDasharray?: string
+  arrowStart?: boolean
+  arrowEnd?: boolean
+  startElementId?: string
+  endElementId?: string
+}
+
+interface FreehandOptions {
+  brushSize?: number
+  color?: string
+  opacity?: number
+}
+
+interface ImageOptions {
+  size?: Size
+  alt?: string
 }
 
 export class ElementManager {
@@ -189,6 +221,103 @@ export class ElementManager {
     
     this.elements.push(circle)
     return circle
+  }
+
+  /**
+   * Creates an ellipse element
+   */
+  createEllipse(
+    position: Position, 
+    style?: ShapeStyle, 
+    size?: Size
+  ): ShapeElement {
+    const safePosition = this.sanitizePosition(position)
+    
+    const defaultStyle = {
+      fill: '#E5E7EB',
+      stroke: '#374151',
+      strokeWidth: 2,
+      opacity: 1
+    }
+
+    const defaultSize = { width: 200, height: 100 }
+    
+    const finalStyle = { ...defaultStyle, ...style }
+    const finalSize = size ? this.sanitizeSize(size, { width: 20, height: 20 }) : defaultSize
+
+    const ellipse: ShapeElement = {
+      id: this.generateId(),
+      type: 'ellipse',
+      boardId: this.boardId,
+      position: safePosition,
+      size: finalSize,
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      style: finalStyle
+    }
+
+    // Create Fabric.js object
+    this.createEllipseFabricObject(ellipse)
+    
+    this.elements.push(ellipse)
+    return ellipse
+  }
+
+  /**
+   * Creates a line element
+   */
+  createLine(
+    startPoint: Position,
+    endPoint: Position,
+    style?: LineStyle
+  ): LineElement {
+    const defaultStyle = {
+      stroke: '#000000',
+      strokeWidth: 2,
+      strokeDasharray: undefined
+    }
+    
+    const finalStyle = { ...defaultStyle, ...style }
+    
+    // Calculate position and size from start and end points
+    const position = {
+      x: Math.min(startPoint.x, endPoint.x),
+      y: Math.min(startPoint.y, endPoint.y)
+    }
+    
+    const size = {
+      width: Math.abs(endPoint.x - startPoint.x),
+      height: Math.abs(endPoint.y - startPoint.y)
+    }
+
+    const line: LineElement = {
+      id: this.generateId(),
+      type: 'line',
+      boardId: this.boardId,
+      position,
+      size,
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      startPoint,
+      endPoint,
+      style: finalStyle
+    }
+
+    // Create Fabric.js object
+    this.createLineFabricObject(line)
+    
+    this.elements.push(line)
+    return line
   }
 
   /**
@@ -428,6 +557,63 @@ export class ElementManager {
     }
   }
 
+  private createEllipseFabricObject(element: ShapeElement): void {
+    try {
+      const ellipse = new fabric.Ellipse({
+        left: element.position.x,
+        top: element.position.y,
+        rx: element.size.width / 2,
+        ry: element.size.height / 2,
+        fill: element.style.fill,
+        stroke: element.style.stroke,
+        strokeWidth: element.style.strokeWidth,
+        opacity: element.style.opacity
+      })
+
+      ;(ellipse as any).elementId = element.id
+      ;(ellipse as any).elementType = element.type
+
+      ellipse.setCoords()
+      ellipse.on('modified', () => this.handleFabricObjectModified(element.id))
+
+      this.canvas.add(ellipse)
+      this.canvas.renderAll()
+
+    } catch (error) {
+      console.warn('Failed to create ellipse Fabric object:', error)
+    }
+  }
+
+  private createLineFabricObject(element: LineElement): void {
+    try {
+      const line = new fabric.Line([
+        element.startPoint.x,
+        element.startPoint.y,
+        element.endPoint.x,
+        element.endPoint.y
+      ], {
+        stroke: element.style.stroke,
+        strokeWidth: element.style.strokeWidth,
+        strokeDashArray: element.style.strokeDasharray ? element.style.strokeDasharray.split(',').map(Number) : undefined,
+        selectable: true,
+        hasControls: true,
+        hasBorders: true
+      })
+
+      ;(line as any).elementId = element.id
+      ;(line as any).elementType = element.type
+
+      line.setCoords()
+      line.on('modified', () => this.handleFabricObjectModified(element.id))
+
+      this.canvas.add(line)
+      this.canvas.renderAll()
+
+    } catch (error) {
+      console.warn('Failed to create line Fabric object:', error)
+    }
+  }
+
   private createTextFabricObject(element: TextElement): void {
     try {
       const text = new fabric.Text(element.content.text, {
@@ -467,13 +653,19 @@ export class ElementManager {
       })
 
       // Update type-specific properties
-      if (element.type === 'rectangle' || element.type === 'circle') {
+      if (element.type === 'rectangle' || element.type === 'circle' || element.type === 'ellipse') {
         const shapeElement = element as ShapeElement
         fabricObject.set({
           fill: shapeElement.style.fill,
           stroke: shapeElement.style.stroke,
           strokeWidth: shapeElement.style.strokeWidth,
           opacity: shapeElement.style.opacity
+        })
+      } else if (element.type === 'line') {
+        const lineElement = element as LineElement
+        fabricObject.set({
+          stroke: lineElement.style.stroke,
+          strokeWidth: lineElement.style.strokeWidth
         })
       }
 
@@ -516,5 +708,254 @@ export class ElementManager {
    */
   getElementsCount(): number {
     return this.elements.length
+  }
+
+  /**
+   * Creates a connector element
+   */
+  createConnector(
+    startPoint: Position,
+    endPoint: Position,
+    options: ConnectorOptions = {}
+  ): ConnectorElement {
+    const id = `connector-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    const connector: ConnectorElement = {
+      id,
+      type: 'connector',
+      boardId: this.boardId,
+      position: {
+        x: Math.min(startPoint.x, endPoint.x),
+        y: Math.min(startPoint.y, endPoint.y)
+      },
+      size: {
+        width: Math.abs(endPoint.x - startPoint.x),
+        height: Math.abs(endPoint.y - startPoint.y)
+      },
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      connection: {
+        startElementId: options.startElementId,
+        endElementId: options.endElementId,
+        startPoint,
+        endPoint,
+        style: options.style || 'straight'
+      },
+      style: {
+        stroke: options.stroke || '#000000',
+        strokeWidth: options.strokeWidth || 2,
+        strokeDasharray: options.strokeDasharray,
+        arrowStart: options.arrowStart || false,
+        arrowEnd: options.arrowEnd !== undefined ? options.arrowEnd : true
+      }
+    }
+
+    this.elements.push(connector)
+    this.createConnectorFabricObject(connector)
+    
+    return connector
+  }
+
+  /**
+   * Creates a freehand drawing element
+   */
+  createFreehand(
+    points: Position[],
+    options: FreehandOptions = {}
+  ): FreehandElement {
+    const id = `freehand-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    // Calculate bounds
+    const minX = Math.min(...points.map(p => p.x))
+    const minY = Math.min(...points.map(p => p.y))
+    const maxX = Math.max(...points.map(p => p.x))
+    const maxY = Math.max(...points.map(p => p.y))
+    
+    const freehand: FreehandElement = {
+      id,
+      type: 'freehand',
+      boardId: this.boardId,
+      position: { x: minX, y: minY },
+      size: {
+        width: maxX - minX,
+        height: maxY - minY
+      },
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      path: {
+        points,
+        brushSize: options.brushSize || 2,
+        color: options.color || '#000000',
+        opacity: options.opacity || 1
+      }
+    }
+
+    this.elements.push(freehand)
+    this.createFreehandFabricObject(freehand)
+    
+    return freehand
+  }
+
+  /**
+   * Creates an image element
+   */
+  createImage(
+    position: Position,
+    url: string,
+    originalSize: Size,
+    options: ImageOptions = {}
+  ): ImageElement {
+    const id = `image-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    
+    // Calculate size maintaining aspect ratio if needed
+    let size = options.size || originalSize
+    if (options.size && options.size.height === 0) {
+      const ratio = originalSize.height / originalSize.width
+      size = {
+        width: options.size.width,
+        height: options.size.width * ratio
+      }
+    }
+    
+    const image: ImageElement = {
+      id,
+      type: 'image',
+      boardId: this.boardId,
+      position,
+      size,
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      content: {
+        url,
+        alt: options.alt,
+        originalSize
+      }
+    }
+
+    this.elements.push(image)
+    this.createImageFabricObject(image)
+    
+    return image
+  }
+
+  /**
+   * Creates Fabric object for connector
+   */
+  private createConnectorFabricObject(connector: ConnectorElement): void {
+    try {
+      const { startPoint, endPoint, style } = connector.connection
+      
+      // Create path string based on connector style
+      let pathString = ''
+      if (style === 'curved') {
+        const cp1x = startPoint.x + (endPoint.x - startPoint.x) / 3
+        const cp1y = startPoint.y
+        const cp2x = startPoint.x + (endPoint.x - startPoint.x) * 2 / 3
+        const cp2y = endPoint.y
+        pathString = `M ${startPoint.x} ${startPoint.y} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endPoint.x} ${endPoint.y}`
+      } else if (style === 'stepped') {
+        const midX = (startPoint.x + endPoint.x) / 2
+        pathString = `M ${startPoint.x} ${startPoint.y} L ${midX} ${startPoint.y} L ${midX} ${endPoint.y} L ${endPoint.x} ${endPoint.y}`
+      } else {
+        pathString = `M ${startPoint.x} ${startPoint.y} L ${endPoint.x} ${endPoint.y}`
+      }
+      
+      const path = new fabric.Path(pathString, {
+        stroke: connector.style.stroke,
+        strokeWidth: connector.style.strokeWidth,
+        strokeDashArray: connector.style.strokeDasharray ? connector.style.strokeDasharray.split(',').map(Number) : undefined,
+        fill: '',
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+        lockRotation: true
+      })
+      
+      // Add arrow heads if needed
+      if (connector.style.arrowEnd || connector.style.arrowStart) {
+        // This would need a more complex implementation with arrow heads
+        // For now, we'll just use the path
+      }
+      
+      ;(path as any).elementId = connector.id
+      this.canvas.add(path)
+    } catch (error) {
+      console.warn('Failed to create connector Fabric object:', error)
+    }
+  }
+
+  /**
+   * Creates Fabric object for freehand drawing
+   */
+  private createFreehandFabricObject(freehand: FreehandElement): void {
+    try {
+      const { points, brushSize, color, opacity } = freehand.path
+      
+      // Create path string from points
+      let pathString = ''
+      points.forEach((point, index) => {
+        if (index === 0) {
+          pathString += `M ${point.x} ${point.y}`
+        } else {
+          pathString += ` L ${point.x} ${point.y}`
+        }
+      })
+      
+      const path = new fabric.Path(pathString, {
+        stroke: color,
+        strokeWidth: brushSize,
+        fill: '',
+        opacity,
+        strokeLineCap: 'round',
+        strokeLineJoin: 'round',
+        selectable: true,
+        hasControls: true,
+        hasBorders: true
+      })
+      
+      ;(path as any).elementId = freehand.id
+      this.canvas.add(path)
+    } catch (error) {
+      console.warn('Failed to create freehand Fabric object:', error)
+    }
+  }
+
+  /**
+   * Creates Fabric object for image
+   */
+  private createImageFabricObject(image: ImageElement): void {
+    try {
+      fabric.Image.fromURL(image.content.url, (fabricImage) => {
+        fabricImage.set({
+          left: image.position.x,
+          top: image.position.y,
+          width: image.size.width,
+          height: image.size.height,
+          selectable: true,
+          hasControls: true,
+          hasBorders: true
+        })
+        
+        ;(fabricImage as any).elementId = image.id
+        this.canvas.add(fabricImage)
+      })
+    } catch (error) {
+      console.warn('Failed to create image Fabric object:', error)
+    }
   }
 }

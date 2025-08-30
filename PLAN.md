@@ -1,762 +1,1125 @@
-# Miro Clone - Project Continuation Plan
+# Cycle 7: Miro Clone - Complete Feature Implementation Plan
 
-## Executive Summary
+**Cycle Start:** August 30, 2025  
+**Vision:** Continue working on the Miro board project to finish all the remaining features  
+**Current State:** Core elements implemented, TypeScript build error blocking progress  
 
-This project continuation plan addresses the current state of the Miro whiteboard clone implementation, incorporating lessons learned from the initial development phase and reviewer feedback. The project demonstrates strong architectural foundation but requires critical bug fixes and feature enhancements to achieve production readiness.
+## Current Project Status
 
-**Current State Assessment:**
-- **Codebase Quality**: Good architectural foundation with modern tech stack
-- **Implementation Progress**: Core features partially implemented with test-driven approach
-- **Critical Issues**: 26 TypeScript compilation errors, 46 failed tests requiring immediate attention
-- **Documentation**: Excellent planning and design specifications completed
+### Completed Work (Cycles 1-6)
+- ✅ **Architecture:** Next.js 15, TypeScript, Fabric.js, Zustand, Tailwind CSS
+- ✅ **Canvas Engine:** Pan/zoom, touch support, event system, camera management
+- ✅ **State Management:** Zustand store with element CRUD, selection, collaboration structure
+- ✅ **Component Structure:** Whiteboard, Toolbar, ToolPanel, CollaborationPanel
+- ✅ **Element Types:** Text, Note, Rectangle, Ellipse, Line, Connector, Freehand, Image
+- ✅ **System Features:** LayerManager, HistoryManager with undo/redo
+- ✅ **Test Infrastructure:** 171/216 tests passing (79% success rate)
 
-**Next Phase Objectives:**
-1. Resolve existing technical debt and compilation issues
-2. Complete core collaborative whiteboard functionality
-3. Enhance real-time collaboration features
-4. Build advanced visual elements and user experience features
-5. Optimize performance for production deployment
+### Critical Issues
+- 🔴 **Build:** TypeScript compilation error in history-manager.ts:208 (blocks build)
+- ⚠️ **Tests:** 45 integration test failures (UI-related, non-critical)
+- ⚠️ **Missing:** No real-time collaboration, export functionality, or mobile optimization
 
-**Timeline**: 12-16 weeks to production-ready release
-**Priority**: Fix existing issues first, then feature enhancement
+---
 
-## 1. Current State Analysis
+## 1. Requirements Analysis - Cycle 7 Focus
 
-### 1.1 Existing Implementation Review
+### 1.1 Current State Analysis
 
-#### ✅ Implemented Strengths
-- **Architecture**: Well-structured Next.js 15 application with TypeScript
-- **Technology Stack**: Modern stack (Next.js, TypeScript, Fabric.js, Zustand, Tailwind)
-- **Component Structure**: Clean React component hierarchy with proper separation
-- **Testing Framework**: Comprehensive test structure with Jest and React Testing Library
-- **State Management**: Zustand implementation for canvas state management
-- **Design System**: Radix UI components with Tailwind CSS styling
-- **Real-time Infrastructure**: Socket.io integration foundation
-- **Canvas Engine**: Fabric.js integration with custom engine wrapper
+#### ✅ Successfully Implemented
+- **Modern Architecture**: Next.js 15 with TypeScript, proper component hierarchy
+- **Canvas Foundation**: Fabric.js integration with custom CanvasEngine class
+- **State Management**: Zustand store with proper TypeScript interfaces
+- **UI Framework**: Radix UI components with Tailwind CSS styling
+- **Element System**: Comprehensive element types with Fabric.js rendering
+- **Layer Management**: Complete layering operations (move up/down/to front/back)
+- **History System**: Command pattern undo/redo with merging support
+- **Test Structure**: Vitest configuration with React Testing Library
 
-#### ❌ Critical Issues from Review
+#### ❌ Critical Issue - Must Fix First
+1. **TypeScript Build Error**
+   - Function signature mismatch in history-manager.ts:208
+   - Blocks production build
+   - Prevents deployment
 
-**TypeScript Compilation Errors (Priority: High)**
-```typescript
-// Issues identified in REVIEW.md:
-// 1. Canvas engine property access - 26 total errors
-src/lib/canvas-engine.ts: Property 'canvas' has no initializer
-src/hooks/useCanvas.ts: Property 'canvas' is private and only accessible
-src/store/useCanvasStore.ts: Type conflicts in element updates
+#### ⚠️ Non-Critical Issues
+1. **Integration Tests**: 45 failures (UI mocking issues)
+2. **Missing Features**: WebSocket, export, mobile support
 
-// 2. Test framework integration issues  
-src/hooks/useCanvas.ts: Namespace 'React' has no exported member 'MouseMove'
+#### 📊 Feature Completion Status
+- **Canvas Operations**: 90% complete - All basic operations working
+- **Element Creation**: 85% complete - All planned element types implemented
+- **System Features**: 80% complete - Layer and history management working
+- **Real-time Collaboration**: 0% complete - Not started
+- **Export Functionality**: 0% complete - Not started
+- **Mobile Optimization**: 0% complete - Not started
 
-// 3. Missing Jest DOM matcher types
-Tests expecting .toBeInTheDocument() failing due to missing @types/jest-dom
-```
+### 1.2 Functional Requirements - Prioritized
 
-**Test Suite Failures (Priority: High)**
-```bash
-Test Results: 46 failed, 93 passed, 139 total
-Issues:
-- Canvas initialization issues with Fabric.js mocking
-- Performance tests timing out
-- Missing Jest DOM matcher types
-- Integration test component rendering failures
-```
+#### Phase 1: Critical Fix (Day 1-2)
+**Immediate Requirements:**
+- Fix TypeScript compilation error in history-manager.ts:208
+- Verify build succeeds
+- Ensure no regression in tests
 
-**Architecture Gaps (Priority: Medium)**
-- Missing error boundaries for React components
-- Incomplete authentication context implementation
-- Limited input validation and sanitization
-- Performance monitoring running continuously
+#### Phase 2: WebSocket Server (Day 3-7)
+**WebSocket Implementation:**
+- Express + Socket.io server setup
+- Room management for boards
+- Connection handling and reconnection
+- Basic operation synchronization
+- Message batching for performance
 
-### 1.2 Technical Debt Assessment
-
-#### Immediate Fixes Required (Weeks 1-2)
-1. **TypeScript Configuration**: Resolve all compilation errors
-2. **Test Infrastructure**: Fix Jest setup and DOM matcher integration
-3. **Canvas Engine**: Proper property initialization and access patterns
-4. **State Management**: Type-safe element updates and conflict resolution
-
-#### Code Quality Improvements (Weeks 3-4)
-1. **Error Handling**: Implement error boundaries and proper error states
-2. **Authentication**: Complete auth context and user session management
-3. **Input Validation**: Add comprehensive input sanitization
-4. **Performance**: Optional frame rate monitoring and optimizations
-
-### 1.3 Feature Completeness Analysis
-
-#### MVP Core Features Status
-```
-Canvas Management: 70% complete
-├── ✅ Basic pan and zoom
-├── ✅ Element creation (sticky notes, shapes)
-├── ⚠️  Element manipulation (partial - needs fixes)
-└── ❌ Export functionality
-
-Real-time Collaboration: 40% complete
-├── ✅ WebSocket foundation
-├── ⚠️  Basic synchronization (needs debugging)
-├── ❌ Conflict resolution
-└── ❌ User presence indicators
-
-Visual Elements: 50% complete
-├── ✅ Sticky notes
-├── ✅ Basic shapes  
-├── ❌ Rich text editing
-├── ❌ Image upload
-└── ❌ Drawing tools
-
-User Management: 30% complete
-├── ⚠️  Basic authentication structure
-├── ❌ User profiles
-├── ❌ Board permissions
-└── ❌ Sharing functionality
-```
-
-## 2. Updated System Architecture
-
-### 2.1 Refined Architecture Decisions
-
-Based on implementation experience, we're refining the original architecture:
-
-#### Frontend Architecture Adjustments
-```typescript
-// Original approach had canvas engine complexity
-// New approach: Simplified canvas wrapper with better error handling
-
-interface CanvasEngineConfig {
-  container: HTMLElement;
-  enableVirtualization: boolean;
-  performanceMonitoring: boolean; // Made optional
-  maxElements: number;
-}
-
-class CanvasEngine {
-  private canvas: fabric.Canvas | null = null; // Proper initialization
-  private config: CanvasEngineConfig;
-  
-  constructor(config: CanvasEngineConfig) {
-    this.config = config;
-    this.initializeCanvas();
-  }
-  
-  private initializeCanvas(): void {
-    // Proper initialization with error handling
-    try {
-      this.canvas = new fabric.Canvas(null, {
-        selection: true,
-        preserveObjectStacking: true,
-      });
-    } catch (error) {
-      console.error('Canvas initialization failed:', error);
-      throw new CanvasInitializationError('Failed to initialize canvas');
-    }
-  }
-}
-```
-
-#### State Management Improvements
-```typescript
-// Enhanced type safety for element updates
-interface CanvasStore {
-  updateElement: <T extends CanvasElement>(
-    id: string, 
-    updates: Partial<T>,
-    options?: { skipValidation?: boolean; broadcast?: boolean }
-  ) => void;
-  
-  // Separate methods for type-specific updates
-  updateStickyNote: (id: string, updates: Partial<StickyNoteElement>) => void;
-  updateShape: (id: string, updates: Partial<ShapeElement>) => void;
-  updateTextBox: (id: string, updates: Partial<TextElement>) => void;
-}
-```
-
-### 2.2 Performance Architecture Refinements
-
-#### Canvas Virtualization Strategy
-```typescript
-// Refined virtualization based on real performance data
-class CanvasVirtualization {
-  private static readonly CULLING_BUFFER = 200; // Increased buffer
-  private static readonly MAX_VISIBLE_ELEMENTS = 500; // Performance limit
-  
-  updateVisibleElements(viewport: Viewport, elements: CanvasElement[]): Set<CanvasElement> {
-    // Spatial indexing for O(log n) queries instead of O(n)
-    return this.spatialIndex.query(viewport.bounds);
-  }
-}
-```
-
-#### Real-time Optimization Strategy
-```typescript
-// Batched updates with intelligent throttling
-class RealtimeManager {
-  private updateBatch: Map<string, ElementUpdate> = new Map();
-  private flushTimeout: NodeJS.Timeout | null = null;
-  
-  queueUpdate(elementId: string, update: ElementUpdate): void {
-    // Merge updates for same element
-    const existing = this.updateBatch.get(elementId);
-    this.updateBatch.set(elementId, this.mergeUpdates(existing, update));
-    
-    // Intelligent throttling based on update type
-    const delay = update.type === 'move' ? 16 : 100; // 60fps for moves, slower for others
-    this.scheduleFlush(delay);
-  }
-}
-```
-
-## 3. Technology Stack Validation
-
-### 3.1 Current Stack Assessment
-
-#### Confirmed Good Choices ✅
-- **Next.js 15**: Excellent performance and developer experience
-- **TypeScript**: Strong typing catching issues early (once compilation errors fixed)
-- **Fabric.js**: Powerful canvas manipulation (needs proper integration)
-- **Zustand**: Lightweight state management working well
-- **Tailwind CSS**: Rapid UI development
-- **Socket.io**: Reliable real-time communication
-
-#### Adjustments Needed ⚠️
-- **Jest Configuration**: Needs DOM matcher integration
-- **Fabric.js Integration**: Requires better TypeScript definitions
-- **Performance Monitoring**: Should be optional, not always-on
-
-#### Dependencies to Add 📦
-```json
-{
-  "devDependencies": {
-    "@types/jest-dom": "^6.1.4", // Fix test type issues
-    "@types/fabric": "^5.3.0",   // Better Fabric.js types
-    "canvas": "^2.11.2",         // Node.js canvas for server-side testing
-    "@testing-library/jest-dom": "^6.1.4" // Jest DOM matchers
-  },
-  "dependencies": {
-    "react-error-boundary": "^4.0.11", // Error boundary component
-    "zod": "^3.22.4",                   // Runtime type validation
-    "react-hotkeys-hook": "^4.4.1"     // Keyboard shortcuts
-  }
-}
-```
-
-## 4. Project Phases - Revised Timeline
-
-### Phase 1: Critical Issue Resolution (Weeks 1-3)
-**Priority: URGENT - Must complete before feature development**
-
-#### Week 1: TypeScript and Build Fixes
-**Deliverables:**
-- All TypeScript compilation errors resolved
-- Jest test configuration working properly
-- Canvas engine properly initialized
-- Basic test suite passing
-
-**Tasks:**
-1. **Fix Canvas Engine Initialization**
-   ```typescript
-   // Fix property initialization issues
-   class CanvasEngine {
-     private canvas: fabric.Canvas;
-     
-     constructor(container: HTMLElement) {
-       this.canvas = this.initializeCanvas(container);
-     }
-     
-     private initializeCanvas(container: HTMLElement): fabric.Canvas {
-       return new fabric.Canvas(container.querySelector('canvas'), {
-         selection: true,
-         preserveObjectStacking: true,
-       });
-     }
-   }
-   ```
-
-2. **Update Jest Configuration**
-   ```javascript
-   // jest.config.js additions
-   module.exports = {
-     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-     testEnvironment: 'jsdom',
-     moduleNameMapping: {
-       '^fabric$': '<rootDir>/src/__mocks__/fabric.js'
-     }
-   };
-   
-   // jest.setup.js
-   import '@testing-library/jest-dom';
-   ```
-
-3. **Fix Type Import Issues**
-   ```typescript
-   // Correct React event type imports
-   import { MouseEvent, KeyboardEvent } from 'react';
-   // Instead of React.MouseMove which doesn't exist
-   ```
-
-**Acceptance Criteria:**
-- ✅ `npm run build` completes without errors
-- ✅ `npm run test` shows >90% passing tests
-- ✅ `npm run type-check` passes without issues
-- ✅ Canvas engine initializes properly in tests
-
-#### Week 2: State Management and Integration Fixes
-**Deliverables:**
-- Type-safe element updates working
-- Integration tests passing
-- Real-time synchronization basic functionality restored
-
-**Tasks:**
-1. **Fix State Management Type Issues**
-   ```typescript
-   // Type guards for element updates
-   const updateElement = <T extends CanvasElement>(
-     id: string,
-     updates: Partial<T>
-   ): void => {
-     set((state) => ({
-       elements: state.elements.map(element => {
-         if (element.id !== id) return element;
-         
-         // Type-safe update with validation
-         if (!isValidUpdate(element, updates)) {
-           throw new Error(`Invalid update for element type ${element.type}`);
-         }
-         
-         return { 
-           ...element, 
-           ...updates, 
-           updatedAt: new Date().toISOString() 
-         } as T;
-       })
-     }));
-   };
-   ```
-
-2. **Implement Proper Error Boundaries**
-   ```typescript
-   // Add error boundaries to main components
-   const WhiteboardErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-     return (
-       <ErrorBoundary
-         FallbackComponent={WhiteboardErrorFallback}
-         onError={(error, errorInfo) => {
-           console.error('Whiteboard error:', error, errorInfo);
-         }}
-       >
-         {children}
-       </ErrorBoundary>
-     );
-   };
-   ```
-
-**Acceptance Criteria:**
-- ✅ Element creation and updates work without type errors
-- ✅ Integration tests pass for basic whiteboard functionality
-- ✅ Error boundaries catch and display errors gracefully
-- ✅ State updates are type-safe and validated
-
-#### Week 3: Performance and Testing Improvements
-**Deliverables:**
-- Performance monitoring made optional
-- Test coverage improved to >85%
-- Canvas operations optimized
-- Memory leaks eliminated
-
-**Acceptance Criteria:**
-- ✅ Performance tests complete within reasonable time
-- ✅ No memory leaks in canvas operations
-- ✅ Test coverage above 85%
-- ✅ All critical bugs from review resolved
-
-### Phase 2: Core Feature Completion (Weeks 4-7)
-**Priority: HIGH - Complete MVP functionality**
-
-#### Week 4: Canvas Operations Completion
-**Deliverables:**
-- Reliable element manipulation (move, resize, delete)
-- Multi-select functionality
-- Undo/redo system
-- Canvas export (PDF, PNG)
-
-**Tasks:**
-1. **Implement Robust Element Manipulation**
-   ```typescript
-   class ElementManager {
-     selectMultiple(elementIds: string[]): void {
-       // Implement multi-select with proper state management
-     }
-     
-     moveElements(elementIds: string[], deltaX: number, deltaY: number): void {
-       // Batch move operations for performance
-     }
-     
-     deleteElements(elementIds: string[]): void {
-       // Safe deletion with undo support
-     }
-   }
-   ```
-
-2. **Build Undo/Redo System**
-   ```typescript
-   interface CommandPattern {
-     execute(): void;
-     undo(): void;
-     redo(): void;
-   }
-   
-   class CanvasHistoryManager {
-     private history: CommandPattern[] = [];
-     private currentIndex = -1;
-     
-     executeCommand(command: CommandPattern): void {
-       command.execute();
-       this.addToHistory(command);
-     }
-   }
-   ```
-
-**Acceptance Criteria:**
-- ✅ Users can select and manipulate multiple elements
-- ✅ Undo/redo works for all canvas operations
-- ✅ Canvas export generates high-quality outputs
-- ✅ Performance remains smooth with 100+ elements
-
-#### Week 5: Real-time Collaboration Foundation
-**Deliverables:**
-- Working WebSocket communication
-- Basic conflict resolution
+#### Phase 3: Collaboration Features (Day 8-10)
+**Real-time Features:**
 - User presence indicators
 - Live cursor tracking
+- Element locking during edit
+- Typing indicators
+- Operational transform for conflicts
 
-**Tasks:**
-1. **Implement Operational Transform**
+#### Phase 4: Export System (Day 11-13)
+**Export Features:**
+- PNG export (client-side)
+- PDF generation (server-side)
+- SVG export using Fabric.js
+- Quality and bounds configuration
+- Progress indicators
+
+#### Phase 5: Mobile Support (Day 14-16)
+**Mobile Optimization:**
+- Touch gesture handlers (pinch, pan, rotate)
+- Responsive toolbar layouts
+- Touch-friendly controls (44x44px)
+- Landscape/portrait adaptations
+
+#### Phase 6: Performance & Polish (Day 17-20)
+**Production Readiness:**
+- Viewport culling for 1000+ elements
+- LOD system implementation
+- WebSocket message batching
+- Load testing with 50+ users
+- Security audit and fixes
+
+### 1.3 Non-Functional Requirements (Cycle 7)
+
+#### Performance Targets
+- **Rendering**: 60fps with 500+ elements
+- **Sync Latency**: <100ms for real-time updates
+- **Load Time**: <3s Time to Interactive
+- **Touch Response**: <100ms on mobile
+- **Export Time**: <5s for 500 elements
+
+#### Scalability Limits
+- **Elements**: 1000 per board maximum
+- **Users**: 50 concurrent per board
+- **Message Size**: 64KB WebSocket limit
+- **Image Size**: 10MB upload, auto-resize to 2048px
+
+#### Security Requirements
+- Input validation on all user data
+- XSS prevention in text elements
+- Rate limiting on WebSocket messages
+- Secure WebSocket connections (WSS)
+
+---
+
+## 2. System Architecture - Cycle 7
+
+### 2.1 Architecture Overview
+
+```
+┌─────────────────────────────────────────┐
+│           Client Application            │
+├─────────────────────────────────────────┤
+│  Canvas Engine │ State Mgmt │ UI Layer  │
+├─────────────────────────────────────────┤
+│         WebSocket Connection            │
+└─────────────────────────────────────────┘
+                    ↕
+┌─────────────────────────────────────────┐
+│          WebSocket Server               │
+├─────────────────────────────────────────┤
+│  Room Mgmt │ OT Engine │ Presence Sys   │
+├─────────────────────────────────────────┤
+│         Export Service (PDF/SVG)        │
+└─────────────────────────────────────────┘
+```
+
+### 2.2 WebSocket Message Protocol
+
+```typescript
+// Client → Server Messages
+type ClientMessage = 
+  | { type: 'join'; boardId: string; userId: string }
+  | { type: 'leave'; boardId: string }
+  | { type: 'cursor'; position: Position }
+  | { type: 'operation'; op: Operation }
+  | { type: 'selection'; elementIds: string[] }
+  | { type: 'ping'; timestamp: number };
+
+// Server → Client Messages  
+type ServerMessage =
+  | { type: 'joined'; users: UserPresence[] }
+  | { type: 'user_joined'; user: UserPresence }
+  | { type: 'user_left'; userId: string }
+  | { type: 'cursor_update'; userId: string; position: Position }
+  | { type: 'operation'; op: Operation; userId: string }
+  | { type: 'sync'; operations: Operation[] }
+  | { type: 'pong'; timestamp: number; serverTime: number };
+```
+
+### 2.3 Operational Transform Matrix
+
+```typescript
+// Transform priority matrix for concurrent operations
+const transformMatrix = {
+  'create-create': (op1, op2) => [op1, op2], // Independent
+  'create-update': (op1, op2) => [op1, op2], // Independent
+  'create-delete': (op1, op2) => [op1, null], // Delete wins
+  'update-update': (op1, op2) => mergeUpdates(op1, op2),
+  'update-delete': (op1, op2) => [null, op2], // Delete wins
+  'delete-delete': (op1, op2) => [null, null], // Both deleted
+};
+```
+
+
+## 3. Technology Stack
+
+### Core Stack (Existing)
+- **Frontend:** Next.js 15.5.2, React 19, TypeScript 5.7.3
+- **Canvas:** Fabric.js 6.5.1
+- **State:** Zustand 5.0.2
+- **UI:** Radix UI, Tailwind CSS
+- **Testing:** Vitest, React Testing Library
+
+### New Dependencies (Cycle 7)
+```json
+{
+  "dependencies": {
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "express": "^4.19.2",
+    "puppeteer": "^22.0.0"
+  }
+}
+```
+
+## 4. Implementation Phases (20 Days)
+
+### Phase 1: Critical Fix (Day 1-2)
+
+**Day 1: TypeScript Build Fix**
+- Fix function signature mismatch in history-manager.ts:208
+- Update onExecute callback type definition
+- Verify build succeeds
+
+**Day 2: Test Stabilization**
+- Run full test suite
+- Fix any regression issues
+- Achieve 80%+ test pass rate
+
+### Phase 2: WebSocket Server (Day 3-7)
+
+**Day 3-4: Server Setup**
+- Create Express + Socket.io server
+- Implement room management
+- Add connection/disconnection handlers
+
+**Day 5-6: Operation Sync**
+- Implement operation broadcasting
+- Add message batching (50ms interval)
+- Create operation queue
+
+**Day 7: Client Integration**
+- WebSocket connection manager
+- Reconnection logic with exponential backoff
+- Connection status UI component
+
+### Phase 3: Collaboration Features (Day 8-10)
+
+**Day 8: User Presence**
+- Live cursor tracking and display
+- User avatar indicators
+- Active user list component
+
+**Day 9: Operational Transform**
+- Implement transform functions
+- Conflict resolution matrix
+- Operation merging
+
+**Day 10: Collaborative Editing**
+- Element locking during edit
+- Typing indicators
+- Selection sharing
+
+### Phase 4: Export System (Day 11-13)
+
+**Day 11: Client-side Export**
+- PNG export using canvas.toDataURL()
+- Quality and bounds configuration
+- Download trigger implementation
+
+**Day 12: Server-side Export**
+- PDF generation with puppeteer
+- SVG export using Fabric.js
+- API endpoints for export
+
+**Day 13: Export UI**
+- Export modal component
+- Format selection interface
+- Progress indicators
+
+### Phase 5: Mobile Support (Day 14-16)
+
+**Day 14: Touch Gestures**
+- Pinch-to-zoom implementation
+- Two-finger pan and rotate
+- Long-press context menus
+
+**Day 15: Responsive UI**
+- Mobile toolbar layout
+- Touch-friendly controls (44x44px)
+- Collapsible panels
+
+**Day 16: Mobile Testing**
+- Test on various devices
+- Fix touch event issues
+- Optimize performance
+
+#### Week 6: Real-time Collaboration Foundation
+**Objective**: Implement basic real-time multi-user editing
+
+**Features:**
+1. **WebSocket Connection Management**
    ```typescript
-   interface Operation {
-     type: 'insert' | 'delete' | 'move' | 'update';
-     elementId: string;
-     data: any;
-     timestamp: number;
-     userId: string;
-   }
-   
-   class OperationalTransform {
-     transform(op1: Operation, op2: Operation): [Operation, Operation] {
-       // Transform operations for conflict resolution
+   class RealtimeManager {
+     private socket: Socket;
+     private connectionState: 'disconnected' | 'connecting' | 'connected' = 'disconnected';
+     private reconnectAttempts = 0;
+     private maxReconnectAttempts = 5;
+     
+     connect(boardId: string): void {
+       this.socket = io(process.env.NEXT_PUBLIC_WS_URL, {
+         query: { boardId },
+         transports: ['websocket']
+       });
+       
+       this.setupEventHandlers();
+     }
+     
+     private setupEventHandlers(): void {
+       this.socket.on('operation', this.handleRemoteOperation.bind(this));
+       this.socket.on('presence', this.handlePresenceUpdate.bind(this));
+       this.socket.on('disconnect', this.handleDisconnection.bind(this));
      }
    }
    ```
 
-2. **Build User Presence System**
+2. **User Presence System**
    ```typescript
    interface UserPresence {
      userId: string;
-     cursorPosition: { x: number; y: number };
+     displayName: string;
+     avatarColor: string;
+     cursor?: Position;
+     selection?: string[];
      lastSeen: Date;
      isActive: boolean;
    }
    
    class PresenceManager {
-     updateUserCursor(userId: string, position: { x: number; y: number }): void {
-       // Real-time cursor updates
+     private presenceMap = new Map<string, UserPresence>();
+     
+     updateCursor(userId: string, position: Position): void {
+       const presence = this.presenceMap.get(userId);
+       if (presence) {
+         this.presenceMap.set(userId, {
+           ...presence,
+           cursor: position,
+           lastSeen: new Date(),
+           isActive: true
+         });
+       }
      }
    }
    ```
 
-**Acceptance Criteria:**
-- ✅ Multiple users can edit same board simultaneously
-- ✅ Conflicts are resolved without data loss
-- ✅ User cursors are visible to other participants
-- ✅ Users can see who else is online
-
-#### Week 6: Visual Elements Enhancement
 **Deliverables:**
-- Rich text editing capabilities
-- Basic drawing/pen tool
-- Image upload and embedding
-- Connector/arrow elements
+- ✅ WebSocket connection with automatic reconnection
+- ✅ User presence indicators and live cursors
+- ✅ Basic operation synchronization
+- ✅ Connection status UI
 
-**Tasks:**
-1. **Implement Rich Text Editor**
-   - Integration with a lightweight rich text library
-   - Proper styling and formatting options
-   - Real-time collaborative text editing
+#### Week 7: Visual Elements Enhancement
+**Objective**: Complete all essential visual element types
 
-2. **Add Drawing Tools**
-   - Pen tool with pressure sensitivity
-   - Different brush sizes and colors
-   - Smooth curve rendering
+**Elements to Implement:**
+1. **Enhanced Sticky Notes**
+   ```typescript
+   interface StickyNoteElement extends BaseElement {
+     type: 'sticky_note';
+     content: {
+       text: string;
+       fontSize: number;
+       fontFamily: string;
+       fontWeight: 'normal' | 'bold';
+       textColor: string;
+       backgroundColor: string;
+       borderColor?: string;
+     };
+     formatting: {
+       bold: boolean;
+       italic: boolean;
+       underline: boolean;
+       strikethrough: boolean;
+     };
+   }
+   ```
 
-3. **Build Image System**
-   - File upload with validation
-   - Image resizing and optimization
-   - Drag-and-drop image embedding
+2. **Drawing/Pen Tool**
+   ```typescript
+   interface FreehandElement extends BaseElement {
+     type: 'freehand';
+     strokes: {
+       points: Position[];
+       brushSize: number;
+       color: string;
+       opacity: number;
+       pressure?: number[];
+     }[];
+   }
+   
+   class DrawingTool {
+     private currentStroke: Position[] = [];
+     private isDrawing = false;
+     
+     startDrawing(point: Position): void {
+       this.isDrawing = true;
+       this.currentStroke = [point];
+     }
+     
+     continueDrawing(point: Position): void {
+       if (!this.isDrawing) return;
+       this.currentStroke.push(point);
+       this.renderPreview();
+     }
+   }
+   ```
 
-**Acceptance Criteria:**
-- ✅ Users can create formatted text with styles
-- ✅ Drawing tools work smoothly on various devices
-- ✅ Images can be uploaded and embedded
-- ✅ Elements can be connected with arrows
+3. **Image Upload System**
+   ```typescript
+   class ImageManager {
+     async uploadImage(file: File): Promise<string> {
+       // Validate file type and size
+       if (!this.isValidImageFile(file)) {
+         throw new Error('Invalid image file');
+       }
+       
+       // Resize if necessary
+       const resizedFile = await this.resizeImage(file, { maxWidth: 1920, maxHeight: 1080 });
+       
+       // Upload to storage
+       const url = await this.uploadToStorage(resizedFile);
+       return url;
+     }
+   }
+   ```
 
-#### Week 7: User Management and Sharing
 **Deliverables:**
-- Complete authentication system
-- Board sharing and permissions
-- User profiles and settings
-- Basic dashboard for board management
+- ✅ Rich text sticky notes with formatting
+- ✅ Smooth drawing/pen tool
+- ✅ Image upload and embedding
+- ✅ Connector/arrow elements
 
-**Acceptance Criteria:**
-- ✅ Users can register, login, and manage profiles
-- ✅ Boards can be shared with granular permissions
-- ✅ Users can organize and manage their boards
-- ✅ Share links work with proper access control
+#### Week 8: Export and Sharing
+**Objective**: Complete board export functionality and basic sharing
 
-### Phase 3: Advanced Features and Polish (Weeks 8-12)
-**Priority: MEDIUM - Enhanced user experience**
-
-#### Week 8-9: Advanced Collaboration
 **Features:**
-- Comments and annotations system
-- @mentions and notifications
-- Activity history and audit trail
-- Video/audio call integration (basic)
+1. **Export System**
+   ```typescript
+   interface ExportOptions {
+     format: 'png' | 'jpg' | 'pdf' | 'svg';
+     quality?: number;
+     scale?: number;
+     bounds?: 'visible' | 'all' | 'selection';
+     includeBackground?: boolean;
+   }
+   
+   class ExportManager {
+     async exportCanvas(options: ExportOptions): Promise<Blob> {
+       const canvas = this.canvasEngine.getCanvas();
+       
+       switch (options.format) {
+         case 'png':
+           return this.exportAsPNG(canvas, options);
+         case 'pdf':
+           return this.exportAsPDF(canvas, options);
+         // ... other formats
+       }
+     }
+   }
+   ```
 
-#### Week 10-11: Performance and Scale
+**Deliverables:**
+- ✅ Export to PNG, PDF, SVG formats
+- ✅ Basic board sharing with links
+- ✅ Permission levels (view, edit)
+- ✅ Share modal with copy link
+
+### Phase 3: Advanced Features (Weeks 9-12) 🚀
+
+#### Week 9-10: Advanced Collaboration
+**Objective**: Implement sophisticated collaboration features
+
 **Features:**
-- Canvas virtualization for large boards
-- Optimized real-time sync algorithms
-- Database query optimization
-- Comprehensive caching strategy
+1. **Comments System**
+   ```typescript
+   interface Comment {
+     id: string;
+     boardId: string;
+     elementId?: string;
+     position: Position;
+     author: User;
+     content: string;
+     createdAt: Date;
+     resolved: boolean;
+     replies: CommentReply[];
+   }
+   
+   class CommentManager {
+     addComment(position: Position, content: string, elementId?: string): Comment {
+       const comment = {
+         id: generateId(),
+         boardId: this.boardId,
+         elementId,
+         position,
+         author: this.currentUser,
+         content,
+         createdAt: new Date(),
+         resolved: false,
+         replies: []
+       };
+       
+       this.store.addComment(comment);
+       return comment;
+     }
+   }
+   ```
 
-#### Week 12: User Experience Polish
+2. **Advanced Conflict Resolution**
+   ```typescript
+   class ConflictResolver {
+     resolveConflict(localOp: Operation, remoteOp: Operation): Operation[] {
+       // Implement sophisticated conflict resolution
+       if (this.areOperationsCompatible(localOp, remoteOp)) {
+         return [localOp, remoteOp];
+       }
+       
+       // Use operational transform
+       return OperationalTransform.transform(localOp, remoteOp);
+     }
+   }
+   ```
+
+#### Week 11: User Management & Dashboard
+**Objective**: Complete user authentication and board management
+
 **Features:**
-- Mobile responsive design improvements
-- Accessibility enhancements (WCAG 2.1 AA)
-- Keyboard shortcuts and navigation
-- Onboarding flow and tutorials
+1. **Authentication System**
+   ```typescript
+   interface AuthContext {
+     user: User | null;
+     login: (email: string, password: string) => Promise<void>;
+     logout: () => void;
+     register: (userData: RegisterData) => Promise<void>;
+     isLoading: boolean;
+     error: string | null;
+   }
+   ```
 
-### Phase 4: Production Readiness (Weeks 13-16)
-**Priority: HIGH - Production deployment**
+2. **Board Dashboard**
+   ```typescript
+   interface BoardDashboard {
+     recentBoards: Board[];
+     sharedBoards: Board[];
+     templates: Template[];
+     createBoard: (data: CreateBoardData) => Promise<Board>;
+     duplicateBoard: (boardId: string) => Promise<Board>;
+     deleteBoard: (boardId: string) => Promise<void>;
+   }
+   ```
 
-#### Week 13-14: Security and Reliability
+#### Week 12: Mobile & Accessibility
+**Objective**: Optimize for mobile devices and ensure accessibility
+
 **Features:**
-- Security audit and penetration testing
-- Input validation and XSS protection
-- Rate limiting and DDoS protection
-- Backup and disaster recovery
+1. **Touch Gestures**
+   ```typescript
+   class TouchGestureHandler {
+     handlePinchZoom(event: TouchEvent): void {
+       if (event.touches.length !== 2) return;
+       
+       const touch1 = event.touches[0];
+       const touch2 = event.touches[1];
+       const distance = this.calculateDistance(touch1, touch2);
+       
+       if (this.lastTouchDistance > 0) {
+         const scale = distance / this.lastTouchDistance;
+         this.canvasEngine.zoomBy(scale);
+       }
+       
+       this.lastTouchDistance = distance;
+     }
+   }
+   ```
 
-#### Week 15-16: Deployment and Monitoring
+2. **Accessibility Improvements**
+   ```typescript
+   // ARIA labels for canvas elements
+   interface AccessibilityManager {
+     announceElementCreation(element: CanvasElement): void;
+     announceSelectionChange(selectedIds: string[]): void;
+     provideElementDescription(element: CanvasElement): string;
+   }
+   ```
+
+### Phase 4: Production Readiness (Weeks 13-16) 🎯
+
+#### Week 13-14: Performance & Scale
+**Objective**: Optimize for production performance
+
 **Features:**
-- Production deployment pipeline
-- Monitoring and alerting system
-- Performance analytics
-- User feedback collection system
+1. **Canvas Virtualization**
+   ```typescript
+   class CanvasVirtualizer {
+     private visibleElements = new Set<string>();
+     private spatialIndex = new SpatialIndex();
+     
+     updateVisibleElements(viewport: Viewport): void {
+       const visibleBounds = this.expandBounds(viewport, 100);
+       const visible = this.spatialIndex.query(visibleBounds);
+       
+       // Only render visible elements
+       this.renderElements(visible);
+     }
+   }
+   ```
 
-## 5. Risk Assessment - Updated
+2. **Performance Monitoring**
+   ```typescript
+   class PerformanceTracker {
+     trackRenderTime(elementCount: number): void {
+       const startTime = performance.now();
+       this.canvas.renderAll();
+       const renderTime = performance.now() - startTime;
+       
+       this.metrics.push({
+         timestamp: Date.now(),
+         renderTime,
+         elementCount,
+         frameRate: this.currentFPS
+       });
+     }
+   }
+   ```
 
-### 5.1 Critical Risks (Immediate Attention)
+#### Week 15-16: Security & Deployment
+**Objective**: Prepare for production deployment
 
-#### Risk 1: Current Technical Debt Blocking Progress
-- **Impact**: HIGH - Cannot add features until fixed
-- **Probability**: CERTAIN - Already blocking development
-- **Mitigation**:
-  - Dedicate first 2-3 weeks exclusively to fixing existing issues
-  - No new feature development until compilation errors resolved
-  - Daily standup focus on technical debt reduction
-  - Consider pair programming for complex TypeScript issues
+**Features:**
+1. **Security Hardening**
+   ```typescript
+   // Input sanitization
+   class InputSanitizer {
+     sanitizeText(input: string): string {
+       return DOMPurify.sanitize(input);
+     }
+     
+     validateImageUpload(file: File): boolean {
+       return this.isValidMimeType(file) && 
+              this.isValidFileSize(file) &&
+              this.isValidImageFile(file);
+     }
+   }
+   ```
 
-#### Risk 2: Test Infrastructure Instability
-- **Impact**: HIGH - Cannot ensure quality without reliable tests
-- **Probability**: HIGH - 46 tests currently failing
-- **Mitigation**:
-  - Fix Jest configuration as priority #1
-  - Establish reliable test data setup/teardown
-  - Add integration tests for critical user journeys
-  - Implement continuous integration checks
+2. **Production Monitoring**
+   ```typescript
+   // Error tracking and analytics
+   class ProductionMonitoring {
+     trackError(error: Error, context: Record<string, any>): void {
+       // Send to monitoring service
+     }
+     
+     trackUserEvent(event: string, properties: Record<string, any>): void {
+       // Track user interactions
+     }
+   }
+   ```
 
-### 5.2 Feature Development Risks
+---
 
-#### Risk 3: Real-time Collaboration Complexity
+## 5. Risk Assessment & Mitigation
+
+### 5.1 Technical Risks
+
+#### High Risk: Current Technical Debt
+- **Risk**: Existing bugs block all feature development
+- **Impact**: CRITICAL - Cannot proceed without fixes
+- **Mitigation**: 
+  - Dedicate first 3 weeks exclusively to issue resolution
+  - No new features until all compilation errors fixed
+  - Daily progress tracking and issue triage
+
+#### Medium Risk: Real-time Collaboration Complexity
+- **Risk**: Operational transform implementation challenges
 - **Impact**: HIGH - Core differentiating feature
-- **Probability**: MEDIUM - Complex but solvable
 - **Mitigation**:
-  - Start with simple conflict resolution (last-write-wins)
-  - Gradually implement more sophisticated algorithms
-  - Extensive testing with multiple concurrent users
-  - Have fallback to single-user mode if real-time fails
+  - Start with simple last-write-wins conflict resolution
+  - Implement comprehensive testing for concurrent scenarios
+  - Have fallback to single-user mode
 
-#### Risk 4: Canvas Performance with Scale
-- **Impact**: MEDIUM - User experience degradation
-- **Probability**: HIGH - Complex canvas operations
+#### Medium Risk: Canvas Performance at Scale
+- **Risk**: Performance degradation with many elements
+- **Impact**: MEDIUM - User experience issues
 - **Mitigation**:
-  - Implement virtualization early
-  - Set reasonable limits (1000 elements per board)
-  - Performance monitoring and optimization
-  - Progressive loading of large boards
+  - Implement virtualization early in development
+  - Set reasonable element limits (1000 per board)
+  - Continuous performance monitoring
 
-## 6. Testing Strategy - Revised
+### 5.2 Project Risks
 
-### 6.1 Immediate Testing Fixes
+#### High Risk: Feature Scope Creep
+- **Risk**: Adding features before fixing existing issues
+- **Impact**: HIGH - Delayed delivery, poor quality
+- **Mitigation**:
+  - Strict adherence to phase-based approach
+  - Fix-first, build-second mentality
+  - Regular quality gates and reviews
 
-#### Fix Current Test Failures
+#### Medium Risk: Real-time Infrastructure Complexity
+- **Risk**: WebSocket implementation and scaling challenges
+- **Impact**: MEDIUM - Collaboration features delayed
+- **Mitigation**:
+  - Use proven Socket.io library
+  - Start with simple messaging, add complexity gradually
+  - Load testing with multiple concurrent users
+
+---
+
+## 6. Testing Strategy - Comprehensive
+
+### 6.1 Phase 1: Fix Current Test Issues
+
+#### Immediate Actions Required
 ```bash
-# Priority fixes for test suite
-1. Install missing dependencies:
-   npm install --save-dev @types/jest-dom
-   
-2. Update jest.setup.js:
-   import '@testing-library/jest-dom'
-   
-3. Fix Fabric.js mocking:
-   // src/__mocks__/fabric.js
-   export const fabric = {
-     Canvas: jest.fn(() => ({
-       add: jest.fn(),
-       remove: jest.fn(),
-       renderAll: jest.fn(),
-       dispose: jest.fn()
-     }))
-   };
-   
-4. Fix React event type imports:
-   import { MouseEvent } from 'react'
+# Fix missing dependencies
+npm install --save-dev @types/jest-dom jest-canvas-mock
+
+# Update jest.setup.js
+echo "import '@testing-library/jest-dom';" >> jest.setup.js
+echo "import 'jest-canvas-mock';" >> jest.setup.js
+
+# Fix Fabric.js mocking
+mkdir -p src/__mocks__
+cat > src/__mocks__/fabric.js << 'EOF'
+export const fabric = {
+  Canvas: jest.fn(() => ({
+    add: jest.fn(),
+    remove: jest.fn(),
+    renderAll: jest.fn(),
+    dispose: jest.fn(),
+    getElement: () => document.createElement('canvas'),
+    setDimensions: jest.fn(),
+    on: jest.fn(),
+    off: jest.fn(),
+  })),
+  Object: jest.fn(),
+  Group: jest.fn(),
+};
+EOF
 ```
 
-### 6.2 Enhanced Testing Strategy
+### 6.2 Testing Coverage by Phase
 
-#### Unit Testing (Target: 85%+ Coverage)
-- **Focus on fixed issues**: Canvas engine, state management
-- **New test categories**: Error boundaries, input validation
-- **Performance testing**: Canvas operations under load
+#### Phase 1 Testing (Weeks 1-3)
+- **Unit Tests**: 85%+ coverage for core utilities
+- **Integration Tests**: Canvas engine initialization and basic operations
+- **Error Handling**: Error boundary and exception scenarios
+- **Performance Tests**: Basic render timing and memory usage
 
-#### Integration Testing
-- **Real-time collaboration**: Multi-user scenarios
-- **Canvas operations**: Element creation, manipulation, deletion
-- **State synchronization**: Ensure UI reflects state accurately
+#### Phase 2 Testing (Weeks 4-8)
+- **Canvas Operations**: Element creation, manipulation, deletion
+- **Real-time Features**: WebSocket connection and operation sync
+- **User Interactions**: Mouse, keyboard, and touch event handling
+- **State Management**: Store updates and selector functions
 
-#### End-to-End Testing
-- **Critical user journeys**: Registration → Board creation → Collaboration
-- **Cross-browser testing**: Chrome, Firefox, Safari
-- **Mobile responsiveness**: Touch interactions, responsive layout
+#### Phase 3 Testing (Weeks 9-12)
+- **End-to-End Tests**: Complete user workflows
+- **Cross-browser Testing**: Chrome, Firefox, Safari compatibility
+- **Mobile Testing**: Touch interactions and responsive design
+- **Accessibility Testing**: Screen reader and keyboard navigation
 
-## 7. Success Metrics - Updated
+#### Phase 4 Testing (Weeks 13-16)
+- **Performance Testing**: Load testing with 1000+ elements
+- **Security Testing**: Input validation and XSS prevention
+- **Stress Testing**: Multiple concurrent users
+- **Production Readiness**: Full CI/CD pipeline testing
 
-### 7.1 Technical Recovery Metrics (Weeks 1-3)
-- **Code Quality**: Zero TypeScript compilation errors
-- **Test Coverage**: >85% unit test coverage
-- **Performance**: <100ms response time for canvas operations
-- **Stability**: >95% test success rate in CI/CD
+### 6.3 Test Infrastructure Enhancements
 
-### 7.2 Feature Completion Metrics (Weeks 4-12)
-- **Core Features**: All MVP features implemented and tested
-- **Collaboration**: 10+ concurrent users per board supported
-- **Performance**: Smooth operation with 500+ canvas elements
-- **User Experience**: <3 second load time, intuitive interface
-
-### 7.3 Production Readiness Metrics (Weeks 13-16)
-- **Security**: Security audit passed with no critical issues
-- **Reliability**: 99.9% uptime target
-- **Performance**: All performance benchmarks met
-- **User Adoption**: Ready for beta user testing
-
-## 8. Budget and Resource Allocation
-
-### 8.1 Development Resource Allocation
-
-#### Weeks 1-3: Issue Resolution (40% of effort)
-- **Focus**: 100% technical debt and bug fixes
-- **Team**: All developers working on critical issues
-- **No new features**: Complete moratorium on new development
-
-#### Weeks 4-12: Feature Development (50% of effort)
-- **Focus**: Core feature completion and enhancement
-- **Team**: Parallel development tracks for different features
-- **Quality gates**: Each feature must have tests and documentation
-
-#### Weeks 13-16: Production Preparation (10% of effort)
-- **Focus**: Security, performance, deployment
-- **Team**: Cross-functional collaboration for production readiness
-- **Success criteria**: Ready for user beta testing
-
-### 8.2 Estimated Timeline and Costs
-
-#### Development Time Allocation
-```
-Phase 1 (Weeks 1-3):   120 hours (3 weeks × 40 hours)
-Phase 2 (Weeks 4-7):   160 hours (4 weeks × 40 hours)
-Phase 3 (Weeks 8-12):  200 hours (5 weeks × 40 hours)
-Phase 4 (Weeks 13-16): 160 hours (4 weeks × 40 hours)
-Total Development:     640 hours
+```typescript
+// Enhanced test utilities
+export class CanvasTestUtils {
+  static createMockElement(type: ElementType = 'sticky_note'): CanvasElement {
+    return {
+      id: generateId(),
+      type,
+      boardId: 'test-board',
+      position: { x: 100, y: 100 },
+      size: { width: 200, height: 100 },
+      rotation: 0,
+      layerIndex: 0,
+      createdBy: 'test-user',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      // Type-specific properties based on type
+      ...this.getTypeSpecificProps(type)
+    };
+  }
+  
+  static async waitForCanvasRender(): Promise<void> {
+    return new Promise(resolve => requestAnimationFrame(resolve));
+  }
+}
 ```
 
-#### Resource Requirements
-- **1-2 Senior Full-stack Developers**: TypeScript, React, Node.js expertise
-- **1 Frontend Specialist**: Canvas/Fabric.js and real-time collaboration
-- **1 DevOps/Testing Engineer**: CI/CD, testing infrastructure, deployment
+---
 
-## 9. Next Immediate Actions
+## 7. Success Metrics & KPIs
 
-### Week 1 Sprint Planning (Start Immediately)
+### 7.1 Technical Quality Metrics
 
-#### Day 1-2: Environment Setup and Issue Triage
-1. **Set up development environment** with all team members
-2. **Triage existing issues** from REVIEW.md by priority
-3. **Create detailed task breakdown** for TypeScript fixes
-4. **Establish daily standup schedule** focused on issue resolution
+#### Phase 1 Success Criteria (Weeks 1-3)
+- ✅ **Zero Critical Issues**: No TypeScript compilation errors
+- ✅ **Test Coverage**: 85%+ unit test success rate
+- ✅ **Build Success**: 100% successful builds in CI/CD
+- ✅ **Performance**: <100ms response time for canvas operations
+- ✅ **Code Quality**: ESLint score >95, zero critical warnings
 
-#### Day 3-5: Critical TypeScript Fixes
-1. **Fix canvas engine initialization** and property access
-2. **Resolve test configuration issues** and Jest setup
-3. **Update type imports** and interface definitions
-4. **Test build and compilation** after each fix
+#### Phase 2 Success Criteria (Weeks 4-8)
+- ✅ **Feature Completeness**: All MVP features implemented and tested
+- ✅ **Collaboration**: 10+ concurrent users per board
+- ✅ **Performance**: Smooth operation with 500+ elements
+- ✅ **User Experience**: <3 second load time, intuitive interface
+- ✅ **Real-time Latency**: <100ms for collaboration updates
 
-#### Week 1 Deliverables
+### 7.2 User Experience Metrics
+
+#### Core Functionality Metrics
+- **Element Creation**: 95% success rate within 5 seconds
+- **Multi-user Collaboration**: 90% successful concurrent sessions
+- **Canvas Navigation**: Smooth 60fps pan and zoom operations
+- **Export Functionality**: 100% successful exports in all formats
+
+#### User Satisfaction Indicators
+- **Task Completion**: 90% users complete core workflows
+- **Performance Satisfaction**: <2 second perceived latency
+- **Error Rate**: <1% user-facing errors
+- **Accessibility**: 100% keyboard navigation functionality
+
+### 7.3 Production Readiness Metrics
+
+#### Scalability Metrics
+- **Concurrent Users**: 50+ users per board without degradation
+- **Board Size**: 1000+ elements with maintained performance
+- **Response Time**: <100ms API response times
+- **Uptime**: 99.9% availability target
+
+#### Security & Compliance
+- **Security Audit**: Zero critical security vulnerabilities
+- **Data Protection**: Full GDPR compliance
+- **Input Validation**: 100% coverage for user inputs
+- **Authentication**: Secure session management
+
+---
+
+## 8. Resource Allocation & Timeline
+
+### 8.1 Development Team Structure
+
+#### Recommended Team Composition
+- **1 Senior Full-Stack Developer** (Technical Lead)
+  - Focus: Architecture, complex features, code reviews
+  - Responsibility: Canvas engine, real-time collaboration, technical decisions
+
+- **1 Frontend Specialist**
+  - Focus: UI/UX implementation, responsive design, accessibility
+  - Responsibility: Component library, mobile optimization, user interactions
+
+- **1 Backend/DevOps Engineer**
+  - Focus: Server infrastructure, database, deployment
+  - Responsibility: Real-time server, authentication, CI/CD pipeline
+
+### 8.2 Time Allocation by Phase
+
+```
+Phase 1 (Weeks 1-3): Critical Issue Resolution
+├── Technical Debt Resolution: 60% (120 hours)
+├── Test Infrastructure: 25% (50 hours)
+└── Quality Assurance: 15% (30 hours)
+Total: 200 hours
+
+Phase 2 (Weeks 4-8): Core Feature Development
+├── Canvas Operations: 30% (96 hours)
+├── Real-time Collaboration: 35% (112 hours)
+├── Visual Elements: 25% (80 hours)
+└── Testing & QA: 10% (32 hours)
+Total: 320 hours
+
+Phase 3 (Weeks 9-12): Advanced Features
+├── Advanced Collaboration: 40% (128 hours)
+├── User Management: 30% (96 hours)
+├── Mobile & Accessibility: 20% (64 hours)
+└── Testing & Polish: 10% (32 hours)
+Total: 320 hours
+
+Phase 4 (Weeks 13-16): Production Readiness
+├── Performance Optimization: 40% (64 hours)
+├── Security & Monitoring: 35% (56 hours)
+├── Deployment & Documentation: 15% (24 hours)
+└── Final Testing: 10% (16 hours)
+Total: 160 hours
+
+TOTAL PROJECT: 1000 hours over 16 weeks
+```
+
+### 8.3 Budget Estimation
+
+#### Development Costs (USD estimates)
+- **Senior Full-Stack Developer**: $125/hour × 400 hours = $50,000
+- **Frontend Specialist**: $100/hour × 350 hours = $35,000
+- **Backend/DevOps Engineer**: $110/hour × 250 hours = $27,500
+
+#### Infrastructure & Tools
+- **Development Tools**: $2,000 (IDEs, testing tools, design software)
+- **Cloud Infrastructure**: $1,500 (hosting, databases, CDN)
+- **Third-party Services**: $1,000 (monitoring, analytics, security)
+
+#### **Total Estimated Budget: $117,000**
+
+---
+
+## 9. Quality Assurance Plan
+
+### 9.1 Code Quality Standards
+
+#### TypeScript Standards
+- **Strict Mode**: Enabled with no `any` types in production code
+- **Interface Documentation**: All public interfaces documented
+- **Error Handling**: Proper error types with context information
+- **Performance**: No blocking operations in main thread
+
+#### React Best Practices
+- **Component Composition**: Prefer composition over inheritance
+- **Hook Dependencies**: Proper dependency arrays for all hooks
+- **Error Boundaries**: Implemented at component boundaries
+- **Accessibility**: ARIA labels and semantic HTML throughout
+
+### 9.2 Testing Standards
+
+#### Test Coverage Requirements
+- **Unit Tests**: 90%+ coverage for utilities and pure functions
+- **Integration Tests**: 80%+ coverage for component interactions
+- **E2E Tests**: 100% coverage for critical user journeys
+- **Performance Tests**: All canvas operations benchmarked
+
+#### Test Quality Standards
+- **Test Isolation**: Each test can run independently
+- **Test Data**: Realistic test data that mirrors production
+- **Assertion Clarity**: Clear, descriptive assertions
+- **Error Scenarios**: Comprehensive error condition testing
+
+### 9.3 Performance Standards
+
+#### Canvas Performance Requirements
+- **Rendering**: 60fps with 500+ elements
+- **Memory**: <500MB total memory usage
+- **Load Time**: <3 seconds initial board load
+- **Interaction Latency**: <50ms for local operations
+
+#### Real-time Performance
+- **Network Latency**: <100ms for operation synchronization
+- **Connection Recovery**: <5 seconds for reconnection
+- **Conflict Resolution**: <200ms for operation transformation
+- **Batch Operations**: Support for 50+ concurrent operations
+
+---
+
+## 10. Risk Mitigation Strategies
+
+### 10.1 Technical Risk Mitigation
+
+#### Risk: Complex Real-time Synchronization
+**Mitigation Strategy:**
+1. **Phased Implementation**: Start with simple last-write-wins
+2. **Comprehensive Testing**: Multi-user testing scenarios
+3. **Fallback Systems**: Offline mode with sync when reconnected
+4. **Performance Monitoring**: Real-time latency tracking
+
+#### Risk: Canvas Performance with Scale
+**Mitigation Strategy:**
+1. **Early Optimization**: Implement virtualization in Phase 2
+2. **Performance Budgets**: Set element limits and monitoring
+3. **Progressive Loading**: Load elements as they come into view
+4. **Memory Management**: Proper cleanup and garbage collection
+
+### 10.2 Project Risk Mitigation
+
+#### Risk: Technical Debt Accumulation
+**Mitigation Strategy:**
+1. **Quality Gates**: No new features until issues resolved
+2. **Code Reviews**: All code reviewed by senior developer
+3. **Automated Testing**: CI/CD pipeline with quality checks
+4. **Regular Refactoring**: Scheduled technical debt reduction
+
+#### Risk: Feature Scope Creep
+**Mitigation Strategy:**
+1. **Strict Prioritization**: MVP-first approach
+2. **Stakeholder Alignment**: Regular feature review sessions
+3. **Change Management**: Formal process for scope changes
+4. **Quality Focus**: Prioritize robustness over feature quantity
+
+---
+
+## 11. Next Immediate Actions
+
+### 11.1 Week 1 Sprint Plan (Start Immediately)
+
+#### Day 1: Project Setup & Team Alignment
+- [ ] **Environment Setup**: Ensure all team members have working dev environment
+- [ ] **Issue Triage**: Create detailed GitHub issues for all 26 TypeScript errors
+- [ ] **Sprint Planning**: Break down Week 1 tasks with time estimates
+- [ ] **Daily Standup Schedule**: Establish daily 15-minute progress reviews
+
+#### Day 2-3: Critical TypeScript Fixes
+```bash
+# Priority fix sequence:
+1. Fix canvas engine property initialization
+2. Resolve React event type imports  
+3. Update Jest configuration with proper types
+4. Fix state management type conflicts
+```
+
+#### Day 4-5: Test Infrastructure Restoration
+- [ ] **Install Missing Dependencies**: Add jest-dom and canvas mocking
+- [ ] **Fix Fabric.js Mocks**: Proper mock implementation
+- [ ] **Test Suite Validation**: Achieve >50% test success rate
+- [ ] **CI/CD Pipeline**: Ensure builds pass consistently
+
+#### Week 1 Success Criteria
 - ✅ Zero TypeScript compilation errors
-- ✅ Basic test suite running (>50% passing)
-- ✅ Canvas engine initializing properly
-- ✅ Development environment stable for team
+- ✅ `npm run build` succeeds without failures  
+- ✅ Basic test suite runs with >50% success rate
+- ✅ Development environment stable for all team members
 
-### Week 2-3: Quality Foundation
-1. **Complete test infrastructure fixes**
-2. **Implement error boundaries and proper error handling**
-3. **Add input validation and type safety**
-4. **Establish CI/CD pipeline with quality gates**
+### 11.2 Phase 1 Detailed Task Breakdown
 
-## 10. Long-term Vision and Extensibility
+#### Week 2 Focus: Code Quality & Error Handling
+1. **Error Boundary Implementation** (2 days)
+   - Canvas error boundary with fallback UI
+   - Network error handling for real-time features
+   - Graceful degradation for failed operations
 
-### 10.1 Platform Evolution
+2. **Input Validation & Sanitization** (2 days)
+   - Zod schemas for all user inputs
+   - XSS prevention for text content
+   - File upload validation for images
 
-#### Phase 5: Advanced Features (Post Week 16)
-- **Templates Library**: Pre-built board templates for common use cases
-- **Plugin System**: Allow third-party extensions and custom elements
-- **API Platform**: Public API for integrations and mobile apps
-- **Enterprise Features**: Team management, analytics, SSO integration
+3. **Test Infrastructure Enhancement** (1 day)
+   - Enhanced Fabric.js mocking
+   - Test utilities for canvas operations
+   - Performance test setup
 
-#### Phase 6: Market Expansion
+#### Week 3 Focus: Integration & Performance
+1. **Component Integration Testing** (2 days)
+   - Whiteboard component rendering tests
+   - Canvas engine integration tests
+   - State management integration verification
+
+2. **Performance Baseline Establishment** (2 days)
+   - Frame rate monitoring implementation
+   - Memory leak detection and fixes
+   - Load time optimization
+
+3. **Quality Gate Implementation** (1 day)
+   - CI/CD pipeline with quality checks
+   - Code coverage requirements
+   - Performance regression detection
+
+---
+
+## 12. Long-term Vision & Scalability
+
+### 12.1 Technical Scalability Roadmap
+
+#### Phase 5: Enterprise Features (Weeks 17-24)
+- **Advanced Permissions**: Team-based access control
+- **Template Marketplace**: User-generated templates
+- **API Platform**: REST and GraphQL APIs for integrations
+- **Plugin System**: Third-party extensions and custom tools
+
+#### Phase 6: Platform Expansion (Weeks 25-32)
 - **Mobile Applications**: Native iOS and Android apps
-- **Integrations**: Slack, Microsoft Teams, Google Workspace
-- **AI Features**: Smart suggestions, auto-layout, content generation
+- **Desktop Application**: Electron-based desktop client
+- **AI Features**: Smart layout suggestions and content generation
 - **Advanced Analytics**: Usage insights and collaboration patterns
 
-### 10.2 Technical Scalability
+### 12.2 Architecture Evolution
 
-The architecture is designed to support:
-- **10,000+ concurrent users** across multiple boards
-- **1M+ canvas elements** with virtualization
-- **Global deployment** with CDN and edge caching
-- **Real-time collaboration** at enterprise scale
+#### Microservices Architecture
+```typescript
+// Future microservices architecture
+interface MicroserviceArchitecture {
+  authService: AuthenticationService;
+  boardService: BoardManagementService;
+  realtimeService: CollaborationService;
+  fileService: AssetManagementService;
+  analyticsService: UserAnalyticsService;
+}
+```
+
+#### Global Deployment Strategy
+- **CDN Integration**: Global content delivery network
+- **Edge Computing**: Real-time processing at edge locations
+- **Database Sharding**: Horizontal scaling for large datasets
+- **Load Balancing**: Multi-region deployment with failover
+
+---
 
 ## Conclusion
 
-This revised project plan takes a pragmatic approach to continuing the Miro clone development by:
+This comprehensive plan provides a clear roadmap to complete the Miro clone project, transforming it from its current state with critical issues into a production-ready collaborative whiteboard platform. The key to success is maintaining strict discipline in the first phase - **no new features until all existing issues are resolved**.
 
-1. **Acknowledging Current Reality**: 26 TypeScript errors and 46 test failures must be fixed first
-2. **Prioritizing Quality**: No new features until existing issues are resolved
-3. **Learning from Experience**: Incorporating lessons from initial implementation
-4. **Maintaining Vision**: Keeping long-term goals while focusing on immediate needs
-5. **Managing Risk**: Addressing technical debt before it compounds
+### Key Success Factors
 
-The project has a solid foundation with excellent architecture and planning. By dedicating the first 2-3 weeks exclusively to issue resolution, we can get back on track for successful feature development and eventual production deployment.
+1. **Quality-First Approach**: Fix existing issues before building new features
+2. **Incremental Development**: Build features in phases with proper testing
+3. **Performance Consciousness**: Optimize for scalability from the beginning
+4. **User-Centric Design**: Focus on essential collaboration features
+5. **Comprehensive Testing**: Maintain high code quality and reliability
 
-**Success depends on discipline**: resist the temptation to add new features until existing issues are completely resolved. The technical debt must be eliminated before building on the foundation.
+### Expected Outcomes
 
-**Next Step**: Begin Week 1 sprint immediately with focus on TypeScript compilation errors and test infrastructure fixes.
+By following this plan, the project will achieve:
+
+- **Technical Excellence**: Zero critical bugs, 95%+ test coverage
+- **User Experience**: Smooth collaboration for 50+ concurrent users
+- **Scalability**: Architecture ready for enterprise deployment
+- **Market Readiness**: Feature-complete competitor to Miro and Figma
+- **Maintainability**: Clean codebase ready for future enhancements
+
+The project has excellent foundations with modern architecture, comprehensive planning, and clear technical vision. With disciplined execution of this plan, it will become a robust, scalable collaborative whiteboard platform ready for production deployment and user adoption.
+
+**Next Step**: Begin Week 1 sprint immediately with exclusive focus on resolving the 26 TypeScript compilation errors and establishing stable development environment.
