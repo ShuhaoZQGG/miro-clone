@@ -1,35 +1,52 @@
 import { CanvasEngine } from '../canvas-engine'
 
 // Mock fabric
-jest.mock('fabric', () => ({
-  fabric: {
-    Canvas: jest.fn().mockImplementation(() => ({
-      getElement: jest.fn(() => document.createElement('canvas')),
-      setDimensions: jest.fn(),
-      renderAll: jest.fn(),
-      getWidth: jest.fn(() => 1920),
-      getHeight: jest.fn(() => 1080),
-      setZoom: jest.fn(),
-      getZoom: jest.fn(() => 1),
-      absolutePan: jest.fn(),
-      relativePan: jest.fn(),
-      on: jest.fn(),
-      off: jest.fn(),
-      clear: jest.fn(),
-      dispose: jest.fn(),
-      getObjects: jest.fn(() => []),
-      add: jest.fn(),
-      setActiveObject: jest.fn(),
-      getPointer: jest.fn(() => ({ x: 0, y: 0 }))
-    })),
-    Rect: jest.fn().mockImplementation((options) => ({
-      ...options,
-      getScaledWidth: jest.fn(() => (options.width || 100) * (options.scaleX || 1)),
-      getScaledHeight: jest.fn(() => (options.height || 100) * (options.scaleY || 1)),
-      scale: jest.fn(function(s) { this.scaleX = s; this.scaleY = s })
-    }))
+jest.mock('fabric', () => {
+  let canvasWidth = window.innerWidth || 1920
+  let canvasHeight = window.innerHeight || 1080
+  
+  return {
+    fabric: {
+      Canvas: jest.fn().mockImplementation(() => ({
+        getElement: jest.fn(() => document.createElement('canvas')),
+        setDimensions: jest.fn((dims) => {
+          if (dims.width) canvasWidth = dims.width
+          if (dims.height) canvasHeight = dims.height
+        }),
+        renderAll: jest.fn(),
+        getWidth: jest.fn(() => canvasWidth),
+        getHeight: jest.fn(() => canvasHeight),
+        setZoom: jest.fn(),
+        getZoom: jest.fn(() => 1),
+        absolutePan: jest.fn(),
+        relativePan: jest.fn(),
+        on: jest.fn(),
+        off: jest.fn(),
+        clear: jest.fn(),
+        dispose: jest.fn(),
+        getObjects: jest.fn(() => []),
+        add: jest.fn(),
+        setActiveObject: jest.fn(),
+        getPointer: jest.fn(() => ({ x: 0, y: 0 }))
+      })),
+      Rect: jest.fn().mockImplementation((options) => ({
+        ...options,
+        getScaledWidth: jest.fn(() => (options.width || 100) * (options.scaleX || 1)),
+        getScaledHeight: jest.fn(() => (options.height || 100) * (options.scaleY || 1)),
+        scale: jest.fn(function(s) { this.scaleX = s; this.scaleY = s })
+      })),
+      Circle: jest.fn().mockImplementation((options) => ({
+        ...options
+      })),
+      Ellipse: jest.fn().mockImplementation((options) => ({
+        ...options
+      })),
+      Line: jest.fn().mockImplementation((points, options) => ({
+        ...options
+      }))
+    }
   }
-}))
+})
 
 describe('CanvasEngine', () => {
   let container: HTMLDivElement
@@ -109,8 +126,6 @@ describe('CanvasEngine', () => {
       engine = new CanvasEngine(container)
       const canvas = engine.getCanvas()
       
-      const initialRatio = canvas.getWidth() / canvas.getHeight()
-      
       // Mock a resize with different dimensions
       jest.spyOn(container, 'getBoundingClientRect').mockReturnValue({
         width: 800,
@@ -126,8 +141,6 @@ describe('CanvasEngine', () => {
       
       const resizeObserverCallback = jest.mocked(ResizeObserver).mock.calls[0][0]
       resizeObserverCallback([{ target: container } as any], {} as any)
-      
-      const newRatio = 800 / 600
       
       // The canvas should update to new dimensions
       expect(canvas.getWidth()).toBe(800)

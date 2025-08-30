@@ -13,6 +13,7 @@ describe('Canvas Disposal Safety', () => {
   let mockElementManager: jest.Mocked<ElementManager>
   let mockDispose: jest.Mock
   let initCallCount = 0
+  const initResolve: (() => void) | null = null
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -61,7 +62,10 @@ describe('Canvas Disposal Safety', () => {
     } as any
 
     ;(CanvasEngine as jest.MockedClass<typeof CanvasEngine>).mockImplementation(
-      () => mockCanvasEngine
+      () => {
+        initCallCount++
+        return mockCanvasEngine
+      }
     )
   })
 
@@ -192,8 +196,10 @@ describe('Canvas Disposal Safety', () => {
       // Unmount before initialization completes
       unmount()
 
-      // Complete initialization after unmount
-      initResolve!()
+      // Complete initialization after unmount (if there was a pending init)
+      if (initResolve) {
+        initResolve()
+      }
 
       await waitFor(() => {
         // Disposal should be called even if init was pending

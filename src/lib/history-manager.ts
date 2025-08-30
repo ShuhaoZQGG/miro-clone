@@ -295,7 +295,6 @@ export class HistoryManager {
       targetCmd.newState = sourceCmd.newState
       
       // Update execute function to use the new state
-      const originalExecute = targetCmd.execute
       targetCmd.execute = () => {
         sourceCmd.execute()
       }

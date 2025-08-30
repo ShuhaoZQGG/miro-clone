@@ -1,5 +1,5 @@
 import { fabric } from 'fabric'
-import { Position, Size, Camera, CanvasElement, Bounds } from '@/types'
+import { Position, Size, Camera, CanvasElement, Bounds, ElementType, ShapeElement, LineElement } from '@/types'
 
 interface CameraState {
   x: number
@@ -42,7 +42,7 @@ export class CanvasEngine {
   private renderThrottleId: number | null = null
   
   // Event system
-  private eventListeners: Map<string, Set<Function>> = new Map()
+  private eventListeners: Map<string, Set<(...args: any[]) => void>> = new Map()
   
   // Touch/gesture handling
   private lastTouchDistance = 0
@@ -762,13 +762,63 @@ export class CanvasEngine {
       this.canvas.add(fabricObject)
       this.scheduleRender()
       
-      const element: CanvasElement = {
+      const now = new Date().toISOString()
+      const baseElement = {
         id: `element-${Date.now()}-${Math.random()}`,
-        type: type as any,
+        boardId: 'default-board',
         position: { x: options.x || 0, y: options.y || 0 },
         size: { width: options.width || 100, height: options.height || 100 },
-        style: {},
-        data: fabricObject
+        rotation: 0,
+        layerIndex: this.elements.length,
+        createdBy: 'user',
+        createdAt: now,
+        updatedAt: now,
+        isLocked: false,
+        isVisible: true
+      }
+      
+      let element: CanvasElement
+      
+      switch (type) {
+        case 'rectangle':
+        case 'circle':
+        case 'ellipse':
+          element = {
+            ...baseElement,
+            type: type as 'rectangle' | 'circle' | 'ellipse',
+            style: {
+              fill: options.fill || '#ffffff',
+              stroke: options.stroke || '#000000',
+              strokeWidth: options.strokeWidth || 1,
+              opacity: options.opacity || 1
+            }
+          } as ShapeElement
+          break
+          
+        case 'line':
+          element = {
+            ...baseElement,
+            type: 'line',
+            startPoint: { x: options.x1 || 0, y: options.y1 || 0 },
+            endPoint: { x: options.x2 || 100, y: options.y2 || 100 },
+            style: {
+              stroke: options.stroke || '#000000',
+              strokeWidth: options.strokeWidth || 1,
+              strokeDasharray: options.strokeDasharray
+            }
+          } as LineElement
+          break
+          
+        default:
+          // Fallback for other types
+          element = {
+            ...baseElement,
+            type: type as ElementType,
+            style: {
+              stroke: options.stroke || '#000000',
+              strokeWidth: options.strokeWidth || 1
+            }
+          } as any
       }
       
       this.elements.push(element)
