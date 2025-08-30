@@ -1,11 +1,13 @@
 import { io, Socket } from 'socket.io-client'
 import { useCanvasStore } from '@/store/useCanvasStore'
+import { UserPresence, Position } from '@/types'
+import { authService } from '@/lib/auth'
 
 export interface Collaborator {
   id: string
   name: string
   color: string
-  cursor?: { x: number; y: number }
+  cursor?: Position
 }
 
 class WebSocketClient {
@@ -22,8 +24,16 @@ class WebSocketClient {
     this.connect()
   }
 
+  private getAuthToken(): string | null {
+    // Get JWT token from auth service
+    return authService.getToken()
+  }
+
   private connect() {
     const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
+    
+    // Get JWT token from localStorage or auth service
+    const token = this.getAuthToken()
     
     this.socket = io(socketUrl, {
       path: '/socket.io/',
@@ -33,6 +43,9 @@ class WebSocketClient {
       reconnectionDelay: this.reconnectDelay,
       reconnectionDelayMax: 5000,
       timeout: 20000,
+      auth: {
+        token: token
+      }
     })
 
     this.setupEventHandlers()
@@ -73,10 +86,17 @@ class WebSocketClient {
       const store = useCanvasStore.getState()
       store.setElements(elements)
       
-      // Update collaborators
-      const collaboratorMap = new Map<string, Collaborator>()
+      // Update collaborators - convert Collaborator to UserPresence
+      const collaboratorMap = new Map<string, UserPresence>()
       collaborators.forEach((collab: Collaborator) => {
-        collaboratorMap.set(collab.id, collab)
+        const userPresence: UserPresence = {
+          userId: collab.id,
+          cursor: collab.cursor,
+          selection: [],
+          lastSeen: new Date().toISOString(),
+          isActive: true
+        }
+        collaboratorMap.set(collab.id, userPresence)
       })
       store.setCollaborators(collaboratorMap)
     })
@@ -85,7 +105,14 @@ class WebSocketClient {
     this.socket.on('collaborator-joined', (user: Collaborator) => {
       const store = useCanvasStore.getState()
       const collaborators = new Map(store.collaborators)
-      collaborators.set(user.id, user)
+      const userPresence: UserPresence = {
+        userId: user.id,
+        cursor: user.cursor,
+        selection: [],
+        lastSeen: new Date().toISOString(),
+        isActive: true
+      }
+      collaborators.set(user.id, userPresence)
       store.setCollaborators(collaborators)
     })
 
@@ -105,7 +132,14 @@ class WebSocketClient {
       if (collaborator) {
         collaborator.cursor = cursor
       } else {
-        collaborators.set(userId, { id: userId, name, color, cursor })
+        const userPresence: UserPresence = {
+          userId: userId,
+          cursor: cursor,
+          selection: [],
+          lastSeen: new Date().toISOString(),
+          isActive: true
+        }
+        collaborators.set(userId, userPresence)
       }
       
       store.setCollaborators(collaborators)
@@ -129,7 +163,7 @@ class WebSocketClient {
     this.socket.on('element-deleted', ({ elementId, userId }) => {
       if (userId !== this.socket?.id) {
         const store = useCanvasStore.getState()
-        store.deleteElement(elementId)
+        store.removeElement(elementId)
       }
     })
 
@@ -147,7 +181,7 @@ class WebSocketClient {
   public joinBoard(boardId: string, userId: string, userName?: string) {
     this.boardId = boardId
     this.userId = userId
-    this.userName = userName
+    this.userName = userName || null
     
     if (this.socket?.connected) {
       this.socket.emit('join-board', { boardId, userId, userName })

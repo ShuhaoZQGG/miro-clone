@@ -2,6 +2,7 @@ import { Server as SocketIOServer, Socket } from 'socket.io'
 import { Server as HTTPServer } from 'http'
 import { authenticateSocket } from './middleware/authMiddleware'
 import { setupCollaborationHandlers } from './handlers/collaborationHandlers'
+import { applyRateLimiting, clearRateLimitForSocket } from './middleware/rateLimitMiddleware'
 
 let io: SocketIOServer | undefined
 
@@ -50,6 +51,9 @@ export function initializeSocketServer(httpServer: HTTPServer) {
     // Additional real-time handlers
     io.on('connection', (socket: Socket) => {
       console.log('New client connected:', socket.id)
+      
+      // Apply rate limiting to this socket
+      applyRateLimiting(socket)
 
       // Handle user joining a board
       socket.on('join-board', ({ boardId, userId, userName }) => {
@@ -162,6 +166,9 @@ export function initializeSocketServer(httpServer: HTTPServer) {
       // Handle disconnection
       socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id)
+        
+        // Clear rate limit data for this socket
+        clearRateLimitForSocket(socket.id)
         
         const user = users.get(socket.id)
         if (user) {
