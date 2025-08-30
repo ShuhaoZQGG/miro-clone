@@ -23,10 +23,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Find user
-    const user = await withDbConnection(
-      () => db.user.findUnique({ where: { email } })
-    )
+    // Find user with password for verification
+    let user: any
+    try {
+      user = await db.user.findUnique({ 
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          password: true,
+          displayName: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      })
+    } catch (dbError: any) {
+      console.error('Database error:', dbError)
+      const { message, statusCode } = handleDatabaseError(dbError)
+      return NextResponse.json(
+        { success: false, error: message },
+        { status: statusCode }
+      )
+    }
 
     if (!user) {
       return NextResponse.json(

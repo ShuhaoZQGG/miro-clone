@@ -51,9 +51,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await withDbConnection(
-      () => db.user.findUnique({ where: { email } })
-    )
+    let existingUser
+    try {
+      existingUser = await db.user.findUnique({ where: { email } })
+    } catch (dbError: any) {
+      console.error('Database error:', dbError)
+      const { message, statusCode } = handleDatabaseError(dbError)
+      return NextResponse.json(
+        { success: false, error: message },
+        { status: statusCode }
+      )
+    }
 
     if (existingUser) {
       return NextResponse.json(
@@ -66,8 +74,9 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Create user
-    const user = await withDbConnection(
-      () => db.user.create({
+    let user: any
+    try {
+      user = await db.user.create({
         data: {
           email,
           password: hashedPassword,
@@ -80,7 +89,21 @@ export async function POST(request: NextRequest) {
           createdAt: true,
         },
       })
-    )
+    } catch (dbError: any) {
+      console.error('Database error:', dbError)
+      const { message, statusCode } = handleDatabaseError(dbError)
+      return NextResponse.json(
+        { success: false, error: message },
+        { status: statusCode }
+      )
+    }
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Failed to create user' },
+        { status: 500 }
+      )
+    }
 
     // Generate JWT token
     const token = jwt.sign(
