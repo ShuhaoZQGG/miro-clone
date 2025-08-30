@@ -2,7 +2,20 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Whiteboard } from '@/components/Whiteboard'
-import { useCanvasStore } from '@/store/useCanvasStore'
+
+// Mock the store
+jest.mock('@/store/useCanvasStore', () => ({
+  useCanvasStore: jest.fn(() => ({
+    isGridVisible: false,
+    isLoading: false,
+    camera: { x: 0, y: 0, zoom: 1 },
+    tool: { type: 'select' },
+    elements: [],
+    selectedElementIds: [],
+    collaborators: new Map(),
+    isConnected: false
+  }))
+}))
 
 // Mock Fabric.js
 jest.mock('fabric', () => ({

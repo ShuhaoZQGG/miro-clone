@@ -72,6 +72,40 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
+// Mock getComputedStyle
+window.getComputedStyle = jest.fn().mockImplementation((element) => {
+  return {
+    getPropertyValue: jest.fn((prop) => {
+      // Return common CSS values
+      switch(prop) {
+        case 'position': return 'fixed'
+        case 'top': return '0px'
+        case 'right': return '0px'
+        case 'bottom': return '0px'
+        case 'left': return '0px'
+        case 'width': return '100%'
+        case 'height': return '100%'
+        case 'margin': return '0px'
+        case 'padding': return '0px'
+        case 'transform': return 'translateZ(0)'
+        case 'will-change': return 'transform'
+        default: return ''
+      }
+    }),
+    position: 'fixed',
+    top: '0px',
+    right: '0px',
+    bottom: '0px',
+    left: '0px',
+    width: '100%',
+    height: '100%',
+    margin: '0px',
+    padding: '0px',
+    transform: 'translateZ(0)',
+    willChange: 'transform'
+  }
+})
+
 // Mock HTMLCanvasElement
 HTMLCanvasElement.prototype.getContext = jest.fn()
 

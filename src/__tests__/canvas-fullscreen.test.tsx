@@ -36,7 +36,9 @@ jest.mock('@/store/useCanvasStore', () => ({
     camera: { x: 0, y: 0, zoom: 1 },
     tool: { type: 'select' },
     elements: [],
-    selectedElementIds: []
+    selectedElementIds: [],
+    collaborators: new Map(),
+    isConnected: false
   }))
 }))
 
