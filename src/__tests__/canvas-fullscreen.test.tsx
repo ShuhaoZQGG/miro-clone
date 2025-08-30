@@ -32,7 +32,11 @@ jest.mock('@/hooks/useKeyboardShortcuts', () => ({
 jest.mock('@/store/useCanvasStore', () => ({
   useCanvasStore: jest.fn(() => ({
     isGridVisible: false,
-    isLoading: false
+    isLoading: false,
+    camera: { x: 0, y: 0, zoom: 1 },
+    tool: { type: 'select' },
+    elements: [],
+    selectedElementIds: []
   }))
 }))
 

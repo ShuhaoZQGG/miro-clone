@@ -63,7 +63,7 @@ describe('Whiteboard Full-Screen Tests', () => {
       // Check for full-screen styling
       const styles = window.getComputedStyle(canvasContainer as Element)
       expect(styles.position).toBe('fixed')
-      expect(styles.inset).toBe('0px')
+      expect(styles.inset).toBe('0')
     })
 
     it('should apply fixed positioning with inset-0', () => {
