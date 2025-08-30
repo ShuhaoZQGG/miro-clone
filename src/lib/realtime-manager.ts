@@ -124,7 +124,7 @@ export class RealtimeManager {
       console.error('WebSocket error:', error)
     })
 
-    this.socket.on('pong', ({ timestamp, serverTime }) => {
+    this.socket.on('pong', ({ timestamp }) => {
       const latency = Date.now() - timestamp
       console.log(`Latency: ${latency}ms`)
     })
@@ -170,7 +170,7 @@ export class RealtimeManager {
     for (const localOp of this.operationQueue) {
       if (!result) break
       
-      const [transformedLocal, transformedRemote] = this.transformOperations(localOp, result)
+      const [, transformedRemote] = this.transformOperations(localOp, result)
       result = transformedRemote
     }
     
