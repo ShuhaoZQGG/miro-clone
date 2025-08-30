@@ -105,11 +105,12 @@ describe('Canvas Disposal Safety', () => {
       })
 
       // Simulate parent node being null
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation()
       mockDispose.mockImplementation(() => {
         const error = new Error('Failed to execute removeChild on Node')
         error.name = 'NotFoundError'
         // Should catch and handle gracefully
-        console.warn('Error disposing fabric canvas:', error)
+        consoleWarnSpy('Error disposing fabric canvas:', error)
       })
 
       expect(() => unmount()).not.toThrow()
@@ -117,6 +118,8 @@ describe('Canvas Disposal Safety', () => {
       await waitFor(() => {
         expect(mockDispose).toHaveBeenCalledTimes(1)
       })
+      
+      consoleWarnSpy.mockRestore()
     })
   })
 

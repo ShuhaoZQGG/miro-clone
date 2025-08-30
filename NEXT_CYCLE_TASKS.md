@@ -1,79 +1,93 @@
 # Next Cycle Tasks
 
-## Immediate Priority (Cycle 35)
-1. **Resolve PR #28 Merge Conflicts**
-   - Pull latest main branch changes
-   - Resolve conflicts in cycle-34 branch
-   - Merge PR to main
+## Priority 0 - Critical (Must Complete)
+### Production Database Setup
+- [ ] Configure PostgreSQL connection (Supabase/Neon)
+- [ ] Set up Redis cache (Upstash)
+- [ ] Create database migration scripts
+- [ ] Test database connections
+- [ ] Implement connection pooling
 
-2. **Fix TypeScript Build Error**
-   - Fix SessionPayload.id property issue in src/app/api/auth/login/route.ts
-   - Ensure build passes with zero errors
+### WebSocket Deployment
+- [ ] Deploy Socket.io server to Railway/Render
+- [ ] Configure WebSocket scaling
+- [ ] Set up sticky sessions for load balancing
+- [ ] Implement reconnection logic
+- [ ] Add connection monitoring
 
-## High Priority
-1. **Production Database Setup**
-   - Configure actual PostgreSQL database
-   - Set up Redis for session management
-   - Create migration scripts
-   - Test database connections
+### API Security
+- [ ] Implement rate limiting middleware
+- [ ] Configure production CORS settings
+- [ ] Add request validation
+- [ ] Set security headers (CSP, HSTS, etc.)
+- [ ] Implement API key authentication for external access
 
-2. **API Security**
-   - Implement rate limiting for all API routes
-   - Configure CORS for production domains
-   - Add request validation middleware
-   - Implement API key authentication
+## Priority 1 - High
+### Fix Test Failures
+- [ ] Debug 6 failing integration tests
+- [ ] Fix whiteboard-integration role="generic" conflicts
+- [ ] Resolve canvas-disposal auth context issues
+- [ ] Achieve 100% test pass rate
 
-3. **Production Environment**
-   - Create production .env template
-   - Configure Vercel deployment settings
-   - Set up monitoring (Sentry/LogRocket)
-   - Configure CDN for assets
+### Production Environment
+- [ ] Create .env.production file
+- [ ] Configure Vercel deployment settings
+- [ ] Set up Sentry error monitoring
+- [ ] Configure CDN for static assets
+- [ ] Add environment variable validation
 
-## Medium Priority
-1. **Remaining Test Failures**
-   - Fix 6 failing tests (element-creation, export)
-   - Achieve 100% test pass rate
-   - Add missing test coverage
+### Create PR for Cycle 35
+- [ ] Create new PR with cycle 35 changes
+- [ ] Document all changes in PR description
+- [ ] Request review
+- [ ] Merge to main branch
 
-2. **WebSocket Server Deployment**
-   - Deploy Socket.io server to production
-   - Configure WebSocket scaling
-   - Implement connection pooling
-   - Add WebSocket monitoring
+## Priority 2 - Medium
+### Performance Optimization
+- [ ] Implement code splitting
+- [ ] Add lazy loading for components
+- [ ] Optimize bundle size
+- [ ] Add service worker for offline support
+- [ ] Implement image optimization
 
-3. **Performance Optimization**
-   - Implement code splitting
-   - Add lazy loading for components
-   - Optimize bundle size
-   - Add service worker for offline support
+### Documentation
+- [ ] Create API documentation
+- [ ] Write deployment guide
+- [ ] Create user manual
+- [ ] Document WebSocket protocol
+- [ ] Add troubleshooting guide
 
-## Low Priority (Future Cycles)
-1. **Feature Enhancements**
-   - Add user profiles and avatars
-   - Implement board templates
-   - Add commenting system
-   - Create mobile responsive design
-
-2. **Documentation**
-   - API documentation
-   - Deployment guide
-   - User manual
-   - Developer onboarding guide
-
-3. **Analytics & Monitoring**
-   - User behavior tracking
-   - Performance metrics dashboard
-   - Error tracking and alerting
-   - Usage analytics
+### Monitoring & Analytics
+- [ ] Set up performance monitoring
+- [ ] Add user analytics (privacy-compliant)
+- [ ] Create admin dashboard
+- [ ] Implement health check endpoints
+- [ ] Add automated alerts
 
 ## Technical Debt
-- Refactor auth route TypeScript types
-- Clean up test mock implementations
-- Optimize canvas rendering performance
-- Standardize error handling across API routes
+- [ ] Refactor auth routes to use consistent patterns
+- [ ] Clean up unused imports and dead code
+- [ ] Improve error handling consistency
+- [ ] Add more comprehensive logging
+- [ ] Optimize database queries
+
+## Feature Enhancements (Future)
+- [ ] Dark mode implementation
+- [ ] Progressive Web App features
+- [ ] Mobile app development
+- [ ] Advanced collaboration features (voice/video)
+- [ ] AI-powered features (smart shapes, auto-layout)
+
+## Infrastructure Improvements
+- [ ] Set up CI/CD pipeline
+- [ ] Implement automated testing on PR
+- [ ] Add staging environment
+- [ ] Set up backup and disaster recovery
+- [ ] Implement blue-green deployment
 
 ## Notes
-- Cycle 34 achieved 98.1% test coverage (APPROVED)
-- PR #28 created but has merge conflicts
-- Production deployment blocked on database setup
-- All security requirements met (no hardcoded secrets)
+- Focus on P0 items first - these are blocking production deployment
+- P1 items should be completed before launch
+- P2 items can be done post-launch
+- Technical debt should be addressed continuously
+- Feature enhancements are for future cycles after successful launch

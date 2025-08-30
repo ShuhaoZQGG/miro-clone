@@ -67,8 +67,10 @@ const MockWhiteboard = ({ boardId }: { boardId: string }) => {
   // Wrap store methods to trigger re-render
   const wrapMethod = (method: (...args: any[]) => any) => {
     return (...args: any[]) => {
-      method(...args)
-      forceUpdate()
+      act(() => {
+        method(...args)
+        forceUpdate()
+      })
     }
   }
   
