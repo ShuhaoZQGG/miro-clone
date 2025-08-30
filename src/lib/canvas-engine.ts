@@ -47,6 +47,18 @@ export class CanvasEngine {
   // Touch/gesture handling
   private lastTouchDistance = 0
   private touchStartPoints: Position[] = []
+  
+  // Bound event handlers (for proper cleanup)
+  private boundHandlers: {
+    keyDown?: (e: KeyboardEvent) => void
+    keyUp?: (e: KeyboardEvent) => void
+    touchStart?: (e: TouchEvent) => void
+    touchMove?: (e: TouchEvent) => void
+    touchEnd?: (e: TouchEvent) => void
+  } = {}
+  
+  // ResizeObserver instance for cleanup
+  private resizeObserver: ResizeObserver | null = null
 
   constructor(container: HTMLElement) {
     this.container = container
@@ -84,21 +96,26 @@ export class CanvasEngine {
     this.canvas.on('mouse:move', this.handleMouseMove.bind(this))
     this.canvas.on('mouse:up', this.handleMouseUp.bind(this))
     
-    // Keyboard events
-    document.addEventListener('keydown', this.handleKeyDown.bind(this))
-    document.addEventListener('keyup', this.handleKeyUp.bind(this))
+    // Keyboard events - store bound handlers for cleanup
+    this.boundHandlers.keyDown = this.handleKeyDown.bind(this)
+    this.boundHandlers.keyUp = this.handleKeyUp.bind(this)
+    document.addEventListener('keydown', this.boundHandlers.keyDown)
+    document.addEventListener('keyup', this.boundHandlers.keyUp)
     
-    // Touch events
+    // Touch events - store bound handlers for cleanup
     const canvasEl = this.canvas.getElement()
     if (canvasEl) {
-      canvasEl.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false })
-      canvasEl.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false })
-      canvasEl.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false })
+      this.boundHandlers.touchStart = this.handleTouchStart.bind(this)
+      this.boundHandlers.touchMove = this.handleTouchMove.bind(this)
+      this.boundHandlers.touchEnd = this.handleTouchEnd.bind(this)
+      canvasEl.addEventListener('touchstart', this.boundHandlers.touchStart, { passive: false })
+      canvasEl.addEventListener('touchmove', this.boundHandlers.touchMove, { passive: false })
+      canvasEl.addEventListener('touchend', this.boundHandlers.touchEnd, { passive: false })
     }
     
     // Resize observer
-    const resizeObserver = new ResizeObserver(this.handleResize.bind(this))
-    resizeObserver.observe(this.container)
+    this.resizeObserver = new ResizeObserver(this.handleResize.bind(this))
+    this.resizeObserver.observe(this.container)
   }
 
   private handleMouseWheel(opt: any): void {
@@ -596,24 +613,73 @@ export class CanvasEngine {
 
   // Cleanup
   dispose(): void {
-    // Remove event listeners
-    this.canvas.off('mouse:wheel')
-    this.canvas.off('mouse:down')
-    this.canvas.off('mouse:move')
-    this.canvas.off('mouse:up')
-    
-    document.removeEventListener('keydown', this.handleKeyDown.bind(this))
-    document.removeEventListener('keyup', this.handleKeyUp.bind(this))
-    
-    // Clear all event listeners
-    this.eventListeners.clear()
-    
-    // Cancel any pending renders
-    if (this.renderThrottleId) {
-      cancelAnimationFrame(this.renderThrottleId)
+    try {
+      // Remove canvas event listeners
+      if (this.canvas) {
+        this.canvas.off('mouse:wheel')
+        this.canvas.off('mouse:down')
+        this.canvas.off('mouse:move')
+        this.canvas.off('mouse:up')
+      }
+      
+      // Remove document event listeners using stored bound handlers
+      if (this.boundHandlers.keyDown) {
+        document.removeEventListener('keydown', this.boundHandlers.keyDown)
+      }
+      if (this.boundHandlers.keyUp) {
+        document.removeEventListener('keyup', this.boundHandlers.keyUp)
+      }
+      
+      // Remove touch event listeners if canvas element exists
+      const canvasEl = this.canvas?.getElement()
+      if (canvasEl) {
+        if (this.boundHandlers.touchStart) {
+          canvasEl.removeEventListener('touchstart', this.boundHandlers.touchStart)
+        }
+        if (this.boundHandlers.touchMove) {
+          canvasEl.removeEventListener('touchmove', this.boundHandlers.touchMove)
+        }
+        if (this.boundHandlers.touchEnd) {
+          canvasEl.removeEventListener('touchend', this.boundHandlers.touchEnd)
+        }
+      }
+      
+      // Clear all event listeners
+      this.eventListeners.clear()
+      
+      // Cancel any pending renders
+      if (this.renderThrottleId) {
+        cancelAnimationFrame(this.renderThrottleId)
+        this.renderThrottleId = null
+      }
+      
+      // Disconnect resize observer
+      if (this.resizeObserver) {
+        this.resizeObserver.disconnect()
+        this.resizeObserver = null
+      }
+      
+      // Safely dispose fabric canvas
+      if (this.canvas) {
+        // Check if canvas element is still in the DOM
+        const canvasElement = this.canvas.getElement()
+        if (canvasElement && canvasElement.parentNode === this.container) {
+          this.canvas.dispose()
+        } else {
+          // Canvas element is not in the expected parent, just clear the canvas
+          this.canvas.clear()
+          // Manually remove if it exists somewhere
+          if (canvasElement && canvasElement.parentNode) {
+            canvasElement.parentNode.removeChild(canvasElement)
+          }
+        }
+      }
+      
+      // Clear bound handlers
+      this.boundHandlers = {}
+    } catch (error) {
+      console.error('Error during canvas disposal:', error)
+      // Continue cleanup even if there's an error
     }
-    
-    // Dispose fabric canvas
-    this.canvas.dispose()
   }
 }
