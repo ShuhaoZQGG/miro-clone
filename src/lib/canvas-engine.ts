@@ -59,6 +59,8 @@ export class CanvasEngine {
   
   // ResizeObserver instance for cleanup
   private resizeObserver: ResizeObserver | null = null
+  private resizeDebounceTimer: number | null = null
+  private renderRequestId: number | null = null
 
   constructor(container: HTMLElement) {
     this.container = container
@@ -76,13 +78,26 @@ export class CanvasEngine {
       selection: true,
       preserveObjectStacking: true,
       imageSmoothingEnabled: true,
+      enableRetinaScaling: true,
+      renderOnAddRemove: false, // Improve performance by batching renders
+      skipOffscreen: true, // Skip rendering objects outside viewport
+      stateful: false, // Disable state tracking for better performance
     })
     
     // Append canvas to container
     const canvasEl = canvas.getElement()
     if (canvasEl) {
+      // Ensure canvas fills container completely
+      canvasEl.style.width = '100%'
+      canvasEl.style.height = '100%'
+      canvasEl.style.position = 'absolute'
+      canvasEl.style.top = '0'
+      canvasEl.style.left = '0'
       this.container.appendChild(canvasEl)
     }
+    
+    // Enable smooth rendering
+    this.setupSmoothRendering(canvas)
     
     return canvas
   }
@@ -242,11 +257,19 @@ export class CanvasEngine {
   }
 
   private handleResize(): void {
-    const rect = this.container.getBoundingClientRect()
-    this.canvas.setDimensions({
-      width: rect.width,
-      height: rect.height
-    })
+    // Debounce resize to improve performance
+    if (this.resizeDebounceTimer) {
+      clearTimeout(this.resizeDebounceTimer)
+    }
+    
+    this.resizeDebounceTimer = setTimeout(() => {
+      const rect = this.container.getBoundingClientRect()
+      this.canvas.setDimensions({
+        width: rect.width,
+        height: rect.height
+      })
+      this.canvas.renderAll()
+    }, 100) as any
     this.canvas.renderAll()
   }
 
@@ -623,6 +646,22 @@ export class CanvasEngine {
     try {
       // Mark as disposed early to prevent race conditions
       this.isDisposed = true
+      
+      // Cancel any pending render requests
+      if (this.renderThrottleId) {
+        cancelAnimationFrame(this.renderThrottleId)
+        this.renderThrottleId = null
+      }
+      
+      if (this.renderRequestId) {
+        cancelAnimationFrame(this.renderRequestId)
+        this.renderRequestId = null
+      }
+      
+      if (this.resizeDebounceTimer) {
+        clearTimeout(this.resizeDebounceTimer)
+        this.resizeDebounceTimer = null
+      }
       
       // Remove canvas event listeners
       if (this.canvas) {

@@ -79,13 +79,21 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         className={clsx(
           'absolute inset-0 cursor-crosshair',
           'touch-none select-none',
-          'bg-gray-50'
+          'bg-gray-50',
+          'w-full h-full' // Ensure full dimensions
         )}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         style={{
-          touchAction: 'none' // Prevent default touch behaviors
+          touchAction: 'none', // Prevent default touch behaviors
+          width: '100%',
+          height: '100%',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
         }}
       >
         {/* Grid */}
