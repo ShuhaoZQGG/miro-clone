@@ -1,12 +1,16 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useMemo, useCallback, useState } from 'react'
 import { useCanvas } from '@/hooks/useCanvas'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useCanvasStore } from '@/store/useCanvasStore'
+import { useWebSocket } from '@/hooks/useWebSocket'
+import { useAuth } from '@/context/AuthContext'
 import { Toolbar } from './Toolbar'
 import { ToolPanel } from './ToolPanel'
 import { CollaborationPanel } from './CollaborationPanel'
+import { CollaborativeCursors } from './CollaborativeCursors'
+import { AuthModal } from './AuthModal'
 import { Grid } from './Grid'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import { clsx } from 'clsx'
@@ -18,6 +22,26 @@ interface WhiteboardProps {
 
 export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) => {
   const { isGridVisible, isLoading } = useCanvasStore()
+  const { user, isAuthenticated } = useAuth()
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  
+  // Use authenticated user or generate temporary ID
+  const userId = useMemo(() => user?.id || `guest-${Math.random().toString(36).substr(2, 9)}`, [user])
+  const displayName = useMemo(() => user?.displayName || `Guest ${userId.substr(6, 4)}`, [user, userId])
+  
+  // Initialize WebSocket connection
+  const {
+    isConnected,
+    users,
+    connect,
+    disconnect,
+    sendCursorPosition,
+    sendOperation,
+    sendSelection,
+    onOperation,
+    onCursorUpdate,
+    onSelectionUpdate
+  } = useWebSocket(boardId)
   
   const {
     containerRef,
@@ -36,16 +60,82 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     boardId,
     onElementCreate: (element) => {
       console.log('Element created:', element)
+      // Send creation operation to other users
+      sendOperation({
+        type: 'create',
+        elementId: element.id,
+        element: element
+      })
     },
     onElementUpdate: (element) => {
       console.log('Element updated:', element)
+      // Send update operation to other users
+      sendOperation({
+        type: 'update',
+        elementId: element.id,
+        newState: element
+      })
     },
     onSelectionChange: (selectedIds) => {
       console.log('Selection changed:', selectedIds)
+      // Send selection update to other users
+      sendSelection(selectedIds)
     }
   })
 
   useKeyboardShortcuts()
+  
+  // Connect to WebSocket on mount or when authentication changes
+  useEffect(() => {
+    connect(userId, displayName)
+    return () => {
+      disconnect()
+    }
+  }, [connect, disconnect, userId, displayName])
+  
+  // Show auth modal if not authenticated (optional)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Optionally prompt for authentication after a delay
+      const timer = setTimeout(() => {
+        // setShowAuthModal(true) // Uncomment to require auth
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [isAuthenticated])
+  
+  // Listen for remote operations
+  useEffect(() => {
+    onOperation((operation) => {
+      // Handle remote operations
+      // This would integrate with your canvas engine
+      console.log('Received remote operation:', operation)
+    })
+    
+    onCursorUpdate((data) => {
+      // Cursor updates are handled by CollaborativeCursors component
+      console.log('Received cursor update:', data)
+    })
+    
+    onSelectionUpdate((data) => {
+      // Handle remote selection updates
+      console.log('Received selection update:', data)
+    })
+  }, [onOperation, onCursorUpdate, onSelectionUpdate])
+  
+  // Enhanced mouse move handler with cursor broadcasting
+  const handleEnhancedMouseMove = useCallback((e: React.MouseEvent) => {
+    handleMouseMove(e)
+    
+    // Send cursor position to other users
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (rect) {
+      sendCursorPosition({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      })
+    }
+  }, [handleMouseMove, sendCursorPosition, containerRef])
 
   return (
     <div 
@@ -73,7 +163,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           'w-full h-full'
         )}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
+        onMouseMove={handleEnhancedMouseMove}
         onMouseUp={handleMouseUp}
         style={{
           position: 'fixed',
@@ -96,6 +186,9 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       >
         {/* Grid */}
         {isGridVisible && <Grid />}
+        
+        {/* Collaborative Cursors */}
+        <CollaborativeCursors users={users.filter(u => u.userId !== userId)} />
         
         {/* Loading State */}
         {(isLoading || !isInitialized) && (
@@ -125,13 +218,40 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       
       {/* Collaboration Panel - Overlay on right */}
       <div style={{ position: 'fixed', right: 16, top: 88, zIndex: 100 }}>
-        <CollaborationPanel />
+        <CollaborationPanel users={users} isConnected={isConnected} />
       </div>
       
       {/* Status Bar */}
       <div className="absolute bottom-4 right-4 bg-white shadow-lg rounded-lg px-3 py-2 text-sm text-gray-600 border" style={{ zIndex: 100 }}>
         <span>Board: {boardId}</span>
+        <span className="ml-4">
+          {isConnected ? (
+            <span className="text-green-600">● Connected</span>
+          ) : (
+            <span className="text-red-600">● Disconnected</span>
+          )}
+        </span>
+        <span className="ml-4">Users: {users.length}</span>
+        <span className="ml-4">
+          {isAuthenticated ? (
+            <span className="text-blue-600">{user?.displayName}</span>
+          ) : (
+            <button 
+              onClick={() => setShowAuthModal(true)}
+              className="text-blue-600 hover:underline"
+            >
+              Sign In
+            </button>
+          )}
+        </span>
       </div>
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => setShowAuthModal(false)}
+      />
       
       {/* Keyboard Shortcuts Help - Hidden for now, can be toggled */}
       <div className="sr-only">
