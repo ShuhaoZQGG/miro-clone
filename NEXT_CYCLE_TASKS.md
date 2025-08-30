@@ -1,12 +1,14 @@
 # Next Cycle Tasks
 
-## Immediate Priority
-1. **Resolve PR #30 Merge Conflicts**
-   - Rebase cycle-37 branch onto latest main
-   - Resolve conflicts in test files and documentation
-   - Merge PR to main branch
+## Critical Blockers (Must Fix First)
+1. **Fix Build Failure**
+   - Remove/comment out DataDog imports in `monitoring/datadog.config.ts`
+   - OR install missing packages: `@datadog/browser-rum` and `@datadog/browser-logs`
+   - Add missing `type-check` script to package.json: `"type-check": "tsc --noEmit"`
+   - Verify build succeeds with `npm run build`
 
-2. **Production Deployment**
+## Immediate Priority
+1. **Production Deployment** (After Build Fix)
    - Deploy frontend to Vercel
    - Deploy WebSocket server to Railway/Render
    - Configure PostgreSQL on Supabase/Neon
