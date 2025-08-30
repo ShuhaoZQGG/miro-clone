@@ -191,8 +191,8 @@ export class HistoryManager {
       element?: Partial<CanvasElement>
       oldState?: any
       newState?: any
-      onExecute: (arg?: any) => void
-      onUndo: (arg?: any) => void
+      onExecute: (arg1?: any, arg2?: any) => void
+      onUndo: (arg1?: any, arg2?: any) => void
     }
   ): ElementCommand {
     const command: ElementCommand = {

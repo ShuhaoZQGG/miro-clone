@@ -1,586 +1,291 @@
-# Miro Clone - Cycle 5 Project Plan
+# Cycle 7: Miro Clone - Complete Feature Implementation Plan
 
-**Cycle Start:** August 29, 2025  
+**Cycle Start:** August 30, 2025  
 **Vision:** Continue working on the Miro board project to finish all the remaining features  
-**Current State:** Core foundation implemented with canvas engine, state management, and test infrastructure  
+**Current State:** Core elements implemented, TypeScript build error blocking progress  
 
 ## Current Project Status
 
-### Completed Work (Cycles 1-4)
+### Completed Work (Cycles 1-6)
 - ✅ **Architecture:** Next.js 15, TypeScript, Fabric.js, Zustand, Tailwind CSS
 - ✅ **Canvas Engine:** Pan/zoom, touch support, event system, camera management
 - ✅ **State Management:** Zustand store with element CRUD, selection, collaboration structure
 - ✅ **Component Structure:** Whiteboard, Toolbar, ToolPanel, CollaborationPanel
-- ✅ **Test Infrastructure:** Jest setup with 68/139 tests passing
-- ✅ **TypeScript:** Full compilation success after critical fixes
-- ✅ **Build System:** Development server functional
+- ✅ **Element Types:** Text, Note, Rectangle, Ellipse, Line, Connector, Freehand, Image
+- ✅ **System Features:** LayerManager, HistoryManager with undo/redo
+- ✅ **Test Infrastructure:** 171/216 tests passing (79% success rate)
 
-### Technical Health
-- **Build:** ✅ Compiles successfully
-- **Tests:** 🟡 68 passing, 71 integration test failures (non-critical)
-- **Type Safety:** ✅ Complete TypeScript coverage
-- **Performance:** ✅ Canvas virtualization and throttling implemented
+### Critical Issues
+- 🔴 **Build:** TypeScript compilation error in history-manager.ts:208 (blocks build)
+- ⚠️ **Tests:** 45 integration test failures (UI-related, non-critical)
+- ⚠️ **Missing:** No real-time collaboration, export functionality, or mobile optimization
 
 ---
 
-## 1. Requirements Analysis - Updated
+## 1. Requirements Analysis - Cycle 7 Focus
 
-### 1.1 Current State Deep Analysis
+### 1.1 Current State Analysis
 
 #### ✅ Successfully Implemented
 - **Modern Architecture**: Next.js 15 with TypeScript, proper component hierarchy
 - **Canvas Foundation**: Fabric.js integration with custom CanvasEngine class
 - **State Management**: Zustand store with proper TypeScript interfaces
 - **UI Framework**: Radix UI components with Tailwind CSS styling
-- **Real-time Infrastructure**: Socket.io client integration prepared
-- **Comprehensive Types**: 309 lines of TypeScript type definitions
-- **Design System**: Complete visual design specification (1932 lines)
-- **Test Structure**: Jest configuration with React Testing Library
+- **Element System**: Comprehensive element types with Fabric.js rendering
+- **Layer Management**: Complete layering operations (move up/down/to front/back)
+- **History System**: Command pattern undo/redo with merging support
+- **Test Structure**: Vitest configuration with React Testing Library
 
-#### ❌ Critical Issues Requiring Immediate Fix
-1. **TypeScript Compilation Failures**
-   - Canvas engine property initialization errors
-   - React event type import issues
-   - Missing Jest DOM type definitions
-   - State management type conflicts
+#### ❌ Critical Issue - Must Fix First
+1. **TypeScript Build Error**
+   - Function signature mismatch in history-manager.ts:208
+   - Blocks production build
+   - Prevents deployment
 
-2. **Test Infrastructure Problems**
-   - 46 out of 139 tests failing
-   - Fabric.js mocking issues
-   - Missing test dependencies
-   - Integration test component rendering failures
+#### ⚠️ Non-Critical Issues
+1. **Integration Tests**: 45 failures (UI mocking issues)
+2. **Missing Features**: WebSocket, export, mobile support
 
-3. **Code Quality Issues**
-   - Unused variables and imports
-   - ESLint violations
-   - Improper React hook usage
-   - Missing error boundaries
-
-#### ⚠️ Partially Implemented Features
-- **Canvas Operations**: 70% complete - Pan/zoom working, element manipulation needs fixes
-- **Element Creation**: 60% complete - Basic sticky notes and shapes implemented
-- **Real-time Collaboration**: 40% complete - Infrastructure ready, needs implementation
-- **User Authentication**: 30% complete - Structure defined, needs backend integration
+#### 📊 Feature Completion Status
+- **Canvas Operations**: 90% complete - All basic operations working
+- **Element Creation**: 85% complete - All planned element types implemented
+- **System Features**: 80% complete - Layer and history management working
+- **Real-time Collaboration**: 0% complete - Not started
+- **Export Functionality**: 0% complete - Not started
+- **Mobile Optimization**: 0% complete - Not started
 
 ### 1.2 Functional Requirements - Prioritized
 
-#### Phase 1: Critical Issue Resolution (Weeks 1-3)
-**Must-Have Requirements:**
-- Zero TypeScript compilation errors
-- 95%+ test success rate
-- Canvas engine properly initialized
-- Element CRUD operations working reliably
-- Error boundaries implemented
-- Input validation and sanitization
+#### Phase 1: Critical Fix (Day 1-2)
+**Immediate Requirements:**
+- Fix TypeScript compilation error in history-manager.ts:208
+- Verify build succeeds
+- Ensure no regression in tests
 
-#### Phase 2: Core Feature Completion (Weeks 4-8)
-**Essential Collaboration Features:**
-- Real-time multi-user editing
-- Element manipulation (move, resize, delete)
-- Multi-selection capabilities
-- Undo/redo system
+#### Phase 2: WebSocket Server (Day 3-7)
+**WebSocket Implementation:**
+- Express + Socket.io server setup
+- Room management for boards
+- Connection handling and reconnection
+- Basic operation synchronization
+- Message batching for performance
+
+#### Phase 3: Collaboration Features (Day 8-10)
+**Real-time Features:**
 - User presence indicators
 - Live cursor tracking
-- Basic conflict resolution
+- Element locking during edit
+- Typing indicators
+- Operational transform for conflicts
 
-**Essential Visual Elements:**
-- Enhanced sticky notes with rich text
-- Shapes (rectangles, circles, arrows)
-- Text elements with formatting
-- Basic drawing/pen tool
-- Image upload and embedding
-- Connector elements
+#### Phase 4: Export System (Day 11-13)
+**Export Features:**
+- PNG export (client-side)
+- PDF generation (server-side)
+- SVG export using Fabric.js
+- Quality and bounds configuration
+- Progress indicators
 
-#### Phase 3: Advanced Features (Weeks 9-12)
-**Enhanced User Experience:**
-- Board management dashboard
-- Sharing and permissions system
-- Export functionality (PDF, PNG, SVG)
-- Keyboard shortcuts and navigation
-- Mobile responsiveness improvements
-- Comments and annotations
+#### Phase 5: Mobile Support (Day 14-16)
+**Mobile Optimization:**
+- Touch gesture handlers (pinch, pan, rotate)
+- Responsive toolbar layouts
+- Touch-friendly controls (44x44px)
+- Landscape/portrait adaptations
 
-#### Phase 4: Production Readiness (Weeks 13-16)
-**Production Requirements:**
-- Performance optimization for 1000+ elements
-- Security audit and hardening
-- Database optimization
-- Monitoring and analytics
-- User onboarding flow
-- Documentation and help system
+#### Phase 6: Performance & Polish (Day 17-20)
+**Production Readiness:**
+- Viewport culling for 1000+ elements
+- LOD system implementation
+- WebSocket message batching
+- Load testing with 50+ users
+- Security audit and fixes
 
-### 1.3 Non-Functional Requirements
+### 1.3 Non-Functional Requirements (Cycle 7)
 
-#### Performance Requirements
-- **Canvas Rendering**: 60fps with 500+ elements
-- **Real-time Latency**: <100ms for collaboration updates
-- **Load Time**: <3 seconds Time to Interactive
-- **Memory Usage**: <500MB for typical boards
-- **Concurrent Users**: 50+ users per board without degradation
+#### Performance Targets
+- **Rendering**: 60fps with 500+ elements
+- **Sync Latency**: <100ms for real-time updates
+- **Load Time**: <3s Time to Interactive
+- **Touch Response**: <100ms on mobile
+- **Export Time**: <5s for 500 elements
+
+#### Scalability Limits
+- **Elements**: 1000 per board maximum
+- **Users**: 50 concurrent per board
+- **Message Size**: 64KB WebSocket limit
+- **Image Size**: 10MB upload, auto-resize to 2048px
 
 #### Security Requirements
-- Input sanitization for all user-generated content
-- XSS and CSRF protection
-- Authentication and authorization
-- Rate limiting for API endpoints
-- Data encryption at rest and in transit
-
-#### Accessibility Requirements
-- WCAG 2.1 AA compliance
-- Full keyboard navigation support
-- Screen reader compatibility
-- High contrast mode support
-- Responsive design for all device sizes
+- Input validation on all user data
+- XSS prevention in text elements
+- Rate limiting on WebSocket messages
+- Secure WebSocket connections (WSS)
 
 ---
 
-## 2. System Architecture - Refined
+## 2. System Architecture - Cycle 7
 
-### 2.1 Current Architecture Assessment
+### 2.1 Architecture Overview
 
-#### Strengths of Existing Architecture
-- **Clean Separation**: Well-structured layers (UI, State, Canvas, Types)
-- **Modern Patterns**: React hooks, TypeScript interfaces, Zustand stores
-- **Scalable Design**: Component composition and proper abstraction
-- **Performance Conscious**: Canvas virtualization and throttled rendering
-- **Type Safety**: Comprehensive TypeScript coverage
+```
+┌─────────────────────────────────────────┐
+│           Client Application            │
+├─────────────────────────────────────────┤
+│  Canvas Engine │ State Mgmt │ UI Layer  │
+├─────────────────────────────────────────┤
+│         WebSocket Connection            │
+└─────────────────────────────────────────┘
+                    ↕
+┌─────────────────────────────────────────┐
+│          WebSocket Server               │
+├─────────────────────────────────────────┤
+│  Room Mgmt │ OT Engine │ Presence Sys   │
+├─────────────────────────────────────────┤
+│         Export Service (PDF/SVG)        │
+└─────────────────────────────────────────┘
+```
 
-#### Architecture Refinements Based on Implementation Experience
+### 2.2 WebSocket Message Protocol
 
 ```typescript
-// Enhanced Canvas Engine with Better Error Handling
-interface CanvasEngineConfig {
-  container: HTMLElement;
-  enableVirtualization?: boolean;
-  performanceMonitoring?: boolean; // Made optional
-  maxElements?: number;
-  onError?: (error: CanvasError) => void;
-}
+// Client → Server Messages
+type ClientMessage = 
+  | { type: 'join'; boardId: string; userId: string }
+  | { type: 'leave'; boardId: string }
+  | { type: 'cursor'; position: Position }
+  | { type: 'operation'; op: Operation }
+  | { type: 'selection'; elementIds: string[] }
+  | { type: 'ping'; timestamp: number };
 
-class CanvasEngine {
-  private canvas: fabric.Canvas | null = null; // Proper null initialization
-  private isInitialized: boolean = false;
-  
-  constructor(config: CanvasEngineConfig) {
-    this.config = config;
-    this.initializeCanvas()
-      .catch(this.handleInitializationError.bind(this));
-  }
-  
-  private async initializeCanvas(): Promise<void> {
-    try {
-      this.canvas = new fabric.Canvas(null, {
-        selection: true,
-        preserveObjectStacking: true,
-        imageSmoothingEnabled: true,
-      });
-      
-      const canvasElement = this.canvas.getElement();
-      if (!canvasElement) {
-        throw new Error('Failed to create canvas element');
-      }
-      
-      this.config.container.appendChild(canvasElement);
-      this.isInitialized = true;
-      this.setupEventListeners();
-    } catch (error) {
-      throw new CanvasInitializationError(`Canvas initialization failed: ${error.message}`);
-    }
-  }
-}
+// Server → Client Messages  
+type ServerMessage =
+  | { type: 'joined'; users: UserPresence[] }
+  | { type: 'user_joined'; user: UserPresence }
+  | { type: 'user_left'; userId: string }
+  | { type: 'cursor_update'; userId: string; position: Position }
+  | { type: 'operation'; op: Operation; userId: string }
+  | { type: 'sync'; operations: Operation[] }
+  | { type: 'pong'; timestamp: number; serverTime: number };
 ```
 
-### 2.2 Enhanced State Management Architecture
+### 2.3 Operational Transform Matrix
 
 ```typescript
-// Improved type-safe state updates
-interface CanvasStore extends BaseStore {
-  // Type-safe element updates with validation
-  updateElement: <T extends CanvasElement>(
-    id: string,
-    updates: Partial<T>,
-    options?: {
-      validate?: boolean;
-      broadcast?: boolean;
-      skipHistory?: boolean;
-    }
-  ) => void;
-  
-  // Batch operations for performance
-  batchUpdate: (operations: ElementOperation[]) => void;
-  
-  // History management
-  undo: () => void;
-  redo: () => void;
-  canUndo: () => boolean;
-  canRedo: () => boolean;
-}
-
-// Enhanced error handling
-class CanvasError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public context?: Record<string, any>
-  ) {
-    super(message);
-    this.name = 'CanvasError';
-  }
-}
-```
-
-### 2.3 Real-time Collaboration Architecture
-
-```typescript
-// Operational Transform for Conflict Resolution
-interface Operation {
-  id: string;
-  type: 'create' | 'update' | 'delete' | 'transform';
-  elementId?: string;
-  userId: string;
-  timestamp: number;
-  data: any;
-  vectorClock: Map<string, number>;
-}
-
-class OperationalTransform {
-  static transform(op1: Operation, op2: Operation): [Operation, Operation] {
-    // Transform operations based on type and dependencies
-    if (op1.elementId !== op2.elementId) {
-      return [op1, op2]; // Independent operations
-    }
-    
-    // Handle concurrent operations on same element
-    if (op1.timestamp < op2.timestamp) {
-      return this.transformConcurrent(op1, op2);
-    } else {
-      return this.transformConcurrent(op2, op1).reverse() as [Operation, Operation];
-    }
-  }
-}
-```
-
----
-
-## 3. Technology Stack Validation
-
-### 3.1 Current Stack Assessment ✅
-
-#### Confirmed Excellent Choices
-- **Next.js 15**: Latest features, excellent performance, built-in optimizations
-- **TypeScript**: Catching errors early, excellent developer experience
-- **Fabric.js**: Mature canvas library with comprehensive feature set
-- **Zustand**: Lightweight, performant state management
-- **Tailwind CSS**: Rapid UI development, consistent design system
-- **Radix UI**: Accessible, unstyled component primitives
-- **React Query**: Server state management and caching
-- **Socket.io**: Reliable real-time communication
-
-#### Required Dependency Additions
-
-```json
-{
-  "dependencies": {
-    "react-error-boundary": "^4.0.13",
-    "zod": "^3.22.4",
-    "react-hotkeys-hook": "^4.5.0",
-    "lodash.debounce": "^4.0.8",
-    "lodash.throttle": "^4.1.1",
-    "uuid": "^9.0.1"
-  },
-  "devDependencies": {
-    "@types/jest-dom": "^6.1.4",
-    "@types/uuid": "^9.0.7",
-    "@types/lodash.debounce": "^4.0.9",
-    "@types/lodash.throttle": "^4.1.4",
-    "canvas": "^2.11.2",
-    "jest-canvas-mock": "^2.5.2"
-  }
-}
-```
-
-### 3.2 Development Tools Configuration
-
-#### Enhanced Jest Configuration
-```javascript
-// jest.config.js
-module.exports = {
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: [
-    '<rootDir>/jest.setup.js',
-    'jest-canvas-mock'
-  ],
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^fabric$': '<rootDir>/src/__mocks__/fabric.js'
-  },
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/**/*.stories.{js,jsx,ts,tsx}',
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
-  },
+// Transform priority matrix for concurrent operations
+const transformMatrix = {
+  'create-create': (op1, op2) => [op1, op2], // Independent
+  'create-update': (op1, op2) => [op1, op2], // Independent
+  'create-delete': (op1, op2) => [op1, null], // Delete wins
+  'update-update': (op1, op2) => mergeUpdates(op1, op2),
+  'update-delete': (op1, op2) => [null, op2], // Delete wins
+  'delete-delete': (op1, op2) => [null, null], // Both deleted
 };
 ```
 
----
 
-## 4. Project Phases - Detailed Implementation Plan
+## 3. Technology Stack
 
-### Phase 1: Critical Issue Resolution (Weeks 1-3) 🚨
+### Core Stack (Existing)
+- **Frontend:** Next.js 15.5.2, React 19, TypeScript 5.7.3
+- **Canvas:** Fabric.js 6.5.1
+- **State:** Zustand 5.0.2
+- **UI:** Radix UI, Tailwind CSS
+- **Testing:** Vitest, React Testing Library
 
-#### Week 1: Foundation Fixes
-**Objective**: Resolve all TypeScript compilation errors and establish stable development environment
-
-**Day 1-2: Environment Setup**
-- Set up proper development environment for all team members
-- Configure IDE settings for consistent TypeScript and ESLint rules
-- Establish daily standup focused on issue resolution
-
-**Day 3-5: TypeScript Fixes**
-```typescript
-// Fix 1: Canvas Engine Property Initialization
-class CanvasEngine {
-  private canvas: fabric.Canvas | null = null;
-  private isInitialized = false;
-  
-  constructor(container: HTMLElement) {
-    this.initializeCanvasAsync(container)
-      .catch(error => {
-        console.error('Canvas initialization failed:', error);
-        throw new CanvasInitializationError(error.message);
-      });
-  }
-}
-
-// Fix 2: React Event Type Imports
-import { MouseEvent, KeyboardEvent, TouchEvent } from 'react';
-// Remove invalid imports like React.MouseMove
-
-// Fix 3: Jest DOM Types
-// Add to jest.setup.js
-import '@testing-library/jest-dom';
-```
-
-**Deliverables:**
-- ✅ Zero TypeScript compilation errors
-- ✅ `npm run build` completes successfully
-- ✅ Basic test suite running (>50% tests passing)
-- ✅ Development environment stable
-
-#### Week 2: Test Infrastructure & Code Quality
-**Objective**: Fix test failures and implement proper error handling
-
-**Tasks:**
-1. **Fix Jest Configuration**
-   ```javascript
-   // Enhanced Fabric.js mock
-   // src/__mocks__/fabric.js
-   export const fabric = {
-     Canvas: jest.fn().mockImplementation(() => ({
-       add: jest.fn(),
-       remove: jest.fn(),
-       renderAll: jest.fn(),
-       dispose: jest.fn(),
-       getElement: jest.fn(() => document.createElement('canvas')),
-       setDimensions: jest.fn(),
-       on: jest.fn(),
-       off: jest.fn(),
-     })),
-     Object: jest.fn(),
-     Group: jest.fn(),
-   };
-   ```
-
-2. **Implement Error Boundaries**
-   ```typescript
-   const CanvasErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-     return (
-       <ErrorBoundary
-         FallbackComponent={({ error, resetErrorBoundary }) => (
-           <div className="flex flex-col items-center justify-center h-full p-8 bg-red-50">
-             <h2 className="text-2xl font-bold text-red-800 mb-4">
-               Canvas Error
-             </h2>
-             <p className="text-red-600 mb-4">{error.message}</p>
-             <button
-               onClick={resetErrorBoundary}
-               className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-             >
-               Reset Canvas
-             </button>
-           </div>
-         )}
-         onError={(error, errorInfo) => {
-           console.error('Canvas error:', error, errorInfo);
-         }}
-       >
-         {children}
-       </ErrorBoundary>
-     );
-   };
-   ```
-
-**Deliverables:**
-- ✅ 85%+ test success rate
-- ✅ Error boundaries implemented
-- ✅ Code quality issues resolved
-- ✅ ESLint warnings addressed
-
-#### Week 3: Integration & Performance
-**Objective**: Ensure all systems work together and establish performance baseline
-
-**Tasks:**
-1. **Integration Testing**
-   - Fix component rendering tests
-   - Test canvas initialization in browser environment
-   - Verify state management integration
-
-2. **Performance Optimization**
-   ```typescript
-   // Optional performance monitoring
-   class PerformanceMonitor {
-     private enabled: boolean;
-     
-     constructor(enabled = false) {
-       this.enabled = enabled;
-     }
-     
-     startFrameRateMonitoring(): void {
-       if (!this.enabled) return;
-       
-       // Performance monitoring logic
-     }
-   }
-   ```
-
-**Deliverables:**
-- ✅ Integration tests passing
-- ✅ Performance baseline established
-- ✅ Memory leaks eliminated
-- ✅ Ready for feature development
-
-### Phase 2: Core Feature Completion (Weeks 4-8) 🎯
-
-#### Week 4: Canvas Operations Enhancement
-**Objective**: Complete reliable element manipulation and multi-selection
-
-**Features to Implement:**
-1. **Enhanced Element Manipulation**
-   ```typescript
-   class ElementManager {
-     moveElements(elementIds: string[], delta: Position): void {
-       const elements = this.store.elements.filter(el => elementIds.includes(el.id));
-       
-       // Batch update for performance
-       const updates = elements.map(element => ({
-         id: element.id,
-         updates: {
-           position: {
-             x: element.position.x + delta.x,
-             y: element.position.y + delta.y
-           }
-         }
-       }));
-       
-       this.store.batchUpdate(updates);
-     }
-     
-     resizeElement(elementId: string, newSize: Size, anchor: ResizeAnchor): void {
-       const element = this.store.getElementById(elementId);
-       if (!element) return;
-       
-       const resizedElement = this.calculateResize(element, newSize, anchor);
-       this.store.updateElement(elementId, resizedElement);
-     }
-   }
-   ```
-
-2. **Multi-Selection System**
-   ```typescript
-   interface SelectionManager {
-     selectArea(bounds: Bounds): string[];
-     toggleSelection(elementId: string): void;
-     selectAll(): void;
-     clearSelection(): void;
-     getSelectionBounds(): Bounds | null;
-   }
-   ```
-
-**Deliverables:**
-- ✅ Reliable element move, resize, delete operations
-- ✅ Multi-selection with visual feedback
-- ✅ Selection handles and bounding boxes
-- ✅ Touch-friendly selection for mobile
-
-#### Week 5: Undo/Redo System
-**Objective**: Implement comprehensive command pattern for canvas operations
-
-**Implementation:**
-```typescript
-interface Command {
-  execute(): void;
-  undo(): void;
-  redo(): void;
-  canMerge(other: Command): boolean;
-  merge(other: Command): Command;
-}
-
-class CreateElementCommand implements Command {
-  constructor(
-    private element: CanvasElement,
-    private store: CanvasStore
-  ) {}
-  
-  execute(): void {
-    this.store.addElement(this.element);
-  }
-  
-  undo(): void {
-    this.store.removeElement(this.element.id);
-  }
-  
-  redo(): void {
-    this.execute();
-  }
-}
-
-class HistoryManager {
-  private history: Command[] = [];
-  private currentIndex = -1;
-  private maxHistorySize = 100;
-  
-  executeCommand(command: Command): void {
-    // Truncate history if we're not at the end
-    if (this.currentIndex < this.history.length - 1) {
-      this.history.splice(this.currentIndex + 1);
-    }
-    
-    command.execute();
-    this.history.push(command);
-    this.currentIndex++;
-    
-    // Limit history size
-    if (this.history.length > this.maxHistorySize) {
-      this.history.shift();
-      this.currentIndex--;
-    }
+### New Dependencies (Cycle 7)
+```json
+{
+  "dependencies": {
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "express": "^4.19.2",
+    "puppeteer": "^22.0.0"
   }
 }
 ```
 
-**Deliverables:**
-- ✅ Undo/Redo for all canvas operations
-- ✅ Command merging for performance
-- ✅ Keyboard shortcuts (Ctrl+Z, Ctrl+Y)
-- ✅ History state in UI
+## 4. Implementation Phases (20 Days)
+
+### Phase 1: Critical Fix (Day 1-2)
+
+**Day 1: TypeScript Build Fix**
+- Fix function signature mismatch in history-manager.ts:208
+- Update onExecute callback type definition
+- Verify build succeeds
+
+**Day 2: Test Stabilization**
+- Run full test suite
+- Fix any regression issues
+- Achieve 80%+ test pass rate
+
+### Phase 2: WebSocket Server (Day 3-7)
+
+**Day 3-4: Server Setup**
+- Create Express + Socket.io server
+- Implement room management
+- Add connection/disconnection handlers
+
+**Day 5-6: Operation Sync**
+- Implement operation broadcasting
+- Add message batching (50ms interval)
+- Create operation queue
+
+**Day 7: Client Integration**
+- WebSocket connection manager
+- Reconnection logic with exponential backoff
+- Connection status UI component
+
+### Phase 3: Collaboration Features (Day 8-10)
+
+**Day 8: User Presence**
+- Live cursor tracking and display
+- User avatar indicators
+- Active user list component
+
+**Day 9: Operational Transform**
+- Implement transform functions
+- Conflict resolution matrix
+- Operation merging
+
+**Day 10: Collaborative Editing**
+- Element locking during edit
+- Typing indicators
+- Selection sharing
+
+### Phase 4: Export System (Day 11-13)
+
+**Day 11: Client-side Export**
+- PNG export using canvas.toDataURL()
+- Quality and bounds configuration
+- Download trigger implementation
+
+**Day 12: Server-side Export**
+- PDF generation with puppeteer
+- SVG export using Fabric.js
+- API endpoints for export
+
+**Day 13: Export UI**
+- Export modal component
+- Format selection interface
+- Progress indicators
+
+### Phase 5: Mobile Support (Day 14-16)
+
+**Day 14: Touch Gestures**
+- Pinch-to-zoom implementation
+- Two-finger pan and rotate
+- Long-press context menus
+
+**Day 15: Responsive UI**
+- Mobile toolbar layout
+- Touch-friendly controls (44x44px)
+- Collapsible panels
+
+**Day 16: Mobile Testing**
+- Test on various devices
+- Fix touch event issues
+- Optimize performance
 
 #### Week 6: Real-time Collaboration Foundation
 **Objective**: Implement basic real-time multi-user editing

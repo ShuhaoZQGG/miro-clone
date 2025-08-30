@@ -1,5 +1,12 @@
 # Next Cycle Tasks
 
+## Immediate Fix Required (Cycle 6 Revision)
+### TypeScript Build Error
+- [ ] **CRITICAL**: Fix TypeScript error in history-manager.ts:208
+- [ ] Fix function signature mismatch for onExecute callback
+- [ ] Verify build succeeds after fix
+- [ ] Re-run all tests to ensure no regressions
+
 ## Priority 1: Critical Fixes
 ### Integration Test Stabilization
 - [ ] Fix 45 failing UI integration tests
@@ -73,6 +80,22 @@
 - [ ] Delta compression for updates
 - [ ] Offline mode with sync
 - [ ] CDN setup for assets
+
+## Features from Cycle 6 (Deferred to Next Cycle)
+### Real-time Implementation
+- [ ] WebSocket server with operational transform
+- [ ] Connection status and user presence UI
+- [ ] Conflict resolution for collaborative editing
+
+### Export System  
+- [ ] Client-side PNG export
+- [ ] Server-side PDF/SVG export
+- [ ] Export progress indicators
+
+### Mobile Optimization
+- [ ] Touch gesture handlers
+- [ ] Responsive layout breakpoints
+- [ ] Mobile-specific UI components
 
 ## Deferred Items (Future Cycles)
 - Template marketplace
