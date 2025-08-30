@@ -1,5 +1,4 @@
 import { ElementManager } from '@/lib/element-manager'
-import { CanvasElement, StickyNoteElement, ShapeElement, TextElement, ElementType } from '@/types'
 
 // Mock Fabric.js
 jest.mock('fabric', () => ({
@@ -98,7 +97,7 @@ describe('ElementManager - Element Creation', () => {
   describe('createStickyNote', () => {
     it('should create a sticky note with default properties', () => {
       const position = { x: 100, y: 200 }
-      const stickyNote = elementManager.createStickyNote(position)
+      elementManager.createStickyNote(position)
 
       expect(stickyNote).toBeDefined()
       expect(stickyNote.type).toBe('sticky_note')
@@ -123,7 +122,7 @@ describe('ElementManager - Element Creation', () => {
         backgroundColor: '#FFB6C1'
       }
 
-      const stickyNote = elementManager.createStickyNote(position, content)
+      elementManager.createStickyNote(position, content)
 
       expect(stickyNote.content).toEqual(content)
       expect(stickyNote.content.text).toBe('My custom note')
@@ -134,7 +133,7 @@ describe('ElementManager - Element Creation', () => {
       const position = { x: 0, y: 0 }
       const size = { width: 250, height: 180 }
 
-      const stickyNote = elementManager.createStickyNote(position, undefined, size)
+      elementManager.createStickyNote(position, undefined, size)
 
       expect(stickyNote.size).toEqual(size)
     })
@@ -150,7 +149,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should add sticky note to canvas', () => {
       const position = { x: 10, y: 20 }
-      const stickyNote = elementManager.createStickyNote(position)
+      elementManager.createStickyNote(position)
 
       expect(mockCanvas.add).toHaveBeenCalled()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
@@ -158,7 +157,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should set creation timestamps', () => {
       const before = new Date()
-      const stickyNote = elementManager.createStickyNote({ x: 0, y: 0 })
+      elementManager.createStickyNote({ x: 0, y: 0 })
       const after = new Date()
 
       const createdAt = new Date(stickyNote.createdAt)
@@ -172,7 +171,7 @@ describe('ElementManager - Element Creation', () => {
       const longText = 'This is a very long text that should be properly handled within the sticky note boundaries and not overflow'
       const content = { text: longText }
 
-      const stickyNote = elementManager.createStickyNote({ x: 0, y: 0 }, content)
+      elementManager.createStickyNote({ x: 0, y: 0 }, content)
 
       expect(stickyNote.content.text).toBe(longText)
       // Should still create the element successfully
@@ -183,7 +182,7 @@ describe('ElementManager - Element Creation', () => {
   describe('createRectangle', () => {
     it('should create a rectangle with default properties', () => {
       const position = { x: 150, y: 100 }
-      const rectangle = elementManager.createRectangle(position)
+      elementManager.createRectangle(position)
 
       expect(rectangle).toBeDefined()
       expect(rectangle.type).toBe('rectangle')
@@ -206,7 +205,7 @@ describe('ElementManager - Element Creation', () => {
         opacity: 0.8
       }
 
-      const rectangle = elementManager.createRectangle(position, style)
+      elementManager.createRectangle(position, style)
 
       expect(rectangle.style).toEqual(style)
       expect(rectangle.style.fill).toBe('#FF6B6B')
@@ -217,7 +216,7 @@ describe('ElementManager - Element Creation', () => {
       const position = { x: 0, y: 0 }
       const size = { width: 300, height: 150 }
 
-      const rectangle = elementManager.createRectangle(position, undefined, size)
+      elementManager.createRectangle(position, undefined, size)
 
       expect(rectangle.size).toEqual(size)
     })
@@ -230,7 +229,7 @@ describe('ElementManager - Element Creation', () => {
     })
 
     it('should add rectangle to canvas', () => {
-      const rectangle = elementManager.createRectangle({ x: 10, y: 20 })
+      elementManager.createRectangle({ x: 10, y: 20 })
 
       expect(mockCanvas.add).toHaveBeenCalled()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
@@ -238,7 +237,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should create rectangle with minimum size constraints', () => {
       const tinySize = { width: 1, height: 1 }
-      const rectangle = elementManager.createRectangle({ x: 0, y: 0 }, undefined, tinySize)
+      elementManager.createRectangle({ x: 0, y: 0 }, undefined, tinySize)
 
       expect(rectangle.size.width).toBeGreaterThanOrEqual(10) // Minimum width
       expect(rectangle.size.height).toBeGreaterThanOrEqual(10) // Minimum height
@@ -248,7 +247,7 @@ describe('ElementManager - Element Creation', () => {
   describe('createCircle', () => {
     it('should create a circle with default properties', () => {
       const position = { x: 200, y: 150 }
-      const circle = elementManager.createCircle(position)
+      elementManager.createCircle(position)
 
       expect(circle).toBeDefined()
       expect(circle.type).toBe('circle')
@@ -270,7 +269,7 @@ describe('ElementManager - Element Creation', () => {
         opacity: 0.9
       }
 
-      const circle = elementManager.createCircle(position, style)
+      elementManager.createCircle(position, style)
 
       expect(circle.style).toEqual(style)
     })
@@ -279,7 +278,7 @@ describe('ElementManager - Element Creation', () => {
       const position = { x: 0, y: 0 }
       const size = { width: 150, height: 150 }
 
-      const circle = elementManager.createCircle(position, undefined, size)
+      elementManager.createCircle(position, undefined, size)
 
       expect(circle.size).toEqual(size)
     })
@@ -288,7 +287,7 @@ describe('ElementManager - Element Creation', () => {
       const position = { x: 0, y: 0 }
       const nonSquareSize = { width: 100, height: 200 }
 
-      const circle = elementManager.createCircle(position, undefined, nonSquareSize)
+      elementManager.createCircle(position, undefined, nonSquareSize)
 
       // Should use the smaller dimension to keep it a circle
       expect(circle.size.width).toBe(circle.size.height)
@@ -296,7 +295,7 @@ describe('ElementManager - Element Creation', () => {
     })
 
     it('should add circle to canvas', () => {
-      const circle = elementManager.createCircle({ x: 30, y: 40 })
+      elementManager.createCircle({ x: 30, y: 40 })
 
       expect(mockCanvas.add).toHaveBeenCalled()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
@@ -304,7 +303,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should create circle with minimum radius constraints', () => {
       const tinySize = { width: 5, height: 5 }
-      const circle = elementManager.createCircle({ x: 0, y: 0 }, undefined, tinySize)
+      elementManager.createCircle({ x: 0, y: 0 }, undefined, tinySize)
 
       expect(circle.size.width).toBeGreaterThanOrEqual(20) // Minimum diameter
       expect(circle.size.height).toBeGreaterThanOrEqual(20)
@@ -339,7 +338,7 @@ describe('ElementManager - Element Creation', () => {
         textAlign: 'center' as const
       }
 
-      const textElement = elementManager.createText(position, content)
+      elementManager.createText(position, content)
 
       expect(textElement.content).toEqual(content)
       expect(textElement.content.text).toBe('Custom text content')
@@ -357,7 +356,7 @@ describe('ElementManager - Element Creation', () => {
     })
 
     it('should add text element to canvas', () => {
-      const textElement = elementManager.createText({ x: 50, y: 60 })
+      elementManager.createText({ x: 50, y: 60 })
 
       expect(mockCanvas.add).toHaveBeenCalled()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
@@ -372,7 +371,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should handle multiline text', () => {
       const multilineText = 'Line 1\nLine 2\nLine 3'
-      const textElement = elementManager.createText({ x: 0, y: 0 }, { text: multilineText })
+      elementManager.createText({ x: 0, y: 0 }, { text: multilineText })
 
       expect(textElement.content.text).toBe(multilineText)
       // Height should be greater for multiline text
@@ -382,9 +381,9 @@ describe('ElementManager - Element Creation', () => {
 
   describe('Element Management', () => {
     it('should add created elements to internal collection', () => {
-      const stickyNote = elementManager.createStickyNote({ x: 0, y: 0 })
-      const rectangle = elementManager.createRectangle({ x: 100, y: 100 })
-      const circle = elementManager.createCircle({ x: 200, y: 200 })
+      elementManager.createStickyNote({ x: 0, y: 0 })
+      elementManager.createRectangle({ x: 100, y: 100 })
+      elementManager.createCircle({ x: 200, y: 200 })
 
       const elements = elementManager.getElements()
 
@@ -453,7 +452,8 @@ describe('ElementManager - Element Creation', () => {
 
   describe('Fabric.js Integration', () => {
     it('should create corresponding Fabric objects for sticky notes', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       
       elementManager.createStickyNote({ x: 100, y: 200 })
 
@@ -463,7 +463,8 @@ describe('ElementManager - Element Creation', () => {
     })
 
     it('should create corresponding Fabric objects for rectangles', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       
       elementManager.createRectangle({ x: 100, y: 200 })
 
@@ -471,7 +472,8 @@ describe('ElementManager - Element Creation', () => {
     })
 
     it('should create corresponding Fabric objects for circles', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       
       elementManager.createCircle({ x: 100, y: 200 })
 
@@ -479,7 +481,8 @@ describe('ElementManager - Element Creation', () => {
     })
 
     it('should create corresponding Fabric objects for text', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       
       elementManager.createText({ x: 100, y: 200 })
 
@@ -487,7 +490,8 @@ describe('ElementManager - Element Creation', () => {
     })
 
     it('should set proper Fabric object properties', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       const mockSetCoords = jest.fn()
       const mockOn = jest.fn()
       
@@ -573,7 +577,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should connect to existing elements', () => {
       const rect = elementManager.createRectangle({ x: 100, y: 100 })
-      const circle = elementManager.createCircle({ x: 300, y: 300 })
+      elementManager.createCircle({ x: 300, y: 300 })
       
       const connector = elementManager.createConnector(
         { x: 150, y: 150 },
@@ -697,7 +701,8 @@ describe('ElementManager - Element Creation', () => {
 
   describe('Fabric.js Integration for New Elements', () => {
     it('should create corresponding Fabric objects for connectors', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       
       elementManager.createConnector({ x: 100, y: 100 }, { x: 200, y: 200 })
       
@@ -705,7 +710,8 @@ describe('ElementManager - Element Creation', () => {
     })
 
     it('should create corresponding Fabric objects for freehand', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       
       const points = [
         { x: 100, y: 100 },
@@ -719,7 +725,8 @@ describe('ElementManager - Element Creation', () => {
     })
 
     it('should create corresponding Fabric objects for images', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       
       elementManager.createImage(
         { x: 100, y: 100 },

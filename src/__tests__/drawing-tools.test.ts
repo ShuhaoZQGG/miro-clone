@@ -1,5 +1,4 @@
 import { ElementManager } from '@/lib/element-manager'
-import { ShapeElement, Position, Size } from '@/types'
 
 // Mock Fabric.js
 jest.mock('fabric', () => ({
@@ -101,7 +100,7 @@ describe('Drawing Tools - Advanced Shapes', () => {
     })
 
     it('should add ellipse to canvas', () => {
-      const ellipse = elementManager.createEllipse({ x: 10, y: 20 })
+      elementManager.createEllipse({ x: 10, y: 20 })
 
       expect(mockCanvas.add).toHaveBeenCalled()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
@@ -188,7 +187,7 @@ describe('Drawing Tools - Advanced Shapes', () => {
     })
 
     it('should add line to canvas', () => {
-      const line = elementManager.createLine({ x: 0, y: 0 }, { x: 100, y: 100 })
+      elementManager.createLine({ x: 0, y: 0 }, { x: 100, y: 100 })
 
       expect(mockCanvas.add).toHaveBeenCalled()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
@@ -197,7 +196,8 @@ describe('Drawing Tools - Advanced Shapes', () => {
 
   describe('Fabric.js Integration for New Drawing Tools', () => {
     it('should create corresponding Fabric objects for ellipses', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       
       elementManager.createEllipse({ x: 100, y: 200 })
 
@@ -205,7 +205,8 @@ describe('Drawing Tools - Advanced Shapes', () => {
     })
 
     it('should create corresponding Fabric objects for lines', () => {
-      const { fabric } = require('fabric')
+      const fabricModule = await import('fabric')
+      const { fabric } = fabricModule
       
       elementManager.createLine({ x: 100, y: 100 }, { x: 200, y: 200 })
 

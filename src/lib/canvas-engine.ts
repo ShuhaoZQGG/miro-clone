@@ -612,14 +612,33 @@ export class CanvasEngine {
   }
 
   // Cleanup
+  private isDisposed = false
+  
   dispose(): void {
+    // Prevent multiple disposal attempts
+    if (this.isDisposed) {
+      return
+    }
+    
     try {
+      // Mark as disposed early to prevent race conditions
+      this.isDisposed = true
+      
       // Remove canvas event listeners
       if (this.canvas) {
         this.canvas.off('mouse:wheel')
         this.canvas.off('mouse:down')
         this.canvas.off('mouse:move')
         this.canvas.off('mouse:up')
+        this.canvas.off('selection:created')
+        this.canvas.off('selection:updated')
+        this.canvas.off('selection:cleared')
+        this.canvas.off('object:added')
+        this.canvas.off('object:removed')
+        this.canvas.off('object:modified')
+        this.canvas.off('object:moving')
+        this.canvas.off('object:scaling')
+        this.canvas.off('object:rotating')
       }
       
       // Remove document event listeners using stored bound handlers
@@ -634,13 +653,13 @@ export class CanvasEngine {
       const canvasEl = this.canvas?.getElement()
       if (canvasEl) {
         if (this.boundHandlers.touchStart) {
-          canvasEl.removeEventListener('touchstart', this.boundHandlers.touchStart)
+          canvasEl.removeEventListener('touchstart', this.boundHandlers.touchStart, { passive: false } as any)
         }
         if (this.boundHandlers.touchMove) {
-          canvasEl.removeEventListener('touchmove', this.boundHandlers.touchMove)
+          canvasEl.removeEventListener('touchmove', this.boundHandlers.touchMove, { passive: false } as any)
         }
         if (this.boundHandlers.touchEnd) {
-          canvasEl.removeEventListener('touchend', this.boundHandlers.touchEnd)
+          canvasEl.removeEventListener('touchend', this.boundHandlers.touchEnd, { passive: false } as any)
         }
       }
       
@@ -661,22 +680,42 @@ export class CanvasEngine {
       
       // Safely dispose fabric canvas
       if (this.canvas) {
-        // Check if canvas element is still in the DOM
-        const canvasElement = this.canvas.getElement()
-        if (canvasElement && canvasElement.parentNode === this.container) {
-          this.canvas.dispose()
-        } else {
-          // Canvas element is not in the expected parent, just clear the canvas
+        try {
+          // Clear all objects first
           this.canvas.clear()
-          // Manually remove if it exists somewhere
-          if (canvasElement && canvasElement.parentNode) {
-            canvasElement.parentNode.removeChild(canvasElement)
+          
+          // Get canvas elements
+          const upperCanvasEl = (this.canvas as any).upperCanvasEl
+          const lowerCanvasEl = (this.canvas as any).lowerCanvasEl
+          const wrapperEl = (this.canvas as any).wrapperEl
+          
+          // Dispose the fabric canvas
+          this.canvas.dispose()
+          
+          // Clean up any remaining DOM elements
+          if (upperCanvasEl && upperCanvasEl.parentNode) {
+            upperCanvasEl.parentNode.removeChild(upperCanvasEl)
           }
+          if (lowerCanvasEl && lowerCanvasEl.parentNode) {
+            lowerCanvasEl.parentNode.removeChild(lowerCanvasEl)
+          }
+          if (wrapperEl && wrapperEl.parentNode) {
+            wrapperEl.parentNode.removeChild(wrapperEl)
+          }
+        } catch (canvasError) {
+          // Log but continue with cleanup
+          console.warn('Error disposing fabric canvas:', canvasError)
         }
+        
+        // Nullify the canvas reference
+        this.canvas = null as any
       }
       
       // Clear bound handlers
       this.boundHandlers = {}
+      
+      // Clear container reference
+      this.container = null as any
     } catch (error) {
       console.error('Error during canvas disposal:', error)
       // Continue cleanup even if there's an error

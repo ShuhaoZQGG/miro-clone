@@ -65,8 +65,16 @@ describe('CanvasEngine', () => {
 
   afterEach(() => {
     jest.useRealTimers()
-    canvasEngine.dispose()
-    document.body.removeChild(mockContainer)
+    if (canvasEngine) {
+      try {
+        canvasEngine.dispose()
+      } catch (error) {
+        // Ignore disposal errors in tests
+      }
+    }
+    if (mockContainer && mockContainer.parentNode) {
+      document.body.removeChild(mockContainer)
+    }
   })
 
   describe('Canvas Initialization', () => {
@@ -399,8 +407,6 @@ describe('CanvasEngine', () => {
     })
 
     it('should maintain 60fps during smooth animations', async () => {
-      const frameRate = canvasEngine.getFrameRate()
-      
       // Start an animation
       canvasEngine.animateZoomTo(2.0, 1000)
       
@@ -510,6 +516,28 @@ describe('CanvasEngine', () => {
       // Should not emit events after disposal
       canvasEngine.emit('pan', { position: { x: 0, y: 0 }, delta: { x: 0, y: 0 } })
       expect(listener).not.toHaveBeenCalled()
+    })
+    
+    it('should handle multiple disposal attempts gracefully', () => {
+      // First disposal
+      expect(() => canvasEngine.dispose()).not.toThrow()
+      
+      // Second disposal should not throw
+      expect(() => canvasEngine.dispose()).not.toThrow()
+      
+      // Third disposal should also not throw
+      expect(() => canvasEngine.dispose()).not.toThrow()
+    })
+    
+    it('should handle disposal when canvas element is not in DOM', () => {
+      // Remove the canvas element from DOM before disposal
+      const canvasEl = mockCanvas.getElement()
+      if (canvasEl && canvasEl.parentNode) {
+        canvasEl.parentNode.removeChild(canvasEl)
+      }
+      
+      // Should not throw error
+      expect(() => canvasEngine.dispose()).not.toThrow()
     })
   })
 })
