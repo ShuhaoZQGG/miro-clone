@@ -46,14 +46,29 @@ jest.mock('fabric', () => ({
       toObject: jest.fn().mockReturnValue({}),
       canvas: null,
     })),
-    Image: jest.fn().mockImplementation(() => ({
-      set: jest.fn().mockReturnThis(),
-      setCoords: jest.fn(),
-      on: jest.fn(),
-      toObject: jest.fn().mockReturnValue({}),
-      canvas: null,
-      setSrc: jest.fn((src, callback) => callback && callback()),
-    })),
+    Image: Object.assign(
+      jest.fn().mockImplementation(() => ({
+        set: jest.fn().mockReturnThis(),
+        setCoords: jest.fn(),
+        on: jest.fn(),
+        toObject: jest.fn().mockReturnValue({}),
+        canvas: null,
+        setSrc: jest.fn((src, callback) => callback && callback()),
+      })),
+      {
+        fromURL: jest.fn((url, callback) => {
+          const mockImage = {
+            set: jest.fn().mockReturnThis(),
+            setCoords: jest.fn(),
+            on: jest.fn(),
+            toObject: jest.fn().mockReturnValue({}),
+            canvas: null,
+          }
+          if (callback) callback(mockImage)
+          return mockImage
+        })
+      }
+    ),
     Canvas: jest.fn().mockImplementation(() => ({
       add: jest.fn(),
       remove: jest.fn(),

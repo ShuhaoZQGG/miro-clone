@@ -1,26 +1,33 @@
 # Next Cycle Tasks
 
 ## Priority 0 - Critical (Must Complete)
+### Resolve PR #29 Issues
+- [ ] **Pull latest main branch**
+- [ ] **Resolve merge conflicts in PR #29**
+- [ ] **Fix 6 failing tests (React act() warnings)**
+- [ ] **Re-run CI/CD pipeline**
+- [ ] **Merge PR #29 to main once all checks pass**
+
 ### Production Database Setup
 - [ ] Configure PostgreSQL connection (Supabase/Neon)
 - [ ] Set up Redis cache (Upstash)
-- [ ] Create database migration scripts
+- [ ] ~~Create database migration scripts~~ (Already implemented)
 - [ ] Test database connections
-- [ ] Implement connection pooling
+- [ ] ~~Implement connection pooling~~ (Already implemented)
 
 ### WebSocket Deployment
 - [ ] Deploy Socket.io server to Railway/Render
-- [ ] Configure WebSocket scaling
-- [ ] Set up sticky sessions for load balancing
-- [ ] Implement reconnection logic
-- [ ] Add connection monitoring
+- [ ] ~~Configure WebSocket scaling~~ (Already implemented with Redis adapter)
+- [ ] ~~Set up sticky sessions for load balancing~~ (Already configured)
+- [ ] ~~Implement reconnection logic~~ (Already implemented)
+- [ ] ~~Add connection monitoring~~ (Already implemented)
 
 ### API Security
-- [ ] Implement rate limiting middleware
-- [ ] Configure production CORS settings
-- [ ] Add request validation
-- [ ] Set security headers (CSP, HSTS, etc.)
-- [ ] Implement API key authentication for external access
+- [ ] ~~Implement rate limiting middleware~~ (Already implemented)
+- [ ] ~~Configure production CORS settings~~ (Already implemented)
+- [ ] ~~Add request validation~~ (Already implemented)
+- [ ] ~~Set security headers (CSP, HSTS, etc.)~~ (Already implemented)
+- [ ] Implement API key authentication for external access (optional)
 
 ## Priority 1 - High
 ### Fix Test Failures
@@ -30,17 +37,11 @@
 - [ ] Achieve 100% test pass rate
 
 ### Production Environment
-- [ ] Create .env.production file
+- [ ] ~~Create .env.production file~~ (Template already created)
 - [ ] Configure Vercel deployment settings
 - [ ] Set up Sentry error monitoring
 - [ ] Configure CDN for static assets
-- [ ] Add environment variable validation
-
-### Create PR for Cycle 35
-- [ ] Create new PR with cycle 35 changes
-- [ ] Document all changes in PR description
-- [ ] Request review
-- [ ] Merge to main branch
+- [ ] ~~Add environment variable validation~~ (Already implemented)
 
 ## Priority 2 - Medium
 ### Performance Optimization

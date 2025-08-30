@@ -192,7 +192,11 @@ describe('Canvas Disposal Safety', () => {
         return <Whiteboard boardId="test-board" />
       }
 
-      const { rerender } = render(<TestComponent />)
+      const { rerender } = render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      )
       
       await waitFor(() => {
         expect(initCallCount).toBe(1)
@@ -202,7 +206,11 @@ describe('Canvas Disposal Safety', () => {
 
       // Force multiple re-renders
       for (let i = 0; i < 5; i++) {
-        rerender(<TestComponent />)
+        rerender(
+          <AuthProvider>
+            <TestComponent />
+          </AuthProvider>
+        )
       }
 
       await waitFor(() => {
