@@ -1,137 +1,186 @@
-# Cycle 22: Architectural Plan
+# Cycle 29: Complete Miro Clone Features
 
 ## Vision
-Continue improving the Miro board project to address remaining features and quality issues. Focus on test stability, performance monitoring, and code quality improvements.
+Complete all remaining features for the Miro board project, fixing critical TypeScript issues and implementing missing production features.
 
 ## Current State Analysis
 
-### Achievements (Cycle 21)
-- ✅ Canvas fills 100% viewport (fixed inset-0)
-- ✅ Smooth 60fps interactions with RAF loop
-- ✅ Momentum physics for drag operations
-- ✅ Ghost preview for element creation
-- ✅ Pinch zoom gesture support
-- ✅ Auto-quality adjustment
+### Achievements (Cycle 28)
+- ✅ Test pass rate: 95.1% (291/306 tests passing)
+- ✅ Canvas full-screen functionality
+- ✅ Smooth 60fps interactions
+- ✅ Element manipulation (rectangles, sticky notes, text)
+- ✅ Zoom/pan controls
+- ✅ Selection and multi-select
 
-### Outstanding Issues
-- 64 failing tests (timing/mock issues)
-- Missing E2E tests for full-screen behavior
-- No performance monitoring dashboard
-- ESLint 'any' type warnings
+### Critical Issues
+- ❌ 38 TypeScript compilation errors blocking production
+- ❌ InternalCanvasElement interface extension issues
+- ❌ Private method access violations in tests
+- ❌ Missing property definitions on element types
+
+### Missing Features
+- Performance monitoring dashboard (currently mocked)
+- Element inspector panel
+- Debug panel
+- Persistence layer (save/load)
+- Undo/redo system
+- Export functionality
+- Real-time collaboration
 
 ## Requirements
 
-### Functional Requirements
-1. **Test Stability** (Priority 1)
-   - Fix 64 failing unit tests
-   - Resolve timing issues in performance tests
-   - Improve RAF mock setup
+### Priority 1: Critical Fixes (Must Complete)
+1. **TypeScript Compilation**
+   - Fix InternalCanvasElement interface issues
+   - Resolve private method access in tests
+   - Add missing property definitions
+   - Ensure `npm run type-check` passes
 
-2. **E2E Testing** (Priority 2)
-   - Full-screen canvas behavior tests
-   - Canvas resize responsiveness tests
-   - 60fps performance verification
-   - GPU acceleration tests
+### Priority 2: Core Features
+1. **Developer Tools**
+   - Real performance monitoring implementation
+   - Complete test dashboard UI
+   - Element inspector with property display
+   - Debug panel with event stream
 
-3. **Performance Monitoring** (Priority 3)
-   - Dev mode FPS counter
-   - Performance metrics collection
-   - Memory usage tracking
-   - Dashboard implementation
+2. **Production Features**
+   - Persistence layer (localStorage/API)
+   - Undo/redo system with command pattern
+   - Export to PNG/SVG
+   - Enhanced keyboard shortcuts
 
-### Non-Functional Requirements
-- Maintain 60fps during interactions
-- < 10ms input latency
-- 100% test pass rate
-- Zero TypeScript errors
-- Clean ESLint output
+### Priority 3: Advanced Features
+1. **Collaboration**
+   - WebSocket integration
+   - Real-time cursor tracking
+   - Conflict resolution (CRDT/OT)
+   - User presence indicators
 
 ## Architecture
 
-### Component Structure
-```
-src/
-├── components/
-│   ├── Whiteboard.tsx (existing)
-│   └── PerformanceMonitor.tsx (new)
-├── lib/
-│   ├── canvas-engine.ts (existing)
-│   ├── utils.ts (existing)
-│   └── performance-tracker.ts (new)
-└── tests/
-    ├── unit/ (fix existing)
-    └── e2e/ (add new)
+### Type System Fix
+```typescript
+// Proper interface composition
+interface InternalCanvasElement extends CanvasElement {
+  fabricObject?: fabric.Object;
+}
 ```
 
-### Technical Stack
-- **Framework**: Next.js 14 + TypeScript
-- **Canvas**: Fabric.js with RAF optimization
-- **Testing**: Jest + React Testing Library + Playwright
-- **Performance**: Web Performance API + Custom metrics
+### Test Architecture
+- Public API testing approach
+- Dependency injection for testability
+- Proper test doubles and mocks
+
+### Performance Monitoring
+```
+┌─────────────────┐     ┌──────────────┐
+│ Canvas Engine   │────▶│ Metrics      │
+│                 │     │ Collector    │
+└─────────────────┘     └──────────────┘
+         │                      │
+         ▼                      ▼
+┌─────────────────┐     ┌──────────────┐
+│ RAF Loop        │     │ Performance  │
+│ Manager         │     │ Dashboard    │
+└─────────────────┘     └──────────────┘
+```
+
+### Persistence Architecture
+```
+┌─────────────────┐     ┌──────────────┐
+│ Canvas State    │────▶│ Serializer   │
+└─────────────────┘     └──────────────┘
+                               │
+                               ▼
+                        ┌──────────────┐
+                        │ Storage API  │
+                        │ (Local/Cloud)│
+                        └──────────────┘
+```
+
+## Technology Stack
+- **Framework**: Next.js 13 (App Router)
+- **Canvas**: Fabric.js
+- **State**: React Context + Command Pattern
+- **Testing**: Jest + React Testing Library
+- **Type Safety**: TypeScript (strict mode)
+- **Styling**: Tailwind CSS
+- **Collaboration**: Socket.io (future)
+- **Persistence**: IndexedDB + API
 
 ## Implementation Phases
 
-### Phase 1: Test Fixes (2 days)
-1. Fix timing issues in unit tests
-2. Improve mock setup for RAF/async
-3. Adjust unrealistic timing expectations
-4. Achieve 100% test pass rate
+### Phase 1: Critical Fixes (Immediate)
+1. Fix TypeScript compilation errors
+   - Update InternalCanvasElement interface
+   - Fix test access patterns
+   - Add missing properties
+2. Validate build and tests pass
+3. Ensure type safety throughout
 
-### Phase 2: E2E Testing (1 day)
-1. Create full-screen canvas tests
-2. Add resize responsiveness tests
-3. Verify 60fps in E2E scenarios
-4. Test GPU acceleration
+### Phase 2: Developer Tools (Day 1-2)
+1. Implement real FPS counter
+2. Memory usage tracking
+3. Performance dashboard UI
+4. Element inspector panel
+5. Debug event stream
 
-### Phase 3: Performance Monitoring (1 day)
-1. Build FPS counter component
-2. Implement metrics collection
-3. Create monitoring dashboard
-4. Add memory tracking
+### Phase 3: Core Features (Day 3-4)
+1. Persistence layer
+   - Save/load functionality
+   - Auto-save mechanism
+2. Undo/redo system
+   - Command pattern implementation
+   - History management
+3. Export functionality
+   - PNG export
+   - SVG export
+   - PDF generation
 
-### Phase 4: Code Quality (1 day)
-1. Fix ESLint warnings
-2. Improve type safety
-3. Document performance strategies
-4. Update README
+### Phase 4: Polish & Testing (Day 5)
+1. E2E test coverage
+2. Performance optimization
+3. Documentation
+4. Deployment preparation
 
-## Risk Analysis
+## Risk Mitigation
 
 ### Technical Risks
-1. **Test Timing Issues**
-   - Risk: Flaky tests in CI
-   - Mitigation: Use proper async utilities, increase timeouts
+1. **Type System Complexity**
+   - Mitigation: Incremental fixes with continuous testing
+   - Fallback: Type assertions if needed temporarily
 
-2. **Performance Regression**
-   - Risk: New features impact 60fps
-   - Mitigation: Automated performance tests, benchmarks
+2. **Performance Impact**
+   - Mitigation: Sampling strategy for monitoring
+   - Use web workers for heavy computations
 
-### Schedule Risks
-1. **Scope Creep**
-   - Risk: Adding features beyond test/monitoring
-   - Mitigation: Strict focus on quality improvements
+3. **State Management Complexity**
+   - Mitigation: Command pattern for predictable state
+   - Comprehensive testing of state transitions
 
-## Success Metrics
-- ✅ 100% unit test pass rate
-- ✅ 95%+ E2E test pass rate
-- ✅ Consistent 60fps in performance tests
-- ✅ Zero TypeScript errors
-- ✅ < 50 ESLint warnings
-- ✅ Performance dashboard deployed
+## Success Criteria
+1. ✅ TypeScript compilation passes (0 errors)
+2. ✅ All tests pass (>95% pass rate maintained)
+3. ✅ Performance monitoring functional
+4. ✅ Persistence layer working
+5. ✅ Undo/redo system operational
+6. ✅ Export functionality complete
+7. ✅ No console errors in production
+8. ✅ Lighthouse score >90
 
-## Next Cycle Considerations
-- WebGL renderer for large canvases
-- Worker threads for computations
-- Real-time collaboration features
-- Canvas rulers and guides
+## Deliverables
+- Fully functional Miro clone
+- All critical TypeScript issues resolved
+- Performance monitoring dashboard
+- Save/load functionality
+- Undo/redo system
+- Export capabilities
+- Comprehensive test coverage
+- Production-ready build
 
-## Decision Points
-- Use existing test infrastructure vs upgrade
-- Custom performance tracker vs third-party
-- Dashboard as separate app vs integrated
-
-## Timeline
-- Day 1-2: Test fixes
-- Day 3: E2E testing
-- Day 4: Performance monitoring
-- Day 5: Code quality + documentation
+## Immediate Actions
+1. Fix InternalCanvasElement interface in canvas-engine.ts
+2. Update test patterns to use public APIs
+3. Implement missing element properties
+4. Run full validation suite
