@@ -1,32 +1,42 @@
 # Next Cycle Tasks
 
-## Cycle 20: Fix Code Quality Issues from Cycle 19
+## Cycle 21: Test Improvements and Optimizations
 
-### Critical Fixes (Must Complete)
+### From Cycle 20 Review (Priority)
 
-#### 1. TypeScript Compilation Errors (28 errors)
-- [ ] Implement missing `setupSmoothRendering()` method in `canvas-engine.ts`
-- [ ] Fix undefined `textElement` variable in element-creation.test.ts (lines 343-346, 376, 378)
-- [ ] Fix undefined `stickyNote`, `rectangle`, `circle` variables in tests (lines 391-393, 587, 592)
-- [ ] Fix missing `init()` method in canvas disposal tests
-- [ ] Fix type mismatch in PDF export route (Uint8Array issue)
-- [ ] Resolve missing module dependencies
+#### 1. Test Fixes (35 failing tests)
+- [ ] Fix timing-related issues in performance tests
+- [ ] Improve RAF mock setup for animation tests
+- [ ] Adjust unrealistic timing expectations in tests
+- [ ] Fix mock setup for async operations
+- [ ] Resolve timeout issues in performance benchmarks
 
-#### 2. Failing Unit Tests (66 failures)
-- [ ] Fix canvas-disposal.test.tsx - add proper `init()` method mock
-- [ ] Fix element-creation.test.ts - define missing variables
-- [ ] Fix integration tests that depend on missing methods
-- [ ] Ensure all test mocks are complete and accurate
+#### 2. E2E Testing
+- [ ] Add E2E tests for full-screen canvas behavior
+- [ ] Test canvas resize responsiveness
+- [ ] Verify 60fps performance in E2E scenarios
+- [ ] Test GPU acceleration effectiveness
 
-#### 3. Missing Dependencies
-- [ ] Install `lucide-react` package
-- [ ] Create `@/lib/utils` module or install required utility library
-- [ ] Ensure all imports resolve correctly
+#### 3. Performance Monitoring
+- [ ] Implement performance monitoring dashboard
+- [ ] Add FPS counter component (dev mode)
+- [ ] Create performance metrics collection
+- [ ] Add memory usage tracking
 
-#### 4. ESLint Issues
-- [ ] Remove unused `screen` import in canvas-disposal.test.tsx
-- [ ] Remove unused `stickyNote` variable in element-creation.test.ts
-- [ ] Replace TypeScript 'any' types with proper types where flagged
+#### 4. Code Quality (Low Priority)
+- [ ] Address ESLint 'any' type warnings
+- [ ] Improve type safety in utility functions
+- [ ] Add stricter TypeScript configurations
+
+## Completed in Cycle 20 ✅
+
+### Critical Fixes (All Completed)
+- [x] Implemented `setupSmoothRendering()` method in `canvas-engine.ts`
+- [x] Fixed all 28 TypeScript compilation errors
+- [x] Installed `lucide-react` package
+- [x] Created `@/lib/utils` module with cn, debounce, throttle
+- [x] Fixed undefined variables in tests
+- [x] Resolved all ESLint errors (warnings remain)
 
 ### Technical Debt from Previous Cycles
 
