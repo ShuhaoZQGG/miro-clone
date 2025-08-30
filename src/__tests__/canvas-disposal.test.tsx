@@ -1,12 +1,12 @@
 import React from 'react'
 import { render, waitFor } from '@testing-library/react'
-import { Whiteboard } from '../components/Whiteboard'
-import { CanvasEngine } from '../lib/canvas-engine'
-import { ElementManager } from '../lib/element-manager'
+import { Whiteboard } from '@/components/Whiteboard'
+import { CanvasEngine } from '@/lib/canvas-engine'
+import { ElementManager } from '@/lib/element-manager'
 
 // Mock canvas engine and element manager
-jest.mock('../lib/canvas-engine')
-jest.mock('../lib/element-manager')
+jest.mock('@/lib/canvas-engine')
+jest.mock('@/lib/element-manager')
 
 describe('Canvas Disposal Safety', () => {
   let mockCanvasEngine: jest.Mocked<CanvasEngine>
