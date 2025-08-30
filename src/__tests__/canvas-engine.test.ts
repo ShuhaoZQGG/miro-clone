@@ -1,12 +1,12 @@
 import { CanvasEngine } from '@/lib/canvas-engine'
 import { Position, CanvasElement } from '@/types'
-import { setupRAFMock, createMockCanvas, waitForAnimationFrame } from './utils/test-helpers'
+import { setupRAFMock, createMockCanvas } from './utils/test-helpers'
 
 // Setup RAF mock
 const rafMock = setupRAFMock()
 
 // Mock fabric.js
-const { mockCanvas, mockCanvasElement } = createMockCanvas()
+const { mockCanvas } = createMockCanvas()
 
 jest.mock('fabric', () => ({
   fabric: {

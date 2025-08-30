@@ -42,7 +42,7 @@ export class CanvasEngine {
   private renderThrottleId: number | null = null
   
   // Event system
-  private eventListeners: Map<string, Set<Function>> = new Map()
+  private eventListeners: Map<string, Set<(...args: any[]) => void>> = new Map()
   
   // Touch/gesture handling
   private lastTouchDistance = 0

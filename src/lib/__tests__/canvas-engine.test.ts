@@ -109,8 +109,6 @@ describe('CanvasEngine', () => {
       engine = new CanvasEngine(container)
       const canvas = engine.getCanvas()
       
-      const initialRatio = canvas.getWidth() / canvas.getHeight()
-      
       // Mock a resize with different dimensions
       jest.spyOn(container, 'getBoundingClientRect').mockReturnValue({
         width: 800,
@@ -126,8 +124,6 @@ describe('CanvasEngine', () => {
       
       const resizeObserverCallback = jest.mocked(ResizeObserver).mock.calls[0][0]
       resizeObserverCallback([{ target: container } as any], {} as any)
-      
-      const newRatio = 800 / 600
       
       // The canvas should update to new dimensions
       expect(canvas.getWidth()).toBe(800)

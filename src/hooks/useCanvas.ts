@@ -24,7 +24,6 @@ export const useCanvas = (options: UseCanvasOptions) => {
     camera,
     elements,
     selectedElementIds,
-    updateCamera,
     addElement,
     setSelectedElements,
     clearSelection

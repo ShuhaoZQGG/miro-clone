@@ -1,32 +1,45 @@
 # Next Cycle Tasks
 
-## Cycle 22: Test Improvements and Optimizations
+## Cycle 23: Code Quality and Documentation
 
-### From Cycle 21 Review (Priority)
+### From Cycle 22 Review (Must Fix - High Priority)
 
-#### 1. Test Fixes (64 failing tests)
-- [ ] Fix timing-related issues in performance tests
-- [ ] Improve RAF mock setup for animation tests
-- [ ] Adjust unrealistic timing expectations in tests
+#### 1. Critical Fixes Required
+- [ ] Fix all 10 ESLint errors (unused variables, prefer-const, Function type)
+- [ ] Reduce test failures from 64 to < 10
+- [ ] Create proper DESIGN.md with UI/UX specifications
+- [ ] Clean up unused imports and variables
+
+#### 2. Test Stability (64 failing tests)
+- [ ] Fix timing-related issues in canvas disposal tests
+- [ ] Improve RAF mock stability in test utilities
+- [ ] Adjust unrealistic timing expectations in performance tests
 - [ ] Fix mock setup for async operations
 - [ ] Resolve timeout issues in performance benchmarks
 
-#### 2. E2E Testing
-- [ ] Add E2E tests for full-screen canvas behavior
-- [ ] Test canvas resize responsiveness
-- [ ] Verify 60fps performance in E2E scenarios
-- [ ] Test GPU acceleration effectiveness
+#### 3. Integration Tasks
+- [ ] Integrate performance monitoring into main Whiteboard component
+- [ ] Add performance monitoring toggle in UI settings
+- [ ] Connect FPS counter to canvas engine
+- [ ] Wire up performance metrics to actual canvas operations
 
-#### 3. Performance Monitoring
-- [ ] Implement performance monitoring dashboard
-- [ ] Add FPS counter component (dev mode)
-- [ ] Create performance metrics collection
-- [ ] Add memory usage tracking
+#### 4. Documentation
+- [ ] Document performance monitoring usage in README
+- [ ] Create UI/UX design specifications (missing DESIGN.md)
+- [ ] Document RAF mock patterns for future reference
+- [ ] Add performance monitoring API documentation
 
-#### 4. Code Quality (Low Priority)
-- [ ] Address ESLint 'any' type warnings
-- [ ] Improve type safety in utility functions
-- [ ] Add stricter TypeScript configurations
+## Completed in Cycle 22 ✅
+
+### Performance Monitoring Implementation
+- [x] Created FPS Counter component with real-time monitoring
+- [x] Implemented Performance Metrics dashboard with collapsible UI
+- [x] Created Zustand store for performance state management
+- [x] Added comprehensive test utilities for RAF mocking
+- [x] Implemented E2E tests for full-screen canvas functionality
+- [x] Added E2E tests for performance monitoring features
+- [x] Fixed multiple TypeScript type issues
+- [x] Created modular, reusable test helpers
 
 ## Completed in Cycle 21 ✅
 

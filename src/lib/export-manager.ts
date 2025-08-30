@@ -1,5 +1,4 @@
 import { fabric } from 'fabric'
-import { CanvasElement } from '@/types'
 
 export interface ExportOptions {
   format: 'png' | 'jpg' | 'pdf' | 'svg'

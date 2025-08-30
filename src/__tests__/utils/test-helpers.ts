@@ -116,7 +116,7 @@ export const createMockPerformanceObserver = () => {
       observers.push(this)
     }
     
-    observe(options: any) {}
+    observe(_options: any) {}
     disconnect() {
       const index = observers.indexOf(this)
       if (index > -1) {
