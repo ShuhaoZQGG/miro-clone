@@ -61,8 +61,17 @@ export const useCanvas = (options: UseCanvasOptions) => {
 
     return () => {
       if (canvasEngineRef.current) {
-        canvasEngineRef.current.dispose()
+        try {
+          canvasEngineRef.current.dispose()
+          canvasEngineRef.current = null
+        } catch (error) {
+          console.error('Error disposing canvas:', error)
+        }
       }
+      if (elementManagerRef.current) {
+        elementManagerRef.current = null
+      }
+      setIsInitialized(false)
     }
   }, [isInitialized, options.boardId, updateCamera, camera.x, camera.y, camera.zoom])
 

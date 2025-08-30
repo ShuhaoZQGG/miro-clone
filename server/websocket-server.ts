@@ -80,7 +80,7 @@ io.on('connection', (socket: Socket) => {
   console.log('New client connected:', socket.id)
   
   let currentBoardId: string | null = null
-  let currentUserId: string | null = null
+  let currentUserId: string = ''
   let batchTimer: NodeJS.Timeout | null = null
 
   socket.on('join', ({ boardId, userId, displayName }) => {

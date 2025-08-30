@@ -1,299 +1,407 @@
-# Cycle 7: UI/UX Design Specifications
+# Cycle 9: Canvas Disposal Fix & E2E Testing UI/UX Design
 
-## Overview
-Focus on completing remaining features with emphasis on real-time collaboration, export functionality, and mobile optimization while fixing critical TypeScript build error.
+## Executive Summary
+Cycle 9 focuses on fixing the critical canvas disposal error and implementing comprehensive E2E testing to prevent similar issues. The design emphasizes robust error handling, graceful cleanup, and automated testing workflows.
 
-## 1. User Journeys
+## Error Fix Design
 
-### 1.1 Critical Fix Journey
-**Goal:** Developer fixes TypeScript error blocking build
+### Canvas Disposal Error Resolution
+**Error:** "Failed to execute removeChild on Node: The node to be removed is not a child of this node"
+**Location:** src/lib/canvas-engine.ts:617
+
+#### Root Cause Analysis UI
 ```
-Start → Identify error location (history-manager.ts:208) → 
-Fix function signature → Run tests → Verify build → 
-Deploy successful build
-```
-
-### 1.2 Real-time Collaboration Journey
-**Goal:** Multiple users collaborate on same board
-```
-User A opens board → User B joins → 
-Both see cursor positions → User A creates element → 
-User B sees it immediately → Conflict resolution handles simultaneous edits
+[Canvas State Monitor]
+├─ Active Canvas: ✓/✗
+├─ DOM Parent: <parent-id>
+├─ Canvas Element: <canvas-id>
+└─ Disposal State: pending/disposed/error
 ```
 
-### 1.3 Export Journey
-**Goal:** Export board to different formats
-```
-User clicks Export → Select format (PNG/PDF/SVG) → 
-Configure options → Preview → Download file
-```
+#### Disposal Flow
+1. **Pre-disposal Check**
+   - Verify canvas element exists in DOM
+   - Check parent-child relationship
+   - Clear all event listeners
+   - Cancel pending animations
 
-### 1.4 Mobile Journey
-**Goal:** Use board on touch device
-```
-Open on mobile → Pinch to zoom → Two-finger pan → 
-Long-press for context menu → Draw with finger → 
-Access mobile-optimized toolbar
-```
+2. **Safe Disposal Pattern**
+   ```typescript
+   // Visual indicator during disposal
+   [Disposing Canvas...]
+   ├─ Clearing event listeners... ✓
+   ├─ Canceling animations... ✓
+   ├─ Removing from DOM... ✓
+   └─ Cleanup complete ✓
+   ```
 
-## 2. Component Specifications
+3. **Error Recovery**
+   - Graceful fallback if disposal fails
+   - Log error details for debugging
+   - Prevent cascade failures
 
-### 2.1 WebSocket Connection Status
-```typescript
-interface ConnectionStatus {
-  state: 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
-  latency: number;
-  users: number;
-}
-```
-**Visual:** Status indicator in top-right corner
-- 🔴 Disconnected (red)
-- 🟡 Connecting/Reconnecting (yellow pulse)
-- 🟢 Connected (green)
-- Display latency in ms when connected
+## E2E Testing Interface
 
-### 2.2 User Presence Indicators
-```typescript
-interface UserPresence {
-  userId: string;
-  name: string;
-  avatarColor: string;
-  cursor: { x: number; y: number };
-  selection: string[];
-}
+### Test Runner Dashboard
 ```
-**Visual:** 
-- Colored cursors with user name labels
-- Avatar circles in top bar showing active users
-- Selection highlights in user's color
-- Typing indicators when editing text
-
-### 2.3 Export Modal
-```typescript
-interface ExportOptions {
-  format: 'png' | 'pdf' | 'svg';
-  quality: 'low' | 'medium' | 'high';
-  bounds: 'visible' | 'all' | 'selection';
-  background: boolean;
-  scale: 1 | 2 | 3;
-}
-```
-**Layout:**
-```
-┌─── Export Board ───────────────┐
-│ Format: [PNG ▼]                │
-│ Quality: ○Low ●Med ○High       │
-│ Include: ●Visible ○All ○Selected│
-│ □ Include background            │
-│ Scale: [1x ▼]                  │
-│ [Preview] [Cancel] [Export]    │
-└─────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│ Miro Clone E2E Test Suite              │
+├─────────────────────────────────────────┤
+│ [▶ Run All Tests] [⚙ Configure]        │
+├─────────────────────────────────────────┤
+│ Test Suites                             │
+│ ├─ ✓ Canvas Operations (12/12)         │
+│ ├─ ⏸ Real-time Collaboration (0/8)    │
+│ ├─ ✗ Export Functions (3/5)            │
+│ └─ ⏳ Mobile Gestures (running...)      │
+├─────────────────────────────────────────┤
+│ Progress: ████████░░ 75% (23/30)       │
+│ Duration: 2m 34s                        │
+└─────────────────────────────────────────┘
 ```
 
-### 2.4 Mobile Toolbar
-**Landscape (width > 768px):**
-- Horizontal toolbar at top
-- Tool groups with separators
-- Touch-friendly 44x44px buttons
+### Test Categories
 
-**Portrait (width ≤ 768px):**
-- Floating action button (FAB) bottom-right
-- Expandable radial menu
-- Collapsible side panels
-
-## 3. WebSocket Protocol
-
-### 3.1 Message Types
-```typescript
-// Client → Server
-type ClientMessage = 
-  | { type: 'join'; boardId: string; userId: string }
-  | { type: 'cursor'; position: Position }
-  | { type: 'operation'; op: Operation }
-  | { type: 'selection'; elementIds: string[] };
-
-// Server → Client  
-type ServerMessage =
-  | { type: 'joined'; users: UserPresence[] }
-  | { type: 'user_joined'; user: UserPresence }
-  | { type: 'cursor_update'; userId: string; position: Position }
-  | { type: 'operation'; op: Operation; userId: string };
-```
-
-### 3.2 Operational Transform Matrix
-```typescript
-const transformMatrix = {
-  'create-create': (op1, op2) => [op1, op2], // Independent
-  'update-update': (op1, op2) => mergeUpdates(op1, op2),
-  'delete-delete': (op1, op2) => [null, null], // Both deleted
-  'update-delete': (op1, op2) => [null, op2], // Delete wins
-};
-```
-
-## 4. Mobile Touch Gestures
-
-### 4.1 Gesture Priority
-1. **Pan (Two fingers):** Canvas navigation
-2. **Pinch:** Zoom in/out
-3. **Rotate (Two fingers):** Rotate selected element
-4. **Tap:** Select element
-5. **Long press:** Context menu
-6. **Swipe:** Quick tool switching
-
-### 4.2 Touch Targets
-- Minimum size: 44x44px
-- Spacing: 8px between targets
-- Visual feedback: Ripple effect on touch
-- Haptic feedback: Light vibration on actions
-
-## 5. Responsive Breakpoints
-
-### 5.1 Desktop (≥1024px)
-- Full toolbar visible
-- Side panels expanded
-- Multi-column property panels
-- Hover states enabled
-
-### 5.2 Tablet (768px-1023px)
-- Condensed toolbar
-- Collapsible side panels
-- Touch-optimized controls
-- Simplified property panels
-
-### 5.3 Mobile (<768px)
-- FAB with radial menu
-- Bottom sheet for properties
-- Fullscreen canvas mode
-- Gesture-based navigation
-
-## 6. Accessibility Requirements
-
-### 6.1 Keyboard Navigation
-```
-Tab: Navigate between elements
-Shift+Tab: Navigate backwards
-Space: Select/deselect
-Enter: Edit text element
-Delete: Remove selected
-Ctrl+Z/Cmd+Z: Undo
-Ctrl+Y/Cmd+Y: Redo
-Arrow keys: Move selected element
-```
-
-### 6.2 Screen Reader Support
-- ARIA labels for all tools
-- Canvas element descriptions
-- Operation announcements
-- Status updates for connection
-
-### 6.3 Color Contrast
-- Text: 4.5:1 minimum ratio
-- Icons: 3:1 minimum ratio
-- Focus indicators: 3px outline
-- High contrast mode support
-
-## 7. Performance Optimization
-
-### 7.1 Rendering Strategy
-```typescript
-class RenderOptimizer {
-  // Level of Detail (LOD)
-  getElementLOD(element: Element, zoom: number): 'full' | 'simplified' | 'bbox' {
-    if (zoom < 0.5) return 'bbox';
-    if (zoom < 0.8) return 'simplified';
-    return 'full';
-  }
+#### 1. Canvas Lifecycle Tests
+- **Canvas Initialization**
+  - Mount canvas element
+  - Verify Fabric.js initialization
+  - Check event listeners attachment
   
-  // Viewport culling
-  isInViewport(element: Element, viewport: Rect): boolean {
-    return intersects(element.bounds, viewport);
-  }
+- **Canvas Disposal**
+  - Test normal disposal flow
+  - Test disposal with active elements
+  - Test disposal during animation
+  - Test multiple disposal attempts
+  - Verify memory cleanup
+
+#### 2. User Interaction Tests
+```
+[Interaction Test Scenarios]
+├─ Drawing Elements
+│  ├─ Rectangle creation
+│  ├─ Ellipse creation
+│  ├─ Line drawing
+│  └─ Freehand drawing
+├─ Selection & Manipulation
+│  ├─ Single selection
+│  ├─ Multi-selection
+│  ├─ Move/resize/rotate
+│  └─ Delete elements
+└─ Canvas Navigation
+   ├─ Pan with mouse
+   ├─ Zoom with wheel
+   └─ Reset view
+```
+
+#### 3. Real-time Collaboration Tests
+- User presence updates
+- Concurrent editing
+- Conflict resolution
+- Connection recovery
+- Message batching
+
+#### 4. Export Functionality Tests
+- PNG export with elements
+- SVG export quality
+- PDF generation timeout
+- Large canvas export (1000+ elements)
+- Export progress indication
+
+#### 5. Mobile Interaction Tests
+```
+[Touch Gesture Tests]
+├─ Single Touch
+│  ├─ Tap to select
+│  └─ Drag to pan
+├─ Multi-Touch
+│  ├─ Pinch to zoom
+│  ├─ Two-finger rotation
+│  └─ Three-finger undo
+└─ Edge Cases
+   ├─ Rapid gestures
+   ├─ Gesture cancellation
+   └─ Touch during animation
+```
+
+### Test Result Visualization
+
+#### Test Report View
+```
+┌─────────────────────────────────────────┐
+│ Test: Canvas Disposal - Multiple Calls  │
+├─────────────────────────────────────────┤
+│ Status: ✗ FAILED                        │
+│ Duration: 245ms                         │
+│                                         │
+│ Steps:                                  │
+│ 1. ✓ Initialize canvas                 │
+│ 2. ✓ Add 5 elements                    │
+│ 3. ✓ First disposal call               │
+│ 4. ✗ Second disposal call               │
+│                                         │
+│ Error:                                  │
+│ DOMException: Failed to execute        │
+│ 'removeChild' on 'Node'                │
+│                                         │
+│ Stack Trace:                            │
+│ at CanvasEngine.dispose (line 617)     │
+│                                         │
+│ [View Screenshot] [View Recording]     │
+└─────────────────────────────────────────┘
+```
+
+#### Coverage Report
+```
+┌─────────────────────────────────────────┐
+│ Code Coverage Report                    │
+├─────────────────────────────────────────┤
+│ File                  Lines    Branches │
+│ canvas-engine.ts      92%      88%     │
+│ element-manager.ts    85%      82%     │
+│ realtime-manager.ts   78%      75%     │
+│ export-manager.ts     88%      85%     │
+│ touch-handler.ts      72%      70%     │
+├─────────────────────────────────────────┤
+│ Total Coverage:       83%      80%     │
+└─────────────────────────────────────────┘
+```
+
+### Test Configuration UI
+
+```
+┌─────────────────────────────────────────┐
+│ E2E Test Configuration                  │
+├─────────────────────────────────────────┤
+│ Browser Selection:                      │
+│ ☑ Chrome  ☑ Firefox  ☐ Safari  ☑ Edge │
+│                                         │
+│ Device Emulation:                       │
+│ ☑ Desktop (1920x1080)                  │
+│ ☑ Tablet (768x1024)                    │
+│ ☑ Mobile (375x667)                     │
+│                                         │
+│ Test Options:                           │
+│ ☑ Run in headless mode                 │
+│ ☑ Record test videos                   │
+│ ☑ Capture screenshots on failure       │
+│ ☐ Parallel execution                   │
+│                                         │
+│ Performance Thresholds:                 │
+│ FPS Target: [60]                        │
+│ Max Latency: [100ms]                   │
+│ Memory Limit: [512MB]                  │
+│                                         │
+│ [Save Config] [Run Tests]               │
+└─────────────────────────────────────────┘
+```
+
+## Error Handling Patterns
+
+### Canvas Disposal Safety
+```typescript
+// Visual feedback during disposal
+interface DisposalState {
+  status: 'idle' | 'disposing' | 'disposed' | 'error'
+  progress: number // 0-100
+  errors: string[]
 }
+
+// UI representation
+[Canvas Cleanup]
+Status: Disposing...
+Progress: ████████░░ 80%
+✓ Event listeners removed
+✓ Animations cancelled
+⏳ Removing from DOM...
 ```
 
-### 7.2 Message Batching
-- Batch interval: 50ms
-- Max batch size: 10 operations
-- Cursor throttle: 30ms
-- Compression for large messages
-
-### 7.3 Asset Loading
-- Lazy load images
-- Progressive image loading
-- Cache frequently used assets
-- Preload next likely tools
-
-## 8. Error Handling
-
-### 8.1 Connection Errors
+### Error Recovery UI
 ```
-Connection Lost → Show banner → 
-Attempt reconnect (exponential backoff) → 
-Switch to offline mode → 
-Queue operations → Sync when reconnected
+┌─────────────────────────────────────────┐
+│ ⚠ Canvas Disposal Error                │
+├─────────────────────────────────────────┤
+│ The canvas could not be properly       │
+│ disposed. This may cause memory leaks. │
+│                                         │
+│ Error Details:                          │
+│ • Node not found in parent             │
+│ • Canvas ID: canvas_1234               │
+│ • Parent ID: container_5678            │
+│                                         │
+│ Recommended Actions:                    │
+│ [Retry Disposal] [Force Cleanup]       │
+│ [Report Issue]   [View Logs]           │
+└─────────────────────────────────────────┘
 ```
 
-### 8.2 Conflict Resolution
-```
-Detect conflict → Apply transform → 
-If unresolvable → Show conflict dialog → 
-User chooses version → Continue
-```
+## Test Automation Workflows
 
-### 8.3 Export Errors
+### Continuous Testing Pipeline
 ```
-Export fails → Show specific error → 
-Offer retry or alternative format → 
-Fallback to client-side export if server fails
-```
-
-## 9. Visual Design System
-
-### 9.1 Color Palette
-```css
---primary: #6366f1;
---secondary: #8b5cf6;
---success: #10b981;
---warning: #f59e0b;
---error: #ef4444;
---neutral: #6b7280;
+[GitHub Actions Workflow]
+├─ On Push to main/PR
+│  ├─ Lint & Type Check
+│  ├─ Unit Tests
+│  ├─ Integration Tests
+│  └─ E2E Tests (Critical Paths)
+├─ Nightly Full Suite
+│  ├─ All E2E Tests
+│  ├─ Performance Tests
+│  ├─ Cross-browser Tests
+│  └─ Accessibility Tests
+└─ Release Candidate
+   ├─ Full Test Suite
+   ├─ Load Testing
+   ├─ Security Scan
+   └─ Manual QA Checklist
 ```
 
-### 9.2 Typography
-```css
---font-heading: 'Inter', sans-serif;
---font-body: 'Inter', sans-serif;
---font-mono: 'JetBrains Mono', monospace;
+### Test Result Notifications
+```
+┌─────────────────────────────────────────┐
+│ 📊 Test Results - PR #4                 │
+├─────────────────────────────────────────┤
+│ ✓ All tests passed!                    │
+│                                         │
+│ Summary:                                │
+│ • Unit: 216/216 ✓                      │
+│ • Integration: 45/45 ✓                 │
+│ • E2E: 30/30 ✓                         │
+│ • Coverage: 85% (↑ 6%)                 │
+│                                         │
+│ Performance Metrics:                    │
+│ • Canvas Init: 45ms (✓ <100ms)        │
+│ • Element Creation: 12ms avg           │
+│ • Export 100 items: 1.2s               │
+│                                         │
+│ [View Full Report] [Merge PR]          │
+└─────────────────────────────────────────┘
 ```
 
-### 9.3 Spacing Scale
-```css
---space-xs: 4px;
---space-sm: 8px;
---space-md: 16px;
---space-lg: 24px;
---space-xl: 32px;
+## User Journey Maps
+
+### Journey 1: Canvas Lifecycle
+```
+User Opens App → Canvas Initializes
+    ↓
+Creates Elements → Interacts with Canvas
+    ↓
+Switches Pages → Canvas Disposes Safely
+    ↓
+Returns to Page → Canvas Re-initializes
+    ↓
+✓ No Memory Leaks, No Errors
 ```
 
-## 10. Animation Guidelines
+### Journey 2: Error Recovery
+```
+Canvas Error Occurs → Error Caught
+    ↓
+User Notified → Recovery Options Shown
+    ↓
+User Chooses Action → System Attempts Recovery
+    ↓
+Success: Continue → Failure: Graceful Degradation
+    ↓
+✓ User Work Preserved, Can Continue
+```
 
-### 10.1 Micro-interactions
-- Tool selection: 150ms ease-out
-- Element creation: 200ms spring
-- Delete: 150ms scale + fade
-- Connection: 300ms draw path
+### Journey 3: E2E Test Execution
+```
+Developer Commits → CI Triggers Tests
+    ↓
+Tests Run in Parallel → Results Collected
+    ↓
+Failed Test → Screenshots/Videos Captured
+    ↓
+Report Generated → Developer Notified
+    ↓
+✓ Quick Feedback Loop, Easy Debugging
+```
 
-### 10.2 Performance Budget
-- First paint: <1s
-- Interactive: <3s
-- Animation: 60fps minimum
-- Input latency: <100ms
+## Responsive Breakpoints
 
-## Next Steps
-1. Fix TypeScript build error immediately
-2. Implement WebSocket server with room management
-3. Add real-time cursor tracking and presence
-4. Create export service with PDF generation
-5. Implement mobile touch handlers
-6. Add comprehensive error recovery
-7. Performance testing with 50+ concurrent users
+### Desktop (≥1024px)
+- Full test dashboard with side panel
+- Detailed test results with code view
+- Multi-column test report layout
+
+### Tablet (768px - 1023px)
+- Collapsible test categories
+- Simplified dashboard view
+- Stack test results vertically
+
+### Mobile (< 768px)
+- Essential test status only
+- Expandable test details
+- Single column layout
+
+## Accessibility
+
+### Keyboard Navigation
+- `Tab`: Navigate test controls
+- `Space`: Run/pause tests
+- `Enter`: View test details
+- `Esc`: Close modals
+- `Ctrl+R`: Re-run failed tests
+
+### Screen Reader Support
+```html
+<div role="region" aria-label="Test Results">
+  <h2 id="test-status">Test Status: 23 of 30 passed</h2>
+  <div role="progressbar" 
+       aria-valuenow="77" 
+       aria-valuemin="0" 
+       aria-valuemax="100"
+       aria-label="Test progress">
+  </div>
+</div>
+```
+
+## Performance Requirements
+
+### Canvas Disposal
+- Disposal time: < 50ms
+- Memory cleanup: 100% of allocated resources
+- No orphaned event listeners
+- No detached DOM nodes
+
+### E2E Test Performance
+- Test startup: < 5s
+- Individual test: < 30s
+- Full suite: < 10 minutes
+- Parallel execution: 4 workers max
+
+## Implementation Priority
+
+### Phase 1: Critical Fix (Day 1)
+1. Fix canvas disposal error
+2. Add disposal safety checks
+3. Implement error recovery
+4. Add unit tests for disposal
+
+### Phase 2: Core E2E Tests (Day 2)
+1. Canvas lifecycle tests
+2. Basic interaction tests
+3. Error scenario tests
+4. Test infrastructure setup
+
+### Phase 3: Comprehensive Testing (Day 3)
+1. Real-time collaboration tests
+2. Export functionality tests
+3. Mobile gesture tests
+4. Performance benchmarks
+
+### Phase 4: Automation (Day 4)
+1. CI/CD integration
+2. Test reporting dashboard
+3. Coverage tracking
+4. Automated notifications
+
+## Success Metrics
+- Canvas disposal error: 0 occurrences
+- E2E test coverage: > 80%
+- Test execution time: < 10 minutes
+- False positive rate: < 5%
+- All critical user paths tested
