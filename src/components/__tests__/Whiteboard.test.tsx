@@ -23,6 +23,20 @@ jest.mock('@/lib/canvas-engine', () => ({
   }))
 }))
 
+// Mock the store
+jest.mock('@/store/useCanvasStore', () => ({
+  useCanvasStore: jest.fn(() => ({
+    isGridVisible: false,
+    isLoading: false,
+    camera: { x: 0, y: 0, zoom: 1 },
+    tool: { type: 'select' },
+    elements: [],
+    selectedElementIds: [],
+    collaborators: new Map(),
+    isConnected: false
+  }))
+}))
+
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),

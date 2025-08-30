@@ -25,11 +25,16 @@ interface CanvasEngineEvents {
   stateChange: { type: string; camera?: Camera; [key: string]: any }
 }
 
+// Internal type that extends CanvasElement with fabric object reference
+interface InternalCanvasElement extends CanvasElement {
+  fabricObject?: fabric.Object
+}
+
 export class CanvasEngine {
   private canvas: fabric.Canvas
   private container: HTMLElement
   private camera: Camera = { x: 0, y: 0, zoom: 1 }
-  private elements: CanvasElement[] = []
+  private elements: InternalCanvasElement[] = []
   private selectedElementIds: string[] = []
   private panBoundaries: PanBoundaries | null = null
   private zoomLimits: ZoomLimits = { min: 0.1, max: 10 }
@@ -777,7 +782,7 @@ export class CanvasEngine {
         isVisible: true
       }
       
-      let element: CanvasElement
+      let element: InternalCanvasElement
       
       switch (type) {
         case 'rectangle':
@@ -791,8 +796,9 @@ export class CanvasEngine {
               stroke: options.stroke || '#000000',
               strokeWidth: options.strokeWidth || 1,
               opacity: options.opacity || 1
-            }
-          } as ShapeElement
+            },
+            fabricObject
+          } as InternalCanvasElement
           break
           
         case 'line':
@@ -805,8 +811,9 @@ export class CanvasEngine {
               stroke: options.stroke || '#000000',
               strokeWidth: options.strokeWidth || 1,
               strokeDasharray: options.strokeDasharray
-            }
-          } as LineElement
+            },
+            fabricObject
+          } as InternalCanvasElement
           break
           
         default:
@@ -817,7 +824,8 @@ export class CanvasEngine {
             style: {
               stroke: options.stroke || '#000000',
               strokeWidth: options.strokeWidth || 1
-            }
+            },
+            fabricObject
           } as any
       }
       
@@ -907,9 +915,9 @@ export class CanvasEngine {
     const element = this.elements.find(e => e.id === elementId)
     if (element) {
       element.position = { ...position }
-      if (element.data) {
-        element.data.set({ left: position.x, top: position.y })
-        element.data.setCoords()
+      if (element.fabricObject) {
+        element.fabricObject.set({ left: position.x, top: position.y })
+        element.fabricObject.setCoords()
       }
       this.scheduleRender()
     }
@@ -947,9 +955,9 @@ export class CanvasEngine {
       }
       
       element.size = { ...size }
-      if (element.data) {
-        element.data.set({ width: size.width, height: size.height })
-        element.data.setCoords()
+      if (element.fabricObject) {
+        element.fabricObject.set({ width: size.width, height: size.height })
+        element.fabricObject.setCoords()
       }
       this.scheduleRender()
     }
@@ -998,9 +1006,9 @@ export class CanvasEngine {
       }
       
       element.size = currentSize
-      if (element.data) {
-        element.data.set({ width: currentSize.width, height: currentSize.height })
-        element.data.setCoords()
+      if (element.fabricObject) {
+        element.fabricObject.set({ width: currentSize.width, height: currentSize.height })
+        element.fabricObject.setCoords()
       }
       this.scheduleRender()
       
@@ -1022,8 +1030,8 @@ export class CanvasEngine {
 
   getElementScale(elementId: string): number {
     const element = this.elements.find(e => e.id === elementId)
-    if (element && element.data) {
-      return element.data.scaleX || 1
+    if (element && element.fabricObject) {
+      return element.fabricObject.scaleX || 1
     }
     return 1
   }
@@ -1032,8 +1040,8 @@ export class CanvasEngine {
     const element = this.createElement(type, { ...options, x: position.x, y: position.y })
     
     // Start with scale 0
-    if (element.data) {
-      element.data.set({ scaleX: 0, scaleY: 0 })
+    if (element.fabricObject) {
+      element.fabricObject.set({ scaleX: 0, scaleY: 0 })
     }
     
     // Animate to scale 1
@@ -1047,9 +1055,9 @@ export class CanvasEngine {
       // Bounce easing
       const easedProgress = 1 - Math.pow(1 - progress, 3)
       
-      if (element.data) {
-        element.data.set({ scaleX: easedProgress, scaleY: easedProgress })
-        element.data.setCoords()
+      if (element.fabricObject) {
+        element.fabricObject.set({ scaleX: easedProgress, scaleY: easedProgress })
+        element.fabricObject.setCoords()
       }
       this.scheduleRender()
       
