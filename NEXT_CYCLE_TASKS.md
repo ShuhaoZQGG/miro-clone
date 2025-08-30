@@ -1,24 +1,25 @@
 # Next Cycle Tasks
 
-## Immediate Fixes Required (Cycle 23 Revision)
-1. **Fix TypeScript Build Error** (BLOCKING)
-   - File: src/lib/canvas-engine.ts:770
-   - Add required stroke and strokeWidth properties to style object
-   - Ensure all required properties are properly initialized
+## Immediate Fixes Required (Cycle 25)
+1. **Fix TypeScript Build Error** (BLOCKING - NEW)
+   - File: src/lib/canvas-engine.ts:910
+   - Property 'data' does not exist on type 'CanvasElement'
+   - Add proper type guard or fix CanvasElement interface
+   - This is preventing build completion
 
 2. **Stabilize Test Suite** (CRITICAL)
-   - Current: 61 failures (20% failure rate)
+   - Current: 59 failures (19.3% failure rate)
    - Target: <10 failures
    - Focus areas:
-     - Canvas engine test timing issues
-     - Mock implementation improvements
-     - RAF mock reliability
-     - Canvas disposal test stability
+     - Canvas-fullscreen test failures
+     - Smooth-interactions test issues
+     - FPSCounter RAF mock setup
+     - Timing-related test failures
 
 3. **Type Safety Improvements**
-   - Replace 40+ TypeScript 'any' usages with proper types
-   - Focus on test files and mock implementations
-   - Improve type definitions for canvas elements
+   - Replace remaining TypeScript 'any' usages (4 warnings)
+   - Focus on canvas-engine.ts type definitions
+   - Improve type definitions for canvas elements with 'data' property
 
 ## Deferred Features from Cycle 23
 1. **Performance Monitoring Integration**
@@ -71,17 +72,30 @@
    - Event handlers
    - Component props
 
+## Architectural Considerations (Cycle 24 Review)
+1. **Complexity Management**
+   - Three attempts at same features indicate complexity issues
+   - Consider breaking down features into smaller, testable units
+   - Review if full-screen canvas and smooth interactions should be separate cycles
+
+2. **Test Infrastructure Investment**
+   - RAF mock implementation needs comprehensive solution
+   - Consider dedicated test utilities module
+   - Standardize timing expectations across all tests
+
 ## Priority Order
-1. Fix build error (immediate)
-2. Stabilize tests (high)
-3. Type safety (medium)
-4. Performance monitoring integration (medium)
-5. E2E tests (low)
-6. Documentation (low)
+1. Fix build error at line 910 (immediate)
+2. Achieve stable build (critical)
+3. Reduce test failures to <10 (high)
+4. RAF mock comprehensive fix (high)
+5. Type safety improvements (medium)
+6. Simplify feature implementation (medium)
+7. Performance monitoring completion (low)
+8. Documentation (low)
 
 ## Success Criteria for Next Cycle
-- ✅ Build passes without errors
+- ✅ Build passes without ANY errors
 - ✅ <10 test failures
-- ✅ <20 TypeScript 'any' warnings
-- ✅ Performance monitoring integrated
-- ✅ PR approved and merged
+- ✅ Zero TypeScript build errors
+- ✅ Proper RAF mock implementation
+- ✅ Clear path forward (no 4th attempt needed)
