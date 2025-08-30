@@ -1,110 +1,96 @@
 # Next Cycle Tasks
 
-## Critical Priority (Must Fix - Cycle 37)
-1. **BUILD FAILURE**: Fix TypeScript error in `/src/app/api/auth/login/route.ts:39`
-   - User type missing password property
-   - Blocking production build
-   
-2. **Test Coverage**: Fix remaining 38 test failures to achieve >95% pass rate
-   - Canvas engine test timeouts in debounce operations
-   - Fabric.js mock interactions not working properly
-   - Integration test timing issues
-   - Performance test expectations with throttling
+## Priority 1: Test Stability (Quick Wins)
+- [ ] Fix remaining 10 canvas-engine test failures
+  - Mock setup issues in canvas-fullscreen.test.tsx
+  - Integration test DOM query issues
+  - Performance test environment adjustments
 
-## High Priority
-1. **WebSocket Server Implementation**
-   - Complete Socket.io server setup
-   - Client connection management
-   - Real-time event broadcasting
-   - Reconnection strategies
-   - Error handling
+## Priority 2: Real-time Collaboration
+- [ ] Set up Socket.io server
+  - WebSocket connection management
+  - Client authentication
+  - Connection state handling
+  - Reconnection strategies
+- [ ] Implement cursor tracking
+  - Live cursor position sharing
+  - User presence indicators
+  - Avatar display
+- [ ] Canvas state synchronization
+  - Operation broadcasting
+  - Conflict detection
+  - Basic operational transformation
 
-2. **Authentication Flow Completion**
-   - User registration flow UI
-   - Login/logout functionality
-   - Session management
-   - Protected routes
-   - Password reset flow
+## Priority 3: Cloud Integration
+- [ ] Backend API development
+  - REST endpoints for board CRUD
+  - User management endpoints
+  - Authentication middleware
+  - Database schema implementation
+- [ ] Cloud sync functionality
+  - Auto-save to cloud
+  - Offline queue management
+  - Sync conflict resolution
+  - Version history
 
-3. **Real-time Collaboration Features**
-   - Cursor position sharing
-   - Element operation broadcasting
-   - User presence system
-   - Conflict resolution (OT/CRDT)
-   - Live user avatars
+## Priority 4: Production Deployment
+- [ ] Deployment configuration
+  - Environment variable setup
+  - CI/CD pipeline
+  - Docker containerization
+  - Kubernetes deployment specs
+- [ ] Performance optimization
+  - Code splitting
+  - Bundle size optimization
+  - CDN configuration
+  - Caching strategies
+- [ ] Monitoring setup
+  - Error tracking (Sentry)
+  - Performance monitoring
+  - Analytics integration
+  - Health checks
 
-## Medium Priority
-1. **Monitoring & Analytics**
-   - Sentry error tracking integration
-   - Performance monitoring dashboard
-   - User analytics
-   - Usage metrics
-   - Error alerting
-
-2. **Documentation**
-   - Complete deployment guide
-   - API documentation
-   - Developer setup guide
-   - Architecture documentation
-   - Troubleshooting guide
-
-3. **Cloud Integration**
-   - S3 file storage setup
-   - Cloud sync implementation
-   - Backup strategies
-   - CDN configuration
-   - Version history
-
-## Low Priority
-1. **UI/UX Enhancements**
-   - Dark mode support
-   - Mobile responsiveness improvements
-   - Accessibility (WCAG compliance)
-   - Animation polish
-   - Keyboard shortcuts
-
-2. **Performance Optimization**
-   - Code splitting implementation
-   - Lazy loading components
-   - Bundle size optimization
-   - Image optimization
-   - Viewport-based rendering
+## Priority 5: Feature Enhancements
+- [ ] Performance monitoring dashboard
+  - Real-time FPS tracking
+  - Memory usage visualization
+  - Render time metrics
+  - Historical data graphs
+- [ ] Advanced export options
+  - Multi-page PDF export
+  - High-resolution image export
+  - Batch export functionality
+- [ ] Collaboration features
+  - Comments and annotations
+  - Version control
+  - Change history
+  - User permissions
 
 ## Technical Debt
-1. Add rate limiting to API endpoints
-2. Implement comprehensive input sanitization
-3. Add structured logging with log levels
-4. Create E2E test suite with Playwright
-5. Set up CI/CD pipeline with GitHub Actions
-6. Add database migrations system
-7. Implement caching strategy
+- [ ] Refactor canvas engine mocking strategy
+- [ ] Improve test environment configuration
+- [ ] Add comprehensive E2E tests
+- [ ] Document deployment process
+- [ ] Create API documentation
+- [ ] Add performance benchmarks
 
-## Known Issues to Address
-- Canvas engine debounce test causing timeouts
-- Fabric.js mock limitations preventing proper interaction tests
-- Missing WebSocket error handling and retry logic
-- Incomplete offline support implementation
-- Some AuthProvider wrapper issues in tests
+## Documentation Needs
+- [ ] Production deployment guide
+- [ ] WebSocket API documentation
+- [ ] Cloud sync architecture docs
+- [ ] Security best practices guide
+- [ ] Performance tuning guide
 
-## Completed in Cycle 36
-- ✅ Fixed critical JWT secret security vulnerability
-- ✅ Added environment variable validation
-- ✅ Implemented database connection error handling
-- ✅ Enhanced production deployment configuration
-- ✅ Improved test coverage from 86% to 88%
+## Estimated Timeline
+- **Week 1**: Test fixes + WebSocket foundation
+- **Week 2**: Real-time collaboration features
+- **Week 3**: Cloud backend + API
+- **Week 4**: Production deployment + monitoring
 
-## Success Metrics for Next Cycle
-- [ ] Test coverage >95% (currently 88%)
-- [ ] WebSocket server fully functional
-- [ ] Authentication working end-to-end
-- [ ] Real-time collaboration MVP complete
-- [ ] Zero critical security issues
-- [ ] Successful production deployment
-- [ ] Monitoring and alerting configured
-- [ ] Load testing completed (100+ concurrent users)
-
-## Notes
-- Security has been addressed but needs ongoing review
-- Production configuration is ready but needs testing
-- Database resilience implemented but needs stress testing
-- Test improvements made but more work needed for stability
+## Success Metrics
+- 100% test pass rate
+- <100ms sync latency
+- Support for 100+ concurrent users
+- Zero data loss
+- 99.9% uptime
+- Complete production deployment
