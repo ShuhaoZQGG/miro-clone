@@ -39,8 +39,8 @@ class SentryService {
     switch (process.env.NODE_ENV) {
       case 'production':
         return 0.1; // 10% in production
-      case 'staging':
-        return 0.5; // 50% in staging
+      case 'test':
+        return 0; // Disable in test environment
       default:
         return 1.0; // 100% in development
     }

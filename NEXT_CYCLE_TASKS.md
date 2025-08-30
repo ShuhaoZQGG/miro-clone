@@ -1,107 +1,57 @@
 # Next Cycle Tasks
 
-## Immediate Priority (P0)
-### Merge Conflict Resolution
-- **PR #31 has merge conflicts** preventing merge to main
-- Need to resolve conflicts with main branch
-- Rebase or merge main into cycle-39 branch
-- Ensure tests still pass after conflict resolution
+## Priority 0 (Critical - Must Fix)
+1. **Fix TypeScript Build Error**
+   - File: `monitoring/sentry-production.config.ts:42`
+   - Issue: Invalid 'staging' case in NODE_ENV switch
+   - Solution: Remove the staging case or update NODE_ENV type definition
+   - Verify: Run `npm run build` to confirm fix
 
-## Deployment Tasks (P1)
-### Frontend Deployment
-1. Deploy to Vercel
-   - Connect GitHub repository
-   - Configure environment variables
-   - Set up custom domain (if available)
-   - Enable automatic deployments
+## Priority 1 (High - Post-Fix)
+1. **Merge PR #32**
+   - After build fix is verified
+   - Ensure all tests still pass
+   - Update PR with fix commit
 
-### WebSocket Server
-1. Deploy to Railway or Render
-   - Configure Socket.io server
-   - Set up Redis adapter (Upstash)
-   - Configure health checks
-   - Enable auto-scaling
+2. **Configure Production Credentials**
+   - Set Sentry DSN in environment variables
+   - Configure Vercel deployment token
+   - Set up Railway API credentials
+   - Configure Supabase connection string
+   - Set up Upstash Redis URL
 
-### Database Setup
-1. PostgreSQL on Supabase
-   - Run database migrations
-   - Configure connection pooling
-   - Set up backup schedule
-   - Create read replicas if needed
+3. **Deploy to Production**
+   - Deploy frontend to Vercel
+   - Deploy WebSocket server to Railway
+   - Run deployment verification script
+   - Monitor initial deployment metrics
 
-2. Redis on Upstash
-   - Configure for session storage
-   - Set up WebSocket adapter
-   - Configure eviction policies
+## Priority 2 (Medium - Enhancements)
+1. **Monitor Production**
+   - Verify Sentry is capturing errors
+   - Check health endpoints are responding
+   - Monitor performance metrics
+   - Set up alerting rules
 
-## Monitoring Configuration (P1)
-1. **Sentry Setup**
-   - Obtain and configure DSN
-   - Set up error boundaries
-   - Configure performance monitoring
-   - Create alert rules
-
-2. **Uptime Monitoring**
-   - Configure UptimeRobot or similar
-   - Set up status page
-   - Configure alert channels
-
-## Technical Debt (P2)
-1. **Code Quality**
-   - Fix 24 TypeScript warnings
-   - Remove unused `token` variable in socketio route
-   - Replace `any` types with proper interfaces
-
-2. **Testing**
-   - Implement E2E tests with Playwright
-   - Add performance benchmarks
-   - Create load testing suite
-
-3. **Documentation**
-   - Update deployment documentation
+2. **Documentation Updates**
+   - Update README with production URLs
+   - Document deployment process results
    - Create runbook for common issues
-   - Document environment variables
-   - Add API documentation
 
-## Feature Enhancements (P3)
-1. **Collaboration Features**
-   - Real-time presence indicators
-   - Voice/video chat integration
-   - Advanced permission system
-   - Team workspaces
+## Technical Debt
+- Consider adding 'staging' to NODE_ENV type if needed
+- Review and optimize bundle size
+- Add more comprehensive E2E tests
+- Implement automated rollback procedures
 
-2. **Export Functionality**
-   - PNG/JPG export with quality settings
-   - PDF export with pagination
-   - SVG export for vector graphics
-   - Batch export capabilities
+## Deferred from Current Cycle
+- None - all planned features were implemented
 
-3. **Mobile Optimization**
-   - Touch gesture improvements
-   - Mobile-specific UI components
-   - Offline mode with sync
-   - Progressive Web App features
-
-## Infrastructure Improvements (P3)
-1. **Performance**
-   - Implement CDN for static assets
-   - Add server-side caching
-   - Optimize database queries
-   - Implement lazy loading
-
-2. **Security**
-   - Add 2FA support
-   - Implement SSO integration
-   - Enhanced audit logging
-   - Regular security scans
-
-## Outstanding PRs to Review
-- PR #29: Production deployment configuration (has conflicts)
-- PR #30: Test fixes and infrastructure (has conflicts)
-- Multiple other open PRs need review and potential closure
-
-## Notes
-- PR #31 is approved but cannot merge due to conflicts
-- All tests are passing (311/311)
-- Build is successful
-- Application is production-ready once conflicts are resolved
+## Success Criteria
+- [ ] Build passes without errors
+- [ ] All 311 tests continue to pass
+- [ ] PR #32 merged to main
+- [ ] Frontend deployed and accessible
+- [ ] WebSocket server connected
+- [ ] Health checks returning 200
+- [ ] Monitoring capturing data
