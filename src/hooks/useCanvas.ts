@@ -163,7 +163,7 @@ export const useCanvas = (options: UseCanvasOptions) => {
     }
   }, [tool, createElementAtPosition])
 
-  const handleMouseMove = useCallback((event: MouseEvent) => {
+  const handleMouseMove = useCallback((_event: MouseEvent) => {
     // Handle mouse move for different tools (drag, resize, etc.)
     if (!canvasEngineRef.current) return
     

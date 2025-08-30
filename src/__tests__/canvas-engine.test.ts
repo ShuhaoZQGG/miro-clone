@@ -68,7 +68,7 @@ describe('CanvasEngine', () => {
     if (canvasEngine) {
       try {
         canvasEngine.dispose()
-      } catch (error) {
+      } catch {
         // Ignore disposal errors in tests
       }
     }

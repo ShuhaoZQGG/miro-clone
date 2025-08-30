@@ -1,5 +1,5 @@
 import { HistoryManager } from '@/lib/history-manager'
-import { CanvasElement, Operation } from '@/types'
+import { CanvasElement } from '@/types'
 
 describe('HistoryManager - Undo/Redo Functionality', () => {
   let historyManager: HistoryManager
