@@ -1,52 +1,92 @@
 # Next Cycle Tasks
 
-## Critical - TypeScript Compilation Fixes (Priority 1)
-1. **Fix InternalCanvasElement Interface Issues**
-   - Resolve interface extension errors (line 29 in canvas-engine.ts)
-   - Ensure proper type compatibility between InternalCanvasElement and CanvasElement
-   - Fix missing property definitions (id, position, size, fabricObject)
+## Priority 1: Critical Integration Work
+1. **Canvas Integration**
+   - Connect WebSocket hooks to main Whiteboard component
+   - Integrate CollaborativeCursors with canvas viewport
+   - Sync canvas operations through WebSocket
+   - Test multi-user canvas interaction
 
-2. **Fix Test Access Patterns**
-   - Replace private method access with proper testing patterns
-   - Use public APIs or test-specific exposure patterns
-   - Fix issues in:
-     - canvas-fullscreen.test.tsx (handleResize, setViewportSize, setupSmoothRendering)
-     - canvas-engine.test.ts (handleResize)
+2. **Authentication System**
+   - Implement JWT-based authentication
+   - Create login/signup modals
+   - Add session management
+   - Secure WebSocket connections
 
-3. **Fix Type Safety Issues**
-   - Resolve globalThis index signature issues in smooth-interactions.test.ts
-   - Fix type 'never' call signature in canvas-disposal.test.tsx
-   - Address 'any' type assignments in integration tests
+## Priority 2: Infrastructure Setup
+1. **Database Configuration**
+   - Set up PostgreSQL for board persistence
+   - Configure Redis for session management
+   - Create database schemas
+   - Implement data migrations
 
-## High Priority - Code Quality
-1. **ESLint Warnings**
-   - Replace 7 instances of 'any' types with proper types
-   - Located primarily in src/types/index.ts
+2. **API Development**
+   - Create REST endpoints for board CRUD
+   - Implement user management APIs
+   - Add board sharing endpoints
+   - Build permission system
 
-2. **Test Stability**
-   - Monitor and fix remaining 15 failing tests if they become critical
-   - Focus on timing-sensitive tests that may fail in CI/CD
+## Priority 3: UI/UX Improvements
+1. **Collaboration UI**
+   - Add collaboration toolbar
+   - Implement user presence indicators
+   - Create active users panel
+   - Add connection status indicator
 
-## Medium Priority - Technical Debt
-1. **Test Infrastructure**
-   - Consider migrating from jsdom to a more complete DOM environment for CSS tests
-   - Improve timer mock utilities for more predictable test execution
+2. **Mobile Optimization**
+   - Responsive design for tablets
+   - Touch gesture support
+   - Mobile-friendly controls
+   - Viewport optimization
 
-2. **Documentation**
-   - Document the test mocking strategy for future developers
-   - Add comments explaining InternalCanvasElement usage pattern
+## Technical Debt
+1. **Test Stabilization**
+   - Fix 18 failing canvas-engine tests (timeout issues)
+   - Improve test isolation
+   - Add E2E tests for collaboration
+   - Increase coverage to 98%
 
-## Low Priority - Future Enhancements
-1. **Performance Monitoring**
-   - Implement actual performance dashboard (currently mocked)
-   - Add real-time metrics collection
+2. **Performance Optimization**
+   - Implement Web Workers for OT calculations
+   - Add connection pooling
+   - Optimize bundle size
+   - Implement lazy loading
 
-2. **E2E Testing**
-   - Add Playwright or Cypress tests for critical user flows
-   - Test actual canvas interactions in a real browser
+3. **Security Hardening**
+   - Add rate limiting
+   - Implement input validation
+   - Add CSRF protection
+   - Set up security headers
 
-## Notes for Next Developer
-- The cycle achieved 95.1% test pass rate successfully
-- TypeScript compilation errors are the only blocker for merge
-- Focus on fixing type issues without breaking the working tests
-- The test infrastructure improvements are solid and should be preserved
+## Documentation Needs
+1. WebSocket API documentation
+2. Deployment guide for production
+3. User guide for collaboration features
+4. Architecture documentation updates
+
+## Future Enhancements
+1. **Advanced Features**
+   - Version history with time travel
+   - Offline support with sync
+   - Real-time voice/video chat
+   - AI-powered suggestions
+
+2. **Enterprise Features**
+   - SSO integration
+   - Audit logging
+   - Advanced permissions
+   - Team management
+
+## Known Issues to Address
+- WebSocket URL using hardcoded fallback
+- Missing environment variable configuration
+- No production deployment setup
+- Incomplete error boundaries
+- Missing analytics integration
+
+## Estimated Timeline
+- Critical Integration: 2-3 days
+- Infrastructure Setup: 2 days
+- UI/UX Improvements: 1-2 days
+- Technical Debt: 1-2 days
+- Total: 6-9 days for full production readiness
