@@ -76,7 +76,8 @@ export function rateLimitMiddleware(
 // Cleanup old entries periodically
 setInterval(() => {
   const now = Date.now()
-  for (const [ip, limit] of requestCounts.entries()) {
+  const entries = Array.from(requestCounts.entries())
+  for (const [ip, limit] of entries) {
     if (now > limit.resetTime) {
       requestCounts.delete(ip)
     }

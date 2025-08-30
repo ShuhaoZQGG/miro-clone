@@ -266,7 +266,7 @@ export class PerformanceManager {
     
     // Disable shadows in low quality mode
     if ('shadow' in obj) {
-      obj.shadow = null
+      obj.shadow = undefined
     }
   }
 

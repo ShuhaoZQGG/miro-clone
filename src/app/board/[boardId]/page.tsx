@@ -11,7 +11,7 @@ interface BoardPageProps {
 export default async function BoardPage({ params }: BoardPageProps) {
   const { boardId } = await params
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gray-50">
+    <div className="fixed inset-0 h-screen w-screen overflow-hidden bg-gray-50">
       <Suspense 
         fallback={
           <div className="h-full w-full flex items-center justify-center">
