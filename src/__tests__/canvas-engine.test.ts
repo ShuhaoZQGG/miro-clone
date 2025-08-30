@@ -5,25 +5,28 @@ import { setupRAFMock, createMockCanvas } from './utils/helpers'
 // Setup RAF mock
 const rafMock = setupRAFMock()
 
-// Mock fabric.js
-const { mockCanvas } = createMockCanvas()
-
-jest.mock('fabric', () => ({
-  fabric: {
-    Canvas: jest.fn(() => mockCanvas),
-    Rect: jest.fn(),
-    Circle: jest.fn(),
-    Text: jest.fn(),
-    Image: jest.fn(),
-  }
-}))
-
 describe('CanvasEngine', () => {
   let canvasEngine: CanvasEngine
   let mockContainer: HTMLElement
+  let mockCanvas: any
 
   beforeEach(() => {
     jest.useFakeTimers()
+    
+    // Create mock canvas with proper setup
+    const mockCanvasObj = createMockCanvas()
+    mockCanvas = mockCanvasObj.mockCanvas
+    
+    // Mock fabric.js with the created mock canvas
+    jest.doMock('fabric', () => ({
+      fabric: {
+        Canvas: jest.fn(() => mockCanvas),
+        Rect: jest.fn(),
+        Circle: jest.fn(),
+        Text: jest.fn(),
+        Image: jest.fn(),
+      }
+    }))
     
     // Create a mock canvas container
     mockContainer = document.createElement('div')
@@ -31,8 +34,10 @@ describe('CanvasEngine', () => {
     mockContainer.style.height = '600px'
     document.body.appendChild(mockContainer)
 
-    canvasEngine = new CanvasEngine(mockContainer)
-    jest.clearAllMocks()
+    // Clear module cache to ensure fresh mock
+    jest.resetModules()
+    const { CanvasEngine: FreshCanvasEngine } = require('@/lib/canvas-engine')
+    canvasEngine = new FreshCanvasEngine(mockContainer)
   })
 
   afterEach(() => {

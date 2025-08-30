@@ -1,24 +1,25 @@
 # Next Cycle Tasks
 
-## Cycle 34 - Production Deployment & Test Stabilization
+## Cycle 35 - Frontend Integration & Production Stabilization
 
-### ✅ Cycle 33 Completed
-1. **WebSocket Server Implementation - DONE**
-   - ✅ Created server/websocket-server.ts with Socket.io
-   - ✅ Implemented operation transformation and conflict resolution
-   - ✅ Added user presence and cursor tracking
-   - ✅ PR #22 merged to main
+### ✅ Cycle 34 Completed
+1. **Production Infrastructure - DONE**
+   - ✅ Vercel deployment configuration (vercel.json)
+   - ✅ WebSocket server with SSE fallback
+   - ✅ Rate limiting and CORS implementation
+   - ✅ PR #23 merged to main
 
-2. **Authentication System - DONE**
-   - ✅ JWT token generation and validation
-   - ✅ Password hashing with bcrypt
-   - ✅ Complete auth API routes (signup, login, me)
-   - ✅ Session management with Redis
+2. **Security Enhancements - DONE**
+   - ✅ Rate limiting middleware with LRU cache
+   - ✅ JWT authentication for WebSockets
+   - ✅ Request throttling with proper headers
+   - ✅ IP-based tracking with cleanup
 
-3. **Database Layer - DONE**
-   - ✅ PostgreSQL schema with Prisma ORM
-   - ✅ Redis integration for sessions
-   - ✅ Mock database fallback for testing
+3. **Database Infrastructure - DONE**
+   - ✅ Enhanced Prisma schema with production tables
+   - ✅ Docker Compose for PostgreSQL and Redis
+   - ✅ Database initialization scripts
+   - ✅ User roles and permissions schema
 
 ### Priority 0: Production Deployment (CRITICAL)
 1. **Deploy WebSocket Server**
@@ -65,12 +66,20 @@
    - [ ] Add caching strategies
    - [ ] Monitor performance metrics
 
-## Priority 4: UI/UX Improvements
-1. **Collaboration UI**
-   - Add collaboration toolbar
-   - Implement user presence indicators
-   - Create active users panel
-   - Add connection status indicator
+### Priority 4: Critical Bug Fixes
+1. **Canvas Engine Test Failures**
+   - [ ] Fix 48 failing tests in canvas-engine.test.ts
+   - [ ] Resolve timeout issues with Fabric.js mocks
+   - [ ] Improve test isolation and stability
+   - [ ] Target 95% test pass rate
+
+## Priority 5: UI/UX Improvements
+1. **Frontend-Backend Integration**
+   - [ ] Connect React components to WebSocket server
+   - [ ] Implement real-time cursor tracking UI
+   - [ ] Add collaborative editing features
+   - [ ] Build user presence indicators
+   - [ ] Test real-time synchronization
 
 2. **Mobile Optimization**
    - Responsive design for tablets
@@ -80,10 +89,10 @@
 
 ## Technical Debt
 1. **Test Stabilization**
-   - Fix 18 failing canvas-engine tests (timeout issues)
+   - Fix 48 failing canvas-engine tests (timeout issues)
    - Improve test isolation
    - Add E2E tests for collaboration
-   - Increase coverage to 98%
+   - Increase coverage to 95%
 
 2. **Performance Optimization**
    - Implement Web Workers for OT calculations

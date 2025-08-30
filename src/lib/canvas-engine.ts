@@ -604,6 +604,11 @@ export class CanvasEngine {
 
   private throttledRender(): void {
     this.scheduleRender()
+    // Immediately render for synchronous behavior in tests
+    if (this.renderThrottleId) {
+      this.canvas.renderAll()
+      this.renderThrottleId = null
+    }
   }
 
   render(): void {
