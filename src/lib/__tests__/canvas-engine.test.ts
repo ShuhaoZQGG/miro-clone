@@ -318,4 +318,57 @@ describe('CanvasEngine', () => {
       expect(newZoom).not.toBe(initialZoom)
     })
   })
+
+  describe('Smooth Rendering Setup', () => {
+    it('should setup RAF-based rendering loop', () => {
+      const rafSpy = jest.spyOn(window, 'requestAnimationFrame')
+      engine = new CanvasEngine(container)
+      
+      // setupSmoothRendering should be called during initialization
+      expect(rafSpy).toHaveBeenCalled()
+      
+      rafSpy.mockRestore()
+    })
+
+    it('should batch render calls within frame budget', async () => {
+      engine = new CanvasEngine(container)
+      const canvas = engine.getCanvas()
+      const renderSpy = jest.spyOn(canvas, 'renderAll')
+      
+      // Clear initial calls
+      renderSpy.mockClear()
+      
+      // Trigger multiple render requests rapidly
+      for (let i = 0; i < 5; i++) {
+        (engine as any).scheduleRender()
+      }
+      
+      // Wait for next frame
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      
+      // Should batch all requests into single render
+      expect(renderSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('should maintain 60fps frame rate', () => {
+      engine = new CanvasEngine(container)
+      
+      // Access the frame rate monitoring
+      const frameRate = (engine as any).currentFrameRate
+      
+      // Should target 60fps
+      expect(frameRate).toBeGreaterThanOrEqual(30)
+      expect(frameRate).toBeLessThanOrEqual(120)
+    })
+
+    it('should configure canvas for optimal performance', () => {
+      engine = new CanvasEngine(container)
+      const canvas = engine.getCanvas()
+      
+      // Check performance-related canvas settings
+      expect((canvas as any).renderOnAddRemove).toBe(false)
+      expect((canvas as any).skipOffscreen).toBe(true)
+      expect((canvas as any).stateful).toBe(false)
+    })
+  })
 })

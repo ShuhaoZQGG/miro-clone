@@ -338,7 +338,7 @@ describe('ElementManager - Element Creation', () => {
         textAlign: 'center' as const
       }
 
-      elementManager.createText(position, content)
+      const textElement = elementManager.createText(position, content)
 
       expect(textElement.content).toEqual(content)
       expect(textElement.content.text).toBe('Custom text content')
@@ -371,7 +371,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should handle multiline text', () => {
       const multilineText = 'Line 1\nLine 2\nLine 3'
-      elementManager.createText({ x: 0, y: 0 }, { text: multilineText })
+      const textElement = elementManager.createText({ x: 0, y: 0 }, { text: multilineText })
 
       expect(textElement.content.text).toBe(multilineText)
       // Height should be greater for multiline text
@@ -381,9 +381,9 @@ describe('ElementManager - Element Creation', () => {
 
   describe('Element Management', () => {
     it('should add created elements to internal collection', () => {
-      elementManager.createStickyNote({ x: 0, y: 0 })
-      elementManager.createRectangle({ x: 100, y: 100 })
-      elementManager.createCircle({ x: 200, y: 200 })
+      const stickyNote = elementManager.createStickyNote({ x: 0, y: 0 })
+      const rectangle = elementManager.createRectangle({ x: 100, y: 100 })
+      const circle = elementManager.createCircle({ x: 200, y: 200 })
 
       const elements = elementManager.getElements()
 
@@ -495,7 +495,7 @@ describe('ElementManager - Element Creation', () => {
       const mockSetCoords = jest.fn()
       const mockOn = jest.fn()
       
-      fabric.Rect.mockImplementation(() => ({
+      ;(fabric.Rect as any).mockImplementation(() => ({
         set: jest.fn().mockReturnThis(),
         setCoords: mockSetCoords,
         on: mockOn,
@@ -577,7 +577,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should connect to existing elements', () => {
       const rect = elementManager.createRectangle({ x: 100, y: 100 })
-      elementManager.createCircle({ x: 300, y: 300 })
+      const circle = elementManager.createCircle({ x: 300, y: 300 })
       
       const connector = elementManager.createConnector(
         { x: 150, y: 150 },

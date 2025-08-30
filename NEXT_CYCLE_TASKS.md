@@ -1,65 +1,108 @@
 # Next Cycle Tasks
 
-## High Priority (Critical for Production)
-1. **Fix Remaining Unit Tests**
-   - 42 tests currently failing
-   - Most failures related to canvas mock initialization
-   - Need to update mocks for async canvas initialization pattern
+## Cycle 20: Fix Code Quality Issues from Cycle 19
 
-2. **Implement Missing Drawing Tools**
-   - Line tool (causing E2E test timeout)
-   - Freehand drawing tool (causing E2E test timeout)
-   - Both tools are expected by existing E2E tests
+### Critical Fixes (Must Complete)
 
-## Medium Priority (Quality Improvements)
-3. **Address TypeScript Type Safety**
-   - Fix 50+ ESLint warnings about `any` types
-   - Improve type definitions for Fabric.js objects
-   - Add proper typing for event handlers
+#### 1. TypeScript Compilation Errors (28 errors)
+- [ ] Implement missing `setupSmoothRendering()` method in `canvas-engine.ts`
+- [ ] Fix undefined `textElement` variable in element-creation.test.ts (lines 343-346, 376, 378)
+- [ ] Fix undefined `stickyNote`, `rectangle`, `circle` variables in tests (lines 391-393, 587, 592)
+- [ ] Fix missing `init()` method in canvas disposal tests
+- [ ] Fix type mismatch in PDF export route (Uint8Array issue)
+- [ ] Resolve missing module dependencies
 
-4. **E2E Test Investigation**
-   - Debug timeout issues in E2E tests
-   - Add retry logic for flaky tests
-   - Improve test stability with better wait conditions
+#### 2. Failing Unit Tests (66 failures)
+- [ ] Fix canvas-disposal.test.tsx - add proper `init()` method mock
+- [ ] Fix element-creation.test.ts - define missing variables
+- [ ] Fix integration tests that depend on missing methods
+- [ ] Ensure all test mocks are complete and accurate
 
-5. **Performance Monitoring**
-   - Add FPS tracking for canvas operations
-   - Monitor memory usage during long sessions
-   - Implement performance benchmarks
+#### 3. Missing Dependencies
+- [ ] Install `lucide-react` package
+- [ ] Create `@/lib/utils` module or install required utility library
+- [ ] Ensure all imports resolve correctly
 
-## Low Priority (Nice to Have)
-6. **Developer Experience**
-   - Fix port conflict (currently using 3003 instead of 3000)
-   - Add hot reload for canvas changes
-   - Improve error messages in development
+#### 4. ESLint Issues
+- [ ] Remove unused `screen` import in canvas-disposal.test.tsx
+- [ ] Remove unused `stickyNote` variable in element-creation.test.ts
+- [ ] Replace TypeScript 'any' types with proper types where flagged
 
-7. **Documentation**
-   - Document canvas lifecycle management approach
-   - Add troubleshooting guide for common issues
-   - Create performance optimization guide
+### Technical Debt from Previous Cycles
 
-## Technical Debt
-- Refactor canvas disposal tests to use proper async patterns
-- Consolidate duplicate test setup code
-- Review and optimize bundle size
-- Add integration tests for real-time collaboration
+#### Performance Enhancements
+- [ ] Consider implementing WebGL renderer for very large canvases
+- [ ] Add worker threads for heavy computations
+- [ ] Implement progressive rendering for complex scenes
+- [ ] Add virtual scrolling for canvases with 1000+ elements
 
-## Feature Enhancements (Future Cycles)
-- Add canvas zoom controls UI
-- Implement element grouping
-- Add keyboard shortcuts for all tools
-- Implement copy/paste functionality
-- Add element alignment guides
-- Implement smart connectors between elements
+#### Testing Improvements
+- [ ] Add integration tests for full screen feature
+- [ ] Create performance benchmarks documentation
+- [ ] Add more edge case tests for canvas interactions
+- [ ] Implement automated performance regression tests
 
-## Infrastructure
-- Set up CI/CD pipeline with test automation
-- Configure automated dependency updates
-- Add monitoring and error tracking
-- Implement feature flags for gradual rollout
+#### Documentation
+- [ ] Document performance optimization strategies
+- [ ] Create troubleshooting guide for canvas issues
+- [ ] Add API documentation for new canvas methods
+- [ ] Update README with new features from Cycle 19
 
-## Notes
-- Canvas refresh loop has been fixed (Cycle 16)
-- Viewport metadata warning resolved (Cycle 16)
-- Build is stable with no errors
-- 81% unit test pass rate achieved
+### Feature Enhancements (Lower Priority)
+
+#### Canvas Features
+- [ ] Add canvas grid snapping option
+- [ ] Implement canvas minimap for large boards
+- [ ] Add canvas zoom presets (fit, 100%, 200%, etc.)
+- [ ] Implement canvas rulers and guides
+
+#### Collaboration Features
+- [ ] Add real-time cursor tracking
+- [ ] Implement collaborative selection
+- [ ] Add user presence indicators
+- [ ] Create conflict resolution for concurrent edits
+
+### Infrastructure Improvements
+
+#### CI/CD
+- [ ] Set up automated type checking in CI
+- [ ] Add ESLint checks to PR validation
+- [ ] Implement automated performance testing
+- [ ] Create deployment preview environments
+
+#### Code Quality
+- [ ] Set up pre-commit hooks for linting
+- [ ] Implement code coverage requirements
+- [ ] Add automated dependency updates
+- [ ] Create coding standards documentation
+
+## Priority Order
+
+1. **Immediate (Blocking PR #10)**
+   - Fix TypeScript compilation errors
+   - Fix failing unit tests
+   - Install missing dependencies
+   - Clean up ESLint errors
+
+2. **High (Next Sprint)**
+   - Performance enhancements
+   - Testing improvements
+   - Critical documentation
+
+3. **Medium (Future Sprints)**
+   - Canvas feature enhancements
+   - Collaboration features
+   - Infrastructure improvements
+
+4. **Low (Backlog)**
+   - Nice-to-have features
+   - Non-critical optimizations
+   - Extended documentation
+
+## Success Criteria for Next Cycle
+- [ ] All TypeScript errors resolved (0 errors)
+- [ ] All unit tests passing (100% pass rate)
+- [ ] All dependencies installed and resolving
+- [ ] ESLint errors cleaned up
+- [ ] PR #10 approved and merged
+- [ ] New branch created for Cycle 20

@@ -50,50 +50,48 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
   return (
     <div 
       className={clsx(
-        'relative w-full h-full overflow-hidden bg-white',
+        'fixed inset-0 overflow-hidden bg-white',
         'focus:outline-none',
         className
       )}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
+      style={{
+        margin: 0,
+        padding: 0
+      }}
     >
-      {/* Toolbar */}
-      <Toolbar
-        onZoomIn={zoomIn}
-        onZoomOut={zoomOut}
-        onResetZoom={resetZoom}
-        onFitToScreen={fitToScreen}
-        onExport={exportCanvas}
-      />
-      
-      {/* Tool Panel */}
-      <ToolPanel />
-      
-      {/* Collaboration Panel */}
-      <CollaborationPanel />
-      
-      {/* Main Canvas Container */}
+      {/* Main Canvas Container - Full screen base layer */}
       <div
         ref={containerRef}
         className={clsx(
-          'absolute inset-0 cursor-crosshair',
+          'canvas-container',
+          'fixed inset-0 cursor-crosshair',
           'touch-none select-none',
           'bg-gray-50',
-          'w-full h-full' // Ensure full dimensions
+          'w-full h-full'
         )}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         style={{
-          touchAction: 'none', // Prevent default touch behaviors
+          position: 'fixed',
+          inset: 0,
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
           width: '100%',
           height: '100%',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0
+          margin: 0,
+          padding: 0,
+          touchAction: 'none',
+          willChange: 'transform',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
+          zIndex: 0
         }}
       >
         {/* Grid */}
@@ -108,9 +106,30 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         
         {/* Canvas content will be rendered here by Fabric.js */}
       </div>
+
+      {/* Toolbar - Overlay on top */}
+      <div className="toolbar" style={{ position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 100 }}>
+        <Toolbar
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onResetZoom={resetZoom}
+          onFitToScreen={fitToScreen}
+          onExport={exportCanvas}
+        />
+      </div>
+      
+      {/* Tool Panel - Overlay on left */}
+      <div style={{ position: 'fixed', left: 16, top: 88, zIndex: 100 }}>
+        <ToolPanel />
+      </div>
+      
+      {/* Collaboration Panel - Overlay on right */}
+      <div style={{ position: 'fixed', right: 16, top: 88, zIndex: 100 }}>
+        <CollaborationPanel />
+      </div>
       
       {/* Status Bar */}
-      <div className="absolute bottom-4 right-4 bg-white shadow-lg rounded-lg px-3 py-2 text-sm text-gray-600 border">
+      <div className="absolute bottom-4 right-4 bg-white shadow-lg rounded-lg px-3 py-2 text-sm text-gray-600 border" style={{ zIndex: 100 }}>
         <span>Board: {boardId}</span>
       </div>
       

@@ -560,15 +560,44 @@ export class CanvasEngine {
     })
   }
 
-  private throttledRender(): void {
-    if (this.renderThrottleId) {
-      return
+  private setupSmoothRendering(canvas: fabric.Canvas): void {
+    // Configure canvas for optimal rendering performance
+    if (canvas) {
+      // Enable GPU acceleration hints
+      const canvasEl = canvas.getElement()
+      if (canvasEl) {
+        canvasEl.style.willChange = 'transform'
+        canvasEl.style.transform = 'translateZ(0)'
+      }
+
+      // Setup RAF-based render loop
+      this.startRenderLoop()
+    }
+  }
+
+  private startRenderLoop(): void {
+    const render = () => {
+      // Only render if needed
+      if (this.renderThrottleId) {
+        this.canvas.renderAll()
+        this.renderThrottleId = null
+      }
+      this.renderRequestId = requestAnimationFrame(render)
     }
     
-    this.renderThrottleId = requestAnimationFrame(() => {
-      this.canvas.renderAll()
-      this.renderThrottleId = null
-    })
+    // Start the render loop
+    this.renderRequestId = requestAnimationFrame(render)
+  }
+
+  private scheduleRender(): void {
+    // Mark that a render is needed
+    if (!this.renderThrottleId) {
+      this.renderThrottleId = 1 // Use non-null value to indicate render is scheduled
+    }
+  }
+
+  private throttledRender(): void {
+    this.scheduleRender()
   }
 
   render(): void {

@@ -62,14 +62,7 @@ export class SecurityManager {
 
     return DOMPurify.sanitize(html, {
       ALLOWED_TAGS: ['b', 'i', 'u', 'strong', 'em', 'br', 'p', 'span', 'div'],
-      ALLOWED_ATTR: ['style', 'class'],
-      ALLOWED_STYLES: {
-        'color': true,
-        'background-color': true,
-        'font-size': true,
-        'font-weight': true,
-        'text-align': true
-      }
+      ALLOWED_ATTR: ['style', 'class']
     })
   }
 

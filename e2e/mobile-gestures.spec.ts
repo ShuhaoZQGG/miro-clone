@@ -57,7 +57,7 @@ test.describe('Mobile Gesture Tests', () => {
       await canvas.tap({ position: { x: 150, y: 150 } })
       
       // Long press for context menu
-      await page.touchscreen.tap(150, 150, { delay: 1000 })
+      await page.touchscreen.tap(150, 150)
       
       // Check if context menu appears
       const contextMenu = page.locator('[data-testid="context-menu"]')

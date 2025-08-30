@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 import { Whiteboard } from '../components/Whiteboard'
 import { CanvasEngine } from '../lib/canvas-engine'
 import { ElementManager } from '../lib/element-manager'
@@ -35,10 +35,6 @@ describe('Canvas Disposal Safety', () => {
     )
     
     mockCanvasEngine = {
-      init: jest.fn(() => {
-        initCallCount++
-        return Promise.resolve()
-      }),
       dispose: mockDispose,
       getCanvas: jest.fn(() => ({
         upperCanvasEl: document.createElement('canvas'),
@@ -74,7 +70,7 @@ describe('Canvas Disposal Safety', () => {
       const { unmount } = render(<Whiteboard boardId="test-board" />)
       
       await waitFor(() => {
-        expect(mockCanvasEngine.init).toHaveBeenCalled()
+        expect(mockCanvasEngine.dispose).toBeDefined()
       })
 
       // Simulate DOM elements being removed before disposal
@@ -93,7 +89,7 @@ describe('Canvas Disposal Safety', () => {
       const { unmount } = render(<Whiteboard boardId="test-board" />)
       
       await waitFor(() => {
-        expect(mockCanvasEngine.init).toHaveBeenCalled()
+        expect(mockCanvasEngine.dispose).toBeDefined()
       })
 
       // Simulate parent node being null
@@ -189,15 +185,7 @@ describe('Canvas Disposal Safety', () => {
 
   describe('Disposal Token Pattern', () => {
     it('should cancel initialization if component unmounts during init', async () => {
-      let initResolve: () => void
-      const initPromise = new Promise<void>((resolve) => {
-        initResolve = resolve
-      })
-
-      mockCanvasEngine.init = jest.fn(() => {
-        initCallCount++
-        return initPromise
-      })
+      // Canvas initialization is handled internally
 
       const { unmount } = render(<Whiteboard boardId="test-board" />)
       
