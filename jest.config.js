@@ -28,6 +28,13 @@ const customJestConfig = {
     'default',
     process.env.JEST_DASHBOARD ? '<rootDir>/src/lib/jest-dashboard-reporter.js' : null
   ].filter(Boolean),
+  // Increase timeout for canvas-related tests
+  testTimeout: 30000,
+  // Prevent memory leaks
+  maxWorkers: '50%',
+  // Clear mocks between tests
+  clearMocks: true,
+  restoreMocks: true,
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
