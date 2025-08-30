@@ -3,6 +3,7 @@ import {
   CanvasElement, 
   StickyNoteElement, 
   ShapeElement, 
+  LineElement,
   TextElement,
   ConnectorElement,
   FreehandElement,
@@ -24,6 +25,12 @@ interface ShapeStyle {
   stroke?: string
   strokeWidth?: number
   opacity?: number
+}
+
+interface LineStyle {
+  stroke?: string
+  strokeWidth?: number
+  strokeDasharray?: string
 }
 
 interface TextContent {
@@ -214,6 +221,103 @@ export class ElementManager {
     
     this.elements.push(circle)
     return circle
+  }
+
+  /**
+   * Creates an ellipse element
+   */
+  createEllipse(
+    position: Position, 
+    style?: ShapeStyle, 
+    size?: Size
+  ): ShapeElement {
+    const safePosition = this.sanitizePosition(position)
+    
+    const defaultStyle = {
+      fill: '#E5E7EB',
+      stroke: '#374151',
+      strokeWidth: 2,
+      opacity: 1
+    }
+
+    const defaultSize = { width: 200, height: 100 }
+    
+    const finalStyle = { ...defaultStyle, ...style }
+    const finalSize = size ? this.sanitizeSize(size, { width: 20, height: 20 }) : defaultSize
+
+    const ellipse: ShapeElement = {
+      id: this.generateId(),
+      type: 'ellipse',
+      boardId: this.boardId,
+      position: safePosition,
+      size: finalSize,
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      style: finalStyle
+    }
+
+    // Create Fabric.js object
+    this.createEllipseFabricObject(ellipse)
+    
+    this.elements.push(ellipse)
+    return ellipse
+  }
+
+  /**
+   * Creates a line element
+   */
+  createLine(
+    startPoint: Position,
+    endPoint: Position,
+    style?: LineStyle
+  ): LineElement {
+    const defaultStyle = {
+      stroke: '#000000',
+      strokeWidth: 2,
+      strokeDasharray: undefined
+    }
+    
+    const finalStyle = { ...defaultStyle, ...style }
+    
+    // Calculate position and size from start and end points
+    const position = {
+      x: Math.min(startPoint.x, endPoint.x),
+      y: Math.min(startPoint.y, endPoint.y)
+    }
+    
+    const size = {
+      width: Math.abs(endPoint.x - startPoint.x),
+      height: Math.abs(endPoint.y - startPoint.y)
+    }
+
+    const line: LineElement = {
+      id: this.generateId(),
+      type: 'line',
+      boardId: this.boardId,
+      position,
+      size,
+      rotation: 0,
+      layerIndex: this.nextLayerIndex++,
+      createdBy: this.currentUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: false,
+      isVisible: true,
+      startPoint,
+      endPoint,
+      style: finalStyle
+    }
+
+    // Create Fabric.js object
+    this.createLineFabricObject(line)
+    
+    this.elements.push(line)
+    return line
   }
 
   /**
@@ -453,6 +557,63 @@ export class ElementManager {
     }
   }
 
+  private createEllipseFabricObject(element: ShapeElement): void {
+    try {
+      const ellipse = new fabric.Ellipse({
+        left: element.position.x,
+        top: element.position.y,
+        rx: element.size.width / 2,
+        ry: element.size.height / 2,
+        fill: element.style.fill,
+        stroke: element.style.stroke,
+        strokeWidth: element.style.strokeWidth,
+        opacity: element.style.opacity
+      })
+
+      ;(ellipse as any).elementId = element.id
+      ;(ellipse as any).elementType = element.type
+
+      ellipse.setCoords()
+      ellipse.on('modified', () => this.handleFabricObjectModified(element.id))
+
+      this.canvas.add(ellipse)
+      this.canvas.renderAll()
+
+    } catch (error) {
+      console.warn('Failed to create ellipse Fabric object:', error)
+    }
+  }
+
+  private createLineFabricObject(element: LineElement): void {
+    try {
+      const line = new fabric.Line([
+        element.startPoint.x,
+        element.startPoint.y,
+        element.endPoint.x,
+        element.endPoint.y
+      ], {
+        stroke: element.style.stroke,
+        strokeWidth: element.style.strokeWidth,
+        strokeDashArray: element.style.strokeDasharray ? element.style.strokeDasharray.split(',').map(Number) : undefined,
+        selectable: true,
+        hasControls: true,
+        hasBorders: true
+      })
+
+      ;(line as any).elementId = element.id
+      ;(line as any).elementType = element.type
+
+      line.setCoords()
+      line.on('modified', () => this.handleFabricObjectModified(element.id))
+
+      this.canvas.add(line)
+      this.canvas.renderAll()
+
+    } catch (error) {
+      console.warn('Failed to create line Fabric object:', error)
+    }
+  }
+
   private createTextFabricObject(element: TextElement): void {
     try {
       const text = new fabric.Text(element.content.text, {
@@ -492,13 +653,19 @@ export class ElementManager {
       })
 
       // Update type-specific properties
-      if (element.type === 'rectangle' || element.type === 'circle') {
+      if (element.type === 'rectangle' || element.type === 'circle' || element.type === 'ellipse') {
         const shapeElement = element as ShapeElement
         fabricObject.set({
           fill: shapeElement.style.fill,
           stroke: shapeElement.style.stroke,
           strokeWidth: shapeElement.style.strokeWidth,
           opacity: shapeElement.style.opacity
+        })
+      } else if (element.type === 'line') {
+        const lineElement = element as LineElement
+        fabricObject.set({
+          stroke: lineElement.style.stroke,
+          strokeWidth: lineElement.style.strokeWidth
         })
       }
 

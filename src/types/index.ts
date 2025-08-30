@@ -70,7 +70,7 @@ export interface BoardPermission {
 }
 
 // Element types
-export type ElementType = 'sticky_note' | 'rectangle' | 'circle' | 'text' | 'image' | 'connector' | 'freehand'
+export type ElementType = 'sticky_note' | 'rectangle' | 'circle' | 'ellipse' | 'line' | 'text' | 'image' | 'connector' | 'freehand'
 
 export interface BaseElement {
   id: string
@@ -99,12 +99,23 @@ export interface StickyNoteElement extends BaseElement {
 }
 
 export interface ShapeElement extends BaseElement {
-  type: 'rectangle' | 'circle'
+  type: 'rectangle' | 'circle' | 'ellipse'
   style: {
     fill: string
     stroke: string
     strokeWidth: number
     opacity: number
+  }
+}
+
+export interface LineElement extends BaseElement {
+  type: 'line'
+  startPoint: Position
+  endPoint: Position
+  style: {
+    stroke: string
+    strokeWidth: number
+    strokeDasharray?: string
   }
 }
 
@@ -160,6 +171,7 @@ export interface FreehandElement extends BaseElement {
 export type CanvasElement = 
   | StickyNoteElement 
   | ShapeElement 
+  | LineElement
   | TextElement 
   | ImageElement 
   | ConnectorElement 
