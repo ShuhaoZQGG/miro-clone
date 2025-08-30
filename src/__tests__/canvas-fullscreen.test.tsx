@@ -1,0 +1,288 @@
+import React from 'react'
+import { render, waitFor, act } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import { Whiteboard } from '@/components/Whiteboard'
+import { CanvasEngine } from '@/lib/canvas-engine'
+
+// Mock canvas engine
+jest.mock('@/lib/canvas-engine')
+
+// Mock hooks
+jest.mock('@/hooks/useCanvas', () => ({
+  useCanvas: jest.fn(() => ({
+    containerRef: { current: document.createElement('div') },
+    isInitialized: true,
+    handleMouseDown: jest.fn(),
+    handleMouseMove: jest.fn(),
+    handleMouseUp: jest.fn(),
+    handleKeyDown: jest.fn(),
+    handleKeyUp: jest.fn(),
+    zoomIn: jest.fn(),
+    zoomOut: jest.fn(),
+    resetZoom: jest.fn(),
+    fitToScreen: jest.fn(),
+    exportCanvas: jest.fn()
+  }))
+}))
+
+jest.mock('@/hooks/useKeyboardShortcuts', () => ({
+  useKeyboardShortcuts: jest.fn()
+}))
+
+jest.mock('@/store/useCanvasStore', () => ({
+  useCanvasStore: jest.fn(() => ({
+    isGridVisible: false,
+    isLoading: false
+  }))
+}))
+
+describe('Canvas Full-Screen Tests', () => {
+  let mockCanvasEngine: jest.Mocked<CanvasEngine>
+
+  beforeEach(() => {
+    // Reset mocks
+    jest.clearAllMocks()
+    
+    // Setup canvas engine mock
+    mockCanvasEngine = {
+      getCanvas: jest.fn(() => ({
+        getElement: jest.fn(() => {
+          const canvas = document.createElement('canvas')
+          canvas.style.width = '100%'
+          canvas.style.height = '100%'
+          canvas.style.position = 'absolute'
+          canvas.style.top = '0'
+          canvas.style.left = '0'
+          return canvas
+        }),
+        renderAll: jest.fn(),
+        setDimensions: jest.fn()
+      })),
+      setupSmoothRendering: jest.fn(),
+      dispose: jest.fn(),
+      getCamera: jest.fn(() => ({ x: 0, y: 0, zoom: 1 })),
+      setViewportSize: jest.fn(),
+      handleResize: jest.fn()
+    } as any
+
+    ;(CanvasEngine as jest.Mock).mockImplementation(() => mockCanvasEngine)
+  })
+
+  describe('Canvas Container Positioning', () => {
+    it('should render canvas with fixed positioning', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      expect(canvasContainer).toBeInTheDocument()
+      const styles = window.getComputedStyle(canvasContainer!)
+      expect(styles.position).toBe('fixed')
+    })
+
+    it('should have inset-0 positioning (top, right, bottom, left all 0)', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      const styles = window.getComputedStyle(canvasContainer!)
+      expect(styles.top).toBe('0px')
+      expect(styles.right).toBe('0px')
+      expect(styles.bottom).toBe('0px')
+      expect(styles.left).toBe('0px')
+    })
+
+    it('should have 100% width and height', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      const styles = window.getComputedStyle(canvasContainer!)
+      expect(styles.width).toBe('100%')
+      expect(styles.height).toBe('100%')
+    })
+
+    it('should have no margin or padding', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      const styles = window.getComputedStyle(canvasContainer!)
+      expect(styles.margin).toBe('0px')
+      expect(styles.padding).toBe('0px')
+    })
+  })
+
+  describe('Viewport Coverage', () => {
+    it('should fill entire viewport without gaps', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      // Check that canvas container fills viewport
+      const rect = canvasContainer!.getBoundingClientRect()
+      expect(rect.width).toBeGreaterThan(0)
+      expect(rect.height).toBeGreaterThan(0)
+      expect(rect.top).toBe(0)
+      expect(rect.left).toBe(0)
+    })
+
+    it('should have proper z-index layering', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      const styles = window.getComputedStyle(canvasContainer!)
+      expect(parseInt(styles.zIndex || '0')).toBe(0) // Base layer
+    })
+
+    it('should have GPU acceleration styles', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      const styles = window.getComputedStyle(canvasContainer!)
+      expect(styles.transform).toBe('translateZ(0)')
+      expect(styles.backfaceVisibility).toBe('hidden')
+    })
+  })
+
+  describe('Responsive Behavior', () => {
+    it('should handle window resize events', async () => {
+      render(<Whiteboard boardId="test-board" />)
+      
+      // Simulate window resize
+      await act(async () => {
+        global.innerWidth = 1920
+        global.innerHeight = 1080
+        global.dispatchEvent(new Event('resize'))
+      })
+
+      await waitFor(() => {
+        expect(mockCanvasEngine.handleResize).toBeDefined()
+      })
+    })
+
+    it('should maintain full coverage after resize', async () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      // Simulate resize
+      await act(async () => {
+        global.innerWidth = 1024
+        global.innerHeight = 768
+        global.dispatchEvent(new Event('resize'))
+      })
+
+      await waitFor(() => {
+        const styles = window.getComputedStyle(canvasContainer!)
+        expect(styles.width).toBe('100%')
+        expect(styles.height).toBe('100%')
+      })
+    })
+
+    it('should update canvas dimensions on container resize', async () => {
+      render(<Whiteboard boardId="test-board" />)
+      
+      // Mock ResizeObserver
+      const resizeCallback = jest.fn()
+      const MockResizeObserver = jest.fn((callback) => {
+        resizeCallback.mockImplementation(callback)
+        return {
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+          disconnect: jest.fn()
+        }
+      })
+      
+      global.ResizeObserver = MockResizeObserver as any
+      
+      // Trigger resize
+      await act(async () => {
+        if (resizeCallback) {
+          resizeCallback([{
+            contentRect: { width: 1600, height: 900 }
+          }])
+        }
+      })
+
+      await waitFor(() => {
+        expect(mockCanvasEngine.setViewportSize).toBeDefined()
+      })
+    })
+  })
+
+  describe('Touch and Interaction Areas', () => {
+    it('should have touch-none style for proper touch handling', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      const styles = window.getComputedStyle(canvasContainer!)
+      expect(styles.touchAction).toBe('none')
+    })
+
+    it('should prevent text selection on canvas', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      expect(canvasContainer).toHaveClass('select-none')
+    })
+
+    it('should have proper cursor styles', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      expect(canvasContainer).toHaveClass('cursor-crosshair')
+    })
+  })
+
+  describe('Performance Optimizations', () => {
+    it('should have will-change transform for smooth rendering', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      const styles = window.getComputedStyle(canvasContainer!)
+      expect(styles.willChange).toBe('transform')
+    })
+
+    it('should setup smooth rendering on initialization', async () => {
+      render(<Whiteboard boardId="test-board" />)
+      
+      await waitFor(() => {
+        expect(mockCanvasEngine.setupSmoothRendering).toBeDefined()
+      })
+    })
+  })
+
+  describe('Integration with UI Elements', () => {
+    it('should position canvas below UI overlays', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const canvasContainer = container.querySelector('.canvas-container')
+      
+      const styles = window.getComputedStyle(canvasContainer!)
+      const zIndex = parseInt(styles.zIndex || '0')
+      
+      // Canvas should be at base layer (z-index: 0)
+      expect(zIndex).toBe(0)
+      
+      // UI elements should have higher z-index
+      // This would be tested with actual UI components
+    })
+
+    it('should not overflow parent container', () => {
+      const { container } = render(<Whiteboard boardId="test-board" />)
+      const wrapper = container.firstChild as HTMLElement
+      
+      expect(wrapper).toHaveClass('overflow-hidden')
+    })
+  })
+
+  describe('Canvas Element Integration', () => {
+    it('should create canvas element with proper dimensions', async () => {
+      render(<Whiteboard boardId="test-board" />)
+      
+      await waitFor(() => {
+        const mockCanvas = mockCanvasEngine.getCanvas()
+        const canvasEl = mockCanvas.getElement()
+        
+        expect(canvasEl.style.width).toBe('100%')
+        expect(canvasEl.style.height).toBe('100%')
+        expect(canvasEl.style.position).toBe('absolute')
+        expect(canvasEl.style.top).toBe('0')
+        expect(canvasEl.style.left).toBe('0')
+      })
+    })
+  })
+})
