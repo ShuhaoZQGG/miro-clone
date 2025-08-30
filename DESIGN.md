@@ -1,104 +1,90 @@
-# Cycle 23: UI/UX Design Specifications
+# Cycle 25: UI/UX Design Specifications
 
-## Design Overview
-Performance monitoring dashboard and test infrastructure improvements for a collaborative whiteboard application with full-screen canvas support.
+## Design Focus
+Enhance developer experience with integrated performance monitoring and improved test visibility while maintaining existing full-screen canvas functionality.
 
 ## User Journeys
 
-### Journey 1: Canvas Full-Screen Experience
-1. User loads board → Canvas instantly fills entire viewport (0 gaps)
-2. Window resizes → Canvas adapts smoothly maintaining aspect ratio
-3. User interacts → Smooth 60fps drag, create, and resize operations
-4. Performance monitored → Real-time FPS counter shows performance
+### 1. Developer Testing Workflow
+**Goal**: Quickly identify and fix test failures
+- Developer runs test suite → Visual test dashboard shows real-time progress
+- Failed tests highlighted with clear error messages and stack traces
+- One-click navigation to failing test file
+- RAF timing issues clearly indicated with suggested fixes
 
-### Journey 2: Performance Monitoring
-1. User opens board → FPS counter appears in corner
-2. System tracks performance → Real-time FPS updates every 250ms
-3. User sees performance issues → Visual indicators change color
-4. User opens metrics dashboard → Detailed performance data displayed
+### 2. Performance Monitoring Flow
+**Goal**: Monitor canvas performance during development
+- Developer enables performance overlay (keyboard shortcut: Ctrl+Shift+P)
+- FPS counter displays in top-right corner (semi-transparent, draggable)
+- Memory usage bar chart updates every second
+- Performance degradation triggers visual warning (red tint when <30fps)
 
-### Journey 3: Smooth Interactions
-1. User creates element → Ghost preview follows cursor smoothly
-2. User drags element → Momentum physics provide natural feel
-3. User resizes element → Real-time preview at 60fps
-4. User releases → Element animates to final position
+### 3. Canvas Interaction Debugging
+**Goal**: Debug element interactions and data properties
+- Developer hovers over canvas element → Tooltip shows element properties
+- Debug panel (toggle: Ctrl+Shift+D) displays:
+  - Active element details
+  - Event stream
+  - Canvas state tree
+  - Element data properties
 
-## Layout Specifications
+## Component Mockups
 
-### Canvas Container (Full-Screen)
+### Performance Overlay
 ```
-Position: fixed
-Inset: 0 (top: 0, right: 0, bottom: 0, left: 0)
-Width: 100vw
-Height: 100vh
-Z-index: 0 (base layer)
-Background: #F7F7F9 (light mode) / #1A1A1A (dark mode)
-Overflow: hidden
-```
-
-### FPS Counter Component
-```
-Position: fixed
-Top: 16px
-Right: 16px
-Width: auto (min 80px)
-Height: 32px
+┌─────────────────────────────────┐
+│ FPS: 60 ▂▄▆█████████            │
+│ MEM: 124MB ████████░░           │
+│ OBJ: 245 elements               │
+│ RAF: 16.67ms                    │
+└─────────────────────────────────┘
+Position: Fixed top-right
 Background: rgba(0,0,0,0.7)
-Color: #FFFFFF
-Font: 12px monospace
-Border-radius: 4px
-Padding: 4px 8px
-Z-index: 1000
-Display: flex
-Align-items: center
-Gap: 8px
+Text: #00ff00 (green) normal, #ff0000 (red) warnings
 ```
 
-**Visual States:**
-- Good (>= 50 FPS): Green indicator (#4CAF50)
-- Medium (30-49 FPS): Yellow indicator (#FFC107)
-- Poor (< 30 FPS): Red indicator (#F44336)
-
-### Performance Metrics Dashboard
+### Test Status Dashboard
 ```
-Position: fixed
-Bottom: 16px
-Right: 16px
+┌─────────────────────────────────────────┐
+│ Test Runner           [Stop] [Clear]    │
+├─────────────────────────────────────────┤
+│ ✓ 247 Passed  ✗ 59 Failed  ⚡ 0 Running │
+├─────────────────────────────────────────┤
+│ ✗ canvas-fullscreen.test.tsx:45        │
+│   Expected fullscreen, got windowed     │
+│ ✗ smooth-interactions.test.tsx:112     │
+│   RAF timing mismatch (expected 16ms)  │
+│ ✗ FPSCounter.test.tsx:23              │
+│   Mock not properly initialized        │
+└─────────────────────────────────────────┘
+Background: Dark theme (#1a1a1a)
+Expandable/Collapsible sections
+```
+
+### Element Inspector Panel
+```
+┌──────────────────────────┐
+│ Element Inspector    [X] │
+├──────────────────────────┤
+│ Type: Rectangle         │
+│ ID: elem-uuid-12345     │
+│ Position: (100, 200)    │
+│ Size: 200x150           │
+│ Data: {                 │
+│   color: "#ff6b6b"     │
+│   layer: 2              │
+│   locked: false        │
+│ }                       │
+├──────────────────────────┤
+│ Events (last 5):        │
+│ • mousedown 12:34:56    │
+│ • drag 12:34:57         │
+│ • dragend 12:34:58      │
+└──────────────────────────┘
+Position: Docked left
 Width: 280px
-Max-height: 400px
-Background: rgba(255,255,255,0.95)
-Border: 1px solid #E0E0E0
-Border-radius: 8px
-Shadow: 0 2px 8px rgba(0,0,0,0.1)
-Z-index: 999
-Padding: 12px
+Resizable
 ```
-
-**Sections:**
-1. **Header**
-   - Title: "Performance Metrics"
-   - Collapse/Expand toggle button
-   - Background: transparent
-   - Height: 32px
-   - Cursor: pointer
-
-2. **FPS Section**
-   - Current FPS: Large display (14px)
-   - Average FPS: 10-sample window
-   - Min/Max values: Secondary text (10px)
-   - Visual graph: Optional spark line
-
-3. **Memory Section**
-   - Heap used / total in MB
-   - Memory limit display
-   - Usage percentage with progress bar
-   - Color coding for memory pressure
-
-4. **Render Section**
-   - Total element count
-   - Average render time (ms)
-   - Frame drops counter
-   - Last update timestamp
 
 ## Interaction Design
 
@@ -240,47 +226,46 @@ const rafMock = {
 --easing-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55)
 ```
 
-## Accessibility
+## Accessibility Specifications
 
-### Keyboard Support
+### Keyboard Navigation
 - Tab: Navigate between UI elements
-- Arrow keys: Pan canvas (when focused)
-- Escape: Close/collapse dashboard
-- Space: Toggle dashboard state
-- Cmd/Ctrl + Scroll: Zoom in/out
+- Ctrl+Shift+P: Toggle performance overlay
+- Ctrl+Shift+D: Toggle debug panel
+- Ctrl+Shift+T: Focus test dashboard
+- Escape: Close active panel
 
 ### Screen Reader Support
-- ARIA labels for all metrics
-- Live regions for FPS updates (throttled)
-- Role descriptions for interactive elements
-- Status announcements for performance alerts
+- ARIA labels for all controls
+- Performance metrics announced on significant changes
+- Test failures announced immediately
+- Role="alert" for critical warnings
 
 ### Visual Accessibility
-- High contrast text (WCAG AAA on dark backgrounds)
-- Minimum touch target: 44x44px
-- Clear focus indicators (3px outline)
-- Color-blind safe palette (red/green alternatives)
-- Text-based indicators alongside colors
+- High contrast mode support
+- Minimum 4.5:1 contrast ratio
+- Color-blind friendly status indicators:
+  - Success: ✓ checkmark + green
+  - Error: ✗ X mark + red
+  - Warning: ⚠ triangle + yellow
+- Adjustable overlay opacity (40-90%)
 
 ## Responsive Design
 
-### Desktop (> 1024px)
-- Full dashboard with all metrics visible
-- FPS counter in top-right corner
-- Detailed performance graphs
-- Multi-column layout for metrics
+### Desktop (>1200px)
+- Full canvas with all panels visible
+- Performance overlay in corner
+- Debug panels docked to sides
 
-### Tablet (768px - 1024px)
-- Compact dashboard layout
-- Essential metrics only (FPS, memory)
-- Single column layout
-- Smaller font sizes
+### Tablet (768-1200px)
+- Canvas maintains full viewport
+- Panels collapse to icons
+- Tap to expand panels temporarily
 
-### Mobile (< 768px)
-- FPS counter only (no dashboard)
-- Simplified touch interactions
-- Performance logging to console only
-- Optimized for touch gestures
+### Mobile (Testing Only, <768px)
+- Read-only canvas view
+- Performance metrics in header bar
+- Swipe gestures for panel access
 
 ## Performance Optimizations
 
@@ -298,25 +283,52 @@ const rafMock = {
 - Maximum 100MB heap usage target
 - Garbage collection triggers at 80% threshold
 
+## Error States
+
+### Build Errors
+- Full-screen red overlay with error details
+- Stack trace with syntax highlighting
+- Quick fix suggestions when available
+- Link to relevant documentation
+
+### Test Failures
+- Inline error display in test list
+- Diff view for assertion failures
+- Timing diagram for RAF issues
+- Copy error to clipboard button
+
+### Performance Warnings
+- Yellow border when FPS < 45
+- Red border when FPS < 30
+- Memory leak detection alert
+- Suggested optimizations panel
+
+## Developer Tools Integration
+
+### Browser DevTools
+- Custom formatters for canvas elements
+- Performance marks for key operations
+- Console groups for debug output
+- Network timing for asset loading
+
+### VS Code Integration
+- Click to open file at line
+- Inline test status indicators
+- Performance hints in editor
+- Quick fix code actions
+
+## Implementation Priority
+
+1. **Critical**: Fix TypeScript build error display
+2. **High**: Test dashboard with real-time updates
+3. **High**: Basic performance overlay (FPS only)
+4. **Medium**: Element inspector panel
+5. **Medium**: Enhanced performance metrics
+6. **Low**: VS Code integration features
+
 ## Success Metrics
-
-### Performance Targets
-- Canvas fills 100% viewport with no gaps ✓
-- Consistent 60fps during all interactions
-- < 10ms input response time
-- < 100ms resize adaptation
-- Zero visual glitches or tearing
-
-### Quality Metrics
-- 100% test pass rate (target)
-- Zero TypeScript errors ✓
-- Zero ESLint errors ✓
-- < 5 ESLint warnings
-- Performance dashboard renders < 16ms
-
-### User Experience
-- Smooth element creation and manipulation
-- Responsive to all user inputs
-- Clear performance feedback
-- No unexpected behaviors
-- Professional, polished interface
+- Build errors identified within 100ms
+- Test results updated in real-time
+- Performance overlay < 1% CPU usage
+- All panels keyboard accessible
+- Zero visual glitches at 60fps

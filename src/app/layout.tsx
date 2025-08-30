@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { TestDashboard } from '@/components/TestDashboard'
+import { PerformanceOverlay } from '@/components/PerformanceOverlay'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,6 +28,8 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className={`${inter.className} h-full antialiased`}>
         {children}
+        <TestDashboard />
+        <PerformanceOverlay />
       </body>
     </html>
   )
