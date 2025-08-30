@@ -157,7 +157,11 @@ describe('Canvas Full-Screen Tests', () => {
 
   describe('Responsive Behavior', () => {
     it('should handle window resize events', async () => {
-      render(<Whiteboard boardId="test-board" />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       
       // Simulate window resize
       await act(async () => {
@@ -192,7 +196,11 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should update canvas dimensions on container resize', async () => {
-      render(<Whiteboard boardId="test-board" />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       
       // Mock ResizeObserver
       const resizeCallback = jest.fn()
@@ -258,7 +266,11 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should setup smooth rendering on initialization', async () => {
-      render(<Whiteboard boardId="test-board" />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       
       await waitFor(() => {
         // Check that the canvas is properly initialized
@@ -293,7 +305,11 @@ describe('Canvas Full-Screen Tests', () => {
 
   describe('Canvas Element Integration', () => {
     it('should create canvas element with proper dimensions', async () => {
-      render(<Whiteboard boardId="test-board" />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       
       await waitFor(() => {
         const mockCanvas = mockCanvasEngine.getCanvas()
