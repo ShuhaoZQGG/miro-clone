@@ -1,21 +1,20 @@
 # Next Cycle Tasks
 
-## Immediate Priority (Blocking Issues)
-1. **Fix TypeScript Build Error**
-   - Resolve `Collaborator` vs `UserPresence` type mismatch in `websocket-client.ts:81`
-   - Ensure build passes without errors
-   - Verify all TypeScript types are correctly aligned
-
-## Security Requirements
-1. **WebSocket Authentication**
-   - Add JWT verification to WebSocket handshake
-   - Implement authentication middleware for Socket.io
-   - Secure board rooms with access control
+## Immediate Priority (From Cycle 37 Review)
+1. **Database Migrations**
+   - Set up Prisma migrations for database schema management
+   - Create initial migration scripts
+   - Document migration workflow
    
-2. **Rate Limiting**
-   - Add rate limiting to WebSocket events
-   - Implement DDoS protection
-   - Add connection limits per user
+2. **WebSocket Integration**
+   - Integrate WebSocket server with main application port
+   - Configure proper proxy settings for production
+   - Remove separate port 3001 dependency
+
+3. **Frontend Updates**
+   - Update components to handle new WebSocket events
+   - Integrate conflict resolution UI feedback
+   - Add collaborative cursor smoothing
 
 ## Technical Debt
 1. **Cursor Position Transformation**
