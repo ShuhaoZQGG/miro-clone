@@ -1,15 +1,40 @@
 # Next Cycle Tasks
 
-## Cycle 32 - Critical Fixes & Production Readiness
+## Cycle 33 - WebSocket Server & Production Infrastructure
 
-### Priority 0: Fix Current Cycle Issues (MUST DO FIRST)
-1. **Fix TypeScript Compilation Errors**
-   - [ ] Fix Avatar style prop type mismatch in CollaborationPanel.tsx (lines 69, 149)
-   - [ ] Add currentUserId prop to CollaborativeCursors in Whiteboard.tsx (line 191)
-   - [ ] Ensure npm run build passes successfully
-   - [ ] Re-submit PR #20 for review and merge
+### ✅ Cycle 32 Completed
+1. **TypeScript Compilation Errors - FIXED**
+   - ✅ Fixed Avatar style prop type mismatch in CollaborationPanel.tsx
+   - ✅ Added currentUserId prop to CollaborativeCursors in Whiteboard.tsx
+   - ✅ Build now passes successfully
+   - ✅ PR #21 merged to main
 
-### Priority 1: Complete Authentication System
+### Priority 0: WebSocket Server Implementation (CRITICAL)
+1. **Create WebSocket Server**
+   - [ ] Create server/websocket.js with Socket.io server
+   - [ ] Implement connection handling
+   - [ ] Add room management for boards
+   - [ ] Set up event handlers for real-time sync
+   
+2. **Connect to Frontend**
+   - [ ] Update WebSocket hook to connect to real server
+   - [ ] Test cursor broadcasting
+   - [ ] Verify operation synchronization
+   - [ ] Ensure user presence tracking works
+
+### Priority 1: Database Connection (CRITICAL)
+1. **PostgreSQL Setup**
+   - [ ] Replace mock database client with real PostgreSQL connection
+   - [ ] Run schema.sql to create tables
+   - [ ] Test database operations
+   - [ ] Implement connection pooling
+
+2. **Redis Integration**
+   - [ ] Connect to Redis for session management
+   - [ ] Configure pub/sub for real-time events
+   - [ ] Test session persistence
+
+### Priority 2: Complete Authentication System
 1. **JWT Implementation**
    - [ ] Install jsonwebtoken package
    - [ ] Generate JWT tokens on login/signup
@@ -22,7 +47,14 @@
    - [ ] Implement secure password comparison
    - [ ] Add password strength validation
 
-## Priority 2: Infrastructure Setup
+## Priority 3: Test Stabilization
+1. **Fix Failing Tests**
+   - [ ] Resolve canvas-engine timeout issues (48 tests failing)
+   - [ ] Fix Fabric.js mock problems
+   - [ ] Improve test isolation
+   - [ ] Target >95% pass rate
+
+## Priority 4: Infrastructure Setup
 1. **Database Configuration**
    - Set up PostgreSQL for board persistence
    - Configure Redis for session management
