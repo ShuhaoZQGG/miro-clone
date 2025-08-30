@@ -78,13 +78,16 @@ describe('PerformanceMetrics', () => {
     const toggleButton = screen.getByTestId('metrics-toggle')
     const content = screen.getByTestId('metrics-content')
     
-    expect(content).toBeVisible()
+    // Check initial state - content is visible (no display: none)
+    expect(content.style.display).not.toBe('none')
     
+    // Click to collapse
     fireEvent.click(toggleButton)
-    expect(content).not.toBeVisible()
+    expect(content.style.display).toBe('none')
     
+    // Click to expand
     fireEvent.click(toggleButton)
-    expect(content).toBeVisible()
+    expect(content.style.display).toBe('block')
   })
 
   it('should show performance warnings', () => {
@@ -114,10 +117,11 @@ describe('PerformanceMetrics', () => {
     render(<PerformanceMetrics position="bottom-right" />)
     
     const dashboard = screen.getByTestId('performance-metrics')
-    expect(dashboard).toHaveStyle({
-      bottom: '10px',
-      right: '10px'
-    })
+    // Check that the element has the expected inline styles for bottom-right position
+    const styles = window.getComputedStyle(dashboard)
+    expect(dashboard.style.bottom).toBe('10px')
+    expect(dashboard.style.right).toBe('10px')
+    expect(dashboard.style.position).toBe('fixed')
   })
 
   it('should support minimal view mode', () => {

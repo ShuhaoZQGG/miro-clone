@@ -24,17 +24,65 @@ jest.mock('@/lib/canvas-engine', () => ({
 }))
 
 // Mock the store
+const mockStoreState = {
+  isGridVisible: false,
+  isLoading: false,
+  camera: { x: 0, y: 0, zoom: 1 },
+  tool: { type: 'select' },
+  elements: [],
+  selectedElementIds: [],
+  collaborators: new Map(),
+  isConnected: false,
+  setTool: jest.fn(),
+  clearSelection: jest.fn(),
+  addElement: jest.fn(),
+  updateElement: jest.fn(),
+  removeElement: jest.fn(),
+  setSelectedElements: jest.fn()
+}
+
 jest.mock('@/store/useCanvasStore', () => ({
-  useCanvasStore: jest.fn(() => ({
-    isGridVisible: false,
-    isLoading: false,
-    camera: { x: 0, y: 0, zoom: 1 },
-    tool: { type: 'select' },
-    elements: [],
-    selectedElementIds: [],
-    collaborators: new Map(),
-    isConnected: false
+  useCanvasStore: Object.assign(
+    jest.fn(() => mockStoreState),
+    {
+      getState: jest.fn(() => mockStoreState)
+    }
+  ),
+  useCanvasActions: jest.fn(() => ({
+    createElement: jest.fn(),
+    duplicateElements: jest.fn(),
+    moveElements: jest.fn(),
+    deleteSelectedElements: jest.fn(),
+    selectAll: jest.fn()
   }))
+}))
+
+// Mock hooks
+jest.mock('@/hooks/useCanvas', () => ({
+  useCanvas: jest.fn(() => ({
+    canvasRef: { current: document.createElement('canvas') },
+    isInitialized: true,
+    engine: {
+      getCanvas: jest.fn(() => ({
+        getElement: jest.fn(() => {
+          const canvas = document.createElement('canvas')
+          canvas.style.width = '100%'
+          canvas.style.height = '100%'
+          return canvas
+        }),
+        renderAll: jest.fn(),
+        setDimensions: jest.fn()
+      })),
+      getCamera: jest.fn(() => ({ x: 0, y: 0, zoom: 1 })),
+      dispose: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn()
+    }
+  }))
+}))
+
+jest.mock('@/hooks/useKeyboardShortcuts', () => ({
+  useKeyboardShortcuts: jest.fn()
 }))
 
 // Mock ResizeObserver
@@ -77,7 +125,11 @@ describe('Whiteboard Full-Screen Tests', () => {
       // Check for full-screen styling
       const styles = window.getComputedStyle(canvasContainer as Element)
       expect(styles.position).toBe('fixed')
-      expect(styles.inset).toBe('0')
+      // Check individual properties instead of inset shorthand (better jsdom compatibility)
+      expect(styles.top).toBe('0px')
+      expect(styles.right).toBe('0px')
+      expect(styles.bottom).toBe('0px')
+      expect(styles.left).toBe('0px')
     })
 
     it('should apply fixed positioning with inset-0', () => {

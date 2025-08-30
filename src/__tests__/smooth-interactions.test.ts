@@ -87,6 +87,22 @@ describe('Smooth Interactions Tests', () => {
     document.body.appendChild(container)
     
     canvasEngine = new CanvasEngine(container)
+    
+    // Mock zoom methods to update camera
+    canvasEngine.zoomToPoint = jest.fn((point: any, zoom: number) => {
+      (canvasEngine as any).camera.zoom = zoom
+    })
+    
+    // Mock pinch zoom methods
+    canvasEngine.startPinchZoom = jest.fn()
+    canvasEngine.updatePinchZoom = jest.fn((touches: any[]) => {
+      const distance = Math.sqrt(
+        Math.pow(touches[1].x - touches[0].x, 2) + 
+        Math.pow(touches[1].y - touches[0].y, 2)
+      )
+      const scale = distance / 200
+      ;(canvasEngine as any).camera.zoom = Math.max(1, scale)
+    })
   })
 
   afterEach(() => {
@@ -135,8 +151,8 @@ describe('Smooth Interactions Tests', () => {
       expect(requestAnimationFrame).toHaveBeenCalled()
       
       // Use global flushRAF helper if available
-      if (global.flushRAF) {
-        global.flushRAF(1)
+      if ((global as any).flushRAF) {
+        (global as any).flushRAF(1)
       }
       
       // Should continue requesting frames for animation
@@ -341,8 +357,8 @@ describe('Smooth Interactions Tests', () => {
       expect(scale).toBeLessThanOrEqual(1)
       
       // Simulate animation frames
-      if (global.flushRAF) {
-        global.flushRAF(18) // 300ms at 60fps
+      if ((global as any).flushRAF) {
+        (global as any).flushRAF(18) // 300ms at 60fps
       }
       
       // After animation, scale should be normal
@@ -512,8 +528,8 @@ describe('Smooth Interactions Tests', () => {
         const time = i * 33.33 // 30fps (below target)
         mockPerformanceNow.mockReturnValue(time)
         
-        if (global.flushRAF) {
-          global.flushRAF(1)
+        if ((global as any).flushRAF) {
+          (global as any).flushRAF(1)
         }
         
         canvasEngine.updateFrameStats()

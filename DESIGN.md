@@ -1,334 +1,314 @@
-# Cycle 25: UI/UX Design Specifications
+# Cycle 29: UI/UX Design Specifications
 
 ## Design Focus
-Enhance developer experience with integrated performance monitoring and improved test visibility while maintaining existing full-screen canvas functionality.
+Complete all remaining production features for the Miro clone, focusing on real performance monitoring, persistence layer, undo/redo system, and export functionality while fixing critical TypeScript compilation issues.
 
 ## User Journeys
 
-### 1. Developer Testing Workflow
-**Goal**: Quickly identify and fix test failures
-- Developer runs test suite → Visual test dashboard shows real-time progress
-- Failed tests highlighted with clear error messages and stack traces
-- One-click navigation to failing test file
-- RAF timing issues clearly indicated with suggested fixes
+### 1. Save and Load Workflow
+**Goal**: Persist canvas work automatically and manually
+- Auto-save triggers every 30 seconds with subtle indicator
+- Manual save via Cmd/Ctrl+S shows toast confirmation
+- Load recent work from File menu (shows 5 most recent)
+- Cloud sync status visible in toolbar (green=synced, yellow=syncing, red=error)
+- Version history accessible through dropdown
 
-### 2. Performance Monitoring Flow
-**Goal**: Monitor canvas performance during development
-- Developer enables performance overlay (keyboard shortcut: Ctrl+Shift+P)
-- FPS counter displays in top-right corner (semi-transparent, draggable)
-- Memory usage bar chart updates every second
-- Performance degradation triggers visual warning (red tint when <30fps)
+### 2. Undo/Redo Workflow
+**Goal**: Reverse and replay actions seamlessly
+- Cmd/Ctrl+Z undoes last action with visual feedback
+- Cmd/Ctrl+Shift+Z redoes action
+- History panel shows last 50 actions with thumbnails
+- Click any history state to jump directly to it
+- Visual timeline scrubber for quick navigation
 
-### 3. Canvas Interaction Debugging
-**Goal**: Debug element interactions and data properties
-- Developer hovers over canvas element → Tooltip shows element properties
-- Debug panel (toggle: Ctrl+Shift+D) displays:
-  - Active element details
-  - Event stream
-  - Canvas state tree
-  - Element data properties
+### 3. Export Workflow
+**Goal**: Export canvas in various formats
+- File → Export or Cmd/Ctrl+E opens export modal
+- Select format: PNG, SVG, or PDF
+- Choose scope: entire canvas, selection, or viewport
+- Set quality/resolution options
+- Preview before export
+- Download file or generate shareable link
+
+### 4. Performance Monitoring Flow
+**Goal**: Monitor real-time canvas performance
+- Click performance icon in toolbar to open dashboard
+- View live FPS, memory usage, object count
+- Graph shows performance over time
+- Toggle individual metrics on/off
+- Minimize to floating widget or close completely
 
 ## Component Mockups
 
-### Performance Overlay
+### Main Toolbar
 ```
-┌─────────────────────────────────┐
-│ FPS: 60 ▂▄▆█████████            │
-│ MEM: 124MB ████████░░           │
-│ OBJ: 245 elements               │
-│ RAF: 16.67ms                    │
-└─────────────────────────────────┘
-Position: Fixed top-right
-Background: rgba(0,0,0,0.7)
-Text: #00ff00 (green) normal, #ff0000 (red) warnings
+┌────────────────────────────────────────────────────────────┐
+│ [☰] Miro Clone  File Edit View Tools Help         [👤] [⚙] │
+├────────────────────────────────────────────────────────────┤
+│ [↶][↷] | [💾][📁] | [▭][○][△][T][✏] | [🔍-][100%][🔍+] [📊] │
+└────────────────────────────────────────────────────────────┘
+Icons: Undo/Redo | Save/Load | Shapes/Tools | Zoom | Performance
 ```
 
-### Test Status Dashboard
-```
-┌─────────────────────────────────────────┐
-│ Test Runner           [Stop] [Clear]    │
-├─────────────────────────────────────────┤
-│ ✓ 247 Passed  ✗ 59 Failed  ⚡ 0 Running │
-├─────────────────────────────────────────┤
-│ ✗ canvas-fullscreen.test.tsx:45        │
-│   Expected fullscreen, got windowed     │
-│ ✗ smooth-interactions.test.tsx:112     │
-│   RAF timing mismatch (expected 16ms)  │
-│ ✗ FPSCounter.test.tsx:23              │
-│   Mock not properly initialized        │
-└─────────────────────────────────────────┘
-Background: Dark theme (#1a1a1a)
-Expandable/Collapsible sections
-```
-
-### Element Inspector Panel
+### Performance Dashboard (Docked Right)
 ```
 ┌──────────────────────────┐
-│ Element Inspector    [X] │
+│ Performance Monitor   [-]│
 ├──────────────────────────┤
-│ Type: Rectangle         │
-│ ID: elem-uuid-12345     │
-│ Position: (100, 200)    │
-│ Size: 200x150           │
-│ Data: {                 │
-│   color: "#ff6b6b"     │
-│   layer: 2              │
-│   locked: false        │
-│ }                       │
+│ FPS: 60 ████████████    │
+│ Memory: 124MB ██████    │
+│ Objects: 234            │
+│ Render: 8.3ms           │
 ├──────────────────────────┤
-│ Events (last 5):        │
-│ • mousedown 12:34:56    │
-│ • drag 12:34:57         │
-│ • dragend 12:34:58      │
+│ [60fps Graph Over Time] │
+│    ╱╲    ╱╲    ╱╲      │
+│ 60 ────────────────     │
+│ 30 ────────────────     │
+│  0 └──────────────┘     │
+├──────────────────────────┤
+│ ☑ Show FPS              │
+│ ☑ Show Memory           │
+│ ☑ Show Render Time      │
+│ [Minimize] [Settings]   │
 └──────────────────────────┘
-Position: Docked left
-Width: 280px
-Resizable
+Width: 300px
+Background: rgba(255,255,255,0.95)
+```
+
+### Export Modal
+```
+┌─────────────────────────────────────┐
+│         Export Canvas            [X]│
+├─────────────────────────────────────┤
+│ Format:                             │
+│ ○ PNG  ● SVG  ○ PDF               │
+│                                     │
+│ Scope:                              │
+│ ● Entire Canvas                     │
+│ ○ Current Selection                 │
+│ ○ Visible Area Only                 │
+│                                     │
+│ Options:                            │
+│ Quality: [High ▼]                   │
+│ Scale:   [2x ▼]                     │
+│ Background: ☑ Transparent           │
+│                                     │
+│ ┌───────────────────┐               │
+│ │                   │ Preview       │
+│ │  [Canvas Preview] │               │
+│ │                   │               │
+│ └───────────────────┘               │
+│                                     │
+│ [Cancel]              [Export]      │
+└─────────────────────────────────────┘
+Width: 480px, Centered modal
+```
+
+### History Panel (Docked Left)
+```
+┌──────────────────────────┐
+│ History           [<][>] │
+├──────────────────────────┤
+│ ┌──────────────────────┐ │
+│ │ [Thumbnail] Add Rect │ │
+│ │ 2 min ago           │ │
+│ └──────────────────────┘ │
+│ ┌──────────────────────┐ │
+│ │ [Thumbnail] Move     │ │
+│ │ 1 min ago     ← Now │ │
+│ └──────────────────────┘ │
+│ ┌──────────────────────┐ │
+│ │ [Thumbnail] Delete   │ │
+│ │ 30 sec ago          │ │
+│ └──────────────────────┘ │
+│                          │
+│ [Clear History]          │
+└──────────────────────────┘
+Width: 240px
+Scrollable list
+```
+
+### Save Status Indicator
+```
+┌───────────────────┐
+│ ✓ Saved to cloud  │  (Green, fades after 2s)
+└───────────────────┘
+
+┌───────────────────┐
+│ ⟳ Saving...       │  (Yellow, animated spinner)
+└───────────────────┘
+
+┌───────────────────┐
+│ ⚠ Save failed     │  (Red, persistent until resolved)
+└───────────────────┘
+Position: Bottom-right toast
 ```
 
 ## Interaction Design
 
-### Canvas Full-Screen Behavior
-- **Initialization**: Canvas fills viewport on mount
-- **Resize Handling**: Debounced at 100ms for efficiency
-- **Aspect Ratio**: Maintains canvas proportions
-- **GPU Acceleration**: transform: translateZ(0)
-- **Double Buffering**: Prevents flicker during updates
+### Persistence System
+- **Auto-Save**: Every 30 seconds with debounce
+- **Manual Save**: Cmd/Ctrl+S with instant feedback
+- **Conflict Resolution**: Last-write-wins with version history
+- **Storage**: IndexedDB for local, API ready for cloud
+- **Data Format**: JSON with compressed binary for images
 
-### Smooth Rendering Specifications
-- **Frame Rate**: Consistent 60fps (16.67ms frame budget)
-- **Input Latency**: < 10ms response to user actions
-- **Animation Curves**: cubic-bezier(0.4, 0, 0.2, 1) for natural motion
-- **RAF Loop**: Continuous animation frame updates
-- **Momentum Physics**: Velocity-based drag continuation
+### Undo/Redo System
+- **Command Pattern**: Each action creates reversible command
+- **History Limit**: 50 actions in memory
+- **Batch Operations**: Group related actions (e.g., multi-select move)
+- **Visual Feedback**: Flash animation on affected elements
+- **Keyboard Shortcuts**: Standard OS shortcuts
+
+### Export System
+- **Formats**: PNG (raster), SVG (vector), PDF (document)
+- **Resolution**: Up to 4x for high DPI displays
+- **Scope Options**: Full canvas, selection, or viewport
+- **Background**: Transparent or white options
+- **Preview**: Real-time preview before export
 
 ### Performance Monitoring
-- **Update Frequency**: 250ms (4Hz) for UI updates
-- **Sample Window**: 10 frames for rolling average
-- **Alert Threshold**: < 30 FPS for 3+ consecutive seconds
-- **Visual Feedback**: Immediate color change on performance shift
-- **Data Collection**: Continuous in background
-
-### Dashboard Interactions
-1. **Toggle Visibility**
-   - Click header to collapse/expand
-   - State persists in component state
-   - Smooth slide animation (300ms)
-   - Maintains performance tracking when collapsed
-
-2. **Performance Alerts**
-   - Flash warning when FPS < 30
-   - Red border on critical performance
-   - Console warnings in dev mode
-   - Optional sound alert
-
-## Technical Specifications
-
-### Canvas Engine Optimizations
-```javascript
-// Full-screen canvas setup
-canvas.setDimensions({
-  width: window.innerWidth,
-  height: window.innerHeight
-})
-
-// RAF-based render loop
-let rafId = null
-function renderLoop() {
-  updatePhysics()
-  renderCanvas()
-  rafId = requestAnimationFrame(renderLoop)
-}
-
-// Smooth interactions
-const MOMENTUM_DECAY = 0.95
-const MIN_VELOCITY = 0.5
-```
-
-### Performance Tracking
-```javascript
-// FPS Calculation
-frameCount++
-const deltaTime = currentTime - lastTime
-if (deltaTime >= updateInterval) {
-  const fps = Math.round((frameCount * 1000) / deltaTime)
-  updateFPSDisplay(fps)
-  frameCount = 0
-  lastTime = currentTime
-}
-
-// Memory Tracking (if available)
-if (performance.memory) {
-  const used = performance.memory.usedJSHeapSize
-  const total = performance.memory.jsHeapSizeLimit
-  const percentage = (used / total) * 100
-}
-```
-
-### Test Infrastructure
-```javascript
-// RAF Mock for Testing
-const rafMock = {
-  callbacks: [],
-  time: 0,
-  requestAnimationFrame(cb) {
-    const id = this.callbacks.length
-    this.callbacks.push(cb)
-    return id
-  },
-  flush(frames = 1) {
-    for (let i = 0; i < frames; i++) {
-      this.time += 16.67
-      const cbs = [...this.callbacks]
-      this.callbacks = []
-      cbs.forEach(cb => cb(this.time))
-    }
-  }
-}
-```
-
-## Visual Design
-
-### Color Palette
-```css
---canvas-bg: #F7F7F9
---canvas-grid: rgba(0,0,0,0.03)
---fps-good: #4CAF50
---fps-medium: #FFC107
---fps-poor: #F44336
---dashboard-bg: rgba(255,255,255,0.95)
---dashboard-border: #E0E0E0
---text-primary: #212121
---text-secondary: #757575
---accent-primary: #0066FF
-```
-
-### Typography
-```css
---font-mono: 'Monaco', 'Courier New', monospace
---font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif
---size-small: 10px
---size-normal: 12px
---size-large: 14px
---weight-normal: 400
---weight-bold: 600
-```
-
-### Spacing & Animations
-```css
---spacing-xs: 4px
---spacing-sm: 8px
---spacing-md: 16px
---spacing-lg: 24px
---duration-fast: 150ms
---duration-normal: 300ms
---easing-default: cubic-bezier(0.4, 0, 0.2, 1)
---easing-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55)
-```
-
-## Accessibility Specifications
-
-### Keyboard Navigation
-- Tab: Navigate between UI elements
-- Ctrl+Shift+P: Toggle performance overlay
-- Ctrl+Shift+D: Toggle debug panel
-- Ctrl+Shift+T: Focus test dashboard
-- Escape: Close active panel
-
-### Screen Reader Support
-- ARIA labels for all controls
-- Performance metrics announced on significant changes
-- Test failures announced immediately
-- Role="alert" for critical warnings
-
-### Visual Accessibility
-- High contrast mode support
-- Minimum 4.5:1 contrast ratio
-- Color-blind friendly status indicators:
-  - Success: ✓ checkmark + green
-  - Error: ✗ X mark + red
-  - Warning: ⚠ triangle + yellow
-- Adjustable overlay opacity (40-90%)
+- **Sampling Rate**: 60Hz for FPS, 1Hz for memory
+- **Metrics**: FPS, memory usage, object count, render time
+- **Visualization**: Real-time graph with 60-second window
+- **Alerts**: Visual warnings at <30 FPS
+- **Overhead**: <1% CPU usage for monitoring
 
 ## Responsive Design
 
-### Desktop (>1200px)
-- Full canvas with all panels visible
-- Performance overlay in corner
-- Debug panels docked to sides
+### Desktop (>1440px)
+- Full toolbar with all features
+- Side panels docked (History left, Performance right)
+- Floating panels draggable
+- Multi-monitor support
 
-### Tablet (768-1200px)
-- Canvas maintains full viewport
-- Panels collapse to icons
-- Tap to expand panels temporarily
+### Tablet (768-1440px)
+- Condensed toolbar with dropdowns
+- Panels as overlays
+- Touch gestures (pinch zoom, two-finger pan)
+- Larger touch targets (44px minimum)
 
-### Mobile (Testing Only, <768px)
-- Read-only canvas view
-- Performance metrics in header bar
-- Swipe gestures for panel access
+### Mobile (320-768px)
+- Bottom navigation bar
+- Full-screen canvas mode
+- Slide-up panels
+- Simplified tools palette
+- Read-only mode option
 
-## Performance Optimizations
+## Accessibility
 
-### Rendering Pipeline
-1. **Viewport Culling**: Only render visible elements
-2. **Layer Caching**: Static elements on separate layers
-3. **Batch Updates**: Group DOM operations per frame
-4. **Dirty Rectangle**: Only redraw changed regions
-5. **Object Pooling**: Reuse element instances
+### Keyboard Navigation
+- **Tab**: Navigate UI elements
+- **Arrow Keys**: Move between canvas elements
+- **Space**: Toggle selection
+- **Enter**: Edit text elements
+- **Escape**: Cancel current operation
+- **Cmd/Ctrl+S**: Save
+- **Cmd/Ctrl+Z/Y**: Undo/Redo
+- **Cmd/Ctrl+E**: Export
+- **Cmd/Ctrl+P**: Toggle performance
 
-### Memory Management
-- Element pooling for frequently created items
-- Lazy loading for off-screen content
-- Automatic cleanup of disposed elements
-- Maximum 100MB heap usage target
-- Garbage collection triggers at 80% threshold
+### Screen Reader Support
+- ARIA labels on all interactive elements
+- Live regions for status updates
+- Descriptive action announcements
+- Canvas state descriptions
+- Role attributes properly set
 
-## Error States
+### Visual Accessibility
+- High contrast mode support
+- 4.5:1 minimum contrast ratio
+- Focus indicators (3px outline)
+- Colorblind-safe palettes
+- Adjustable UI scale (75%-150%)
+- Reduced motion option
 
-### Build Errors
-- Full-screen red overlay with error details
-- Stack trace with syntax highlighting
-- Quick fix suggestions when available
-- Link to relevant documentation
+## Design System
 
-### Test Failures
-- Inline error display in test list
-- Diff view for assertion failures
-- Timing diagram for RAF issues
-- Copy error to clipboard button
+### Colors
+- **Primary**: #3B82F6 (Blue)
+- **Secondary**: #8B5CF6 (Purple)  
+- **Success**: #10B981 (Green)
+- **Warning**: #F59E0B (Amber)
+- **Error**: #EF4444 (Red)
+- **Background**: #FFFFFF
+- **Surface**: #F9FAFB
+- **Text**: #111827
+- **Border**: #E5E7EB
 
-### Performance Warnings
-- Yellow border when FPS < 45
-- Red border when FPS < 30
-- Memory leak detection alert
-- Suggested optimizations panel
+### Typography
+- **Headings**: Inter Bold (16/20/24px)
+- **Body**: Inter Regular (14px)
+- **Code**: JetBrains Mono (12px)
+- **Icons**: Material Icons (20/24px)
 
-## Developer Tools Integration
+### Spacing
+- **Base**: 4px grid
+- **Padding**: 8/12/16/24px
+- **Margins**: 4/8/16/32px
+- **Gaps**: 8/16px
 
-### Browser DevTools
-- Custom formatters for canvas elements
-- Performance marks for key operations
-- Console groups for debug output
-- Network timing for asset loading
+### Shadows
+- **sm**: 0 1px 2px rgba(0,0,0,0.05)
+- **md**: 0 4px 6px rgba(0,0,0,0.1)
+- **lg**: 0 10px 15px rgba(0,0,0,0.1)
 
-### VS Code Integration
-- Click to open file at line
-- Inline test status indicators
-- Performance hints in editor
-- Quick fix code actions
+## Animation Specifications
 
-## Implementation Priority
+### Transitions
+- **Panel open/close**: 200ms ease-out
+- **Element selection**: 150ms ease-in-out  
+- **Hover states**: 100ms ease
+- **Save indicator**: 500ms fade
+- **Undo/redo flash**: 300ms
 
-1. **Critical**: Fix TypeScript build error display
-2. **High**: Test dashboard with real-time updates
-3. **High**: Basic performance overlay (FPS only)
-4. **Medium**: Element inspector panel
-5. **Medium**: Enhanced performance metrics
-6. **Low**: VS Code integration features
+### Loading States
+- **Spinner**: 1s rotation loop
+- **Progress bar**: Smooth linear
+- **Skeleton screens**: Pulse animation
 
-## Success Metrics
-- Build errors identified within 100ms
-- Test results updated in real-time
-- Performance overlay < 1% CPU usage
-- All panels keyboard accessible
-- Zero visual glitches at 60fps
+## Performance Targets
+
+### Load Performance
+- **Initial Load**: <3 seconds
+- **Time to Interactive**: <5 seconds
+- **First Contentful Paint**: <1.5 seconds
+- **Lighthouse Score**: >90
+
+### Runtime Performance
+- **Frame Rate**: 60fps consistently
+- **Response Time**: <100ms for actions
+- **Auto-save**: <500ms background
+- **Export Generation**: <2 seconds
+
+### Memory Targets
+- **Initial**: <50MB
+- **Active Use**: <150MB
+- **Maximum**: 200MB before cleanup
+
+## Implementation Priorities
+
+### Phase 1: Critical Fixes
+1. Fix TypeScript compilation errors
+2. Update InternalCanvasElement interface
+3. Refactor test access patterns
+4. Ensure build passes
+
+### Phase 2: Core Features
+1. Implement persistence layer
+2. Build undo/redo system
+3. Create export functionality
+4. Real performance monitoring
+
+### Phase 3: Polish
+1. History panel UI
+2. Advanced export options
+3. Cloud sync preparation
+4. Accessibility enhancements
+
+## Success Criteria
+- Zero TypeScript errors
+- All core features functional
+- Performance targets met
+- Accessibility compliant
+- Production-ready build

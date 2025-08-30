@@ -89,6 +89,10 @@ window.getComputedStyle = jest.fn().mockImplementation((element) => {
         case 'padding': return '0px'
         case 'transform': return 'translateZ(0)'
         case 'will-change': return 'transform'
+        case 'backface-visibility': return 'hidden'
+        case 'touch-action': return 'none'
+        case 'overflow': return 'hidden'
+        case 'z-index': return '0'
         default: return ''
       }
     }),
@@ -102,9 +106,26 @@ window.getComputedStyle = jest.fn().mockImplementation((element) => {
     margin: '0px',
     padding: '0px',
     transform: 'translateZ(0)',
-    willChange: 'transform'
+    willChange: 'transform',
+    backfaceVisibility: 'hidden',
+    touchAction: 'none',
+    overflow: 'hidden',
+    zIndex: '0'
   }
 })
+
+// Mock getBoundingClientRect
+Element.prototype.getBoundingClientRect = jest.fn(() => ({
+  width: 1920,
+  height: 1080,
+  top: 0,
+  right: 1920,
+  bottom: 1080,
+  left: 0,
+  x: 0,
+  y: 0,
+  toJSON: () => {}
+}))
 
 // Mock HTMLCanvasElement
 HTMLCanvasElement.prototype.getContext = jest.fn()
