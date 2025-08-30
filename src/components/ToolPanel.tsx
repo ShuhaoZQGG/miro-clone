@@ -13,7 +13,8 @@ import {
   TextIcon,
   ImageIcon,
   ConnectorIcon,
-  PenIcon
+  PenIcon,
+  LineIcon
 } from './ui/Icons'
 import { ElementType } from '@/types'
 import { clsx } from 'clsx'
@@ -25,9 +26,10 @@ const tools = [
   { type: 'rectangle' as ElementType, icon: RectangleIcon, label: 'Rectangle (R)', shortcut: 'R' },
   { type: 'circle' as ElementType, icon: CircleIcon, label: 'Circle (C)', shortcut: 'C' },
   { type: 'text' as ElementType, icon: TextIcon, label: 'Text (T)', shortcut: 'T' },
+  { type: 'line' as ElementType, icon: LineIcon, label: 'Line (L)', shortcut: 'L' },
+  { type: 'freehand' as ElementType, icon: PenIcon, label: 'Pen (P)', shortcut: 'P' },
   // { type: 'image' as ElementType, icon: ImageIcon, label: 'Image', shortcut: 'I' },
-  // { type: 'connector' as ElementType, icon: ConnectorIcon, label: 'Connector', shortcut: 'L' },
-  // { type: 'freehand' as ElementType, icon: PenIcon, label: 'Pen', shortcut: 'P' }
+  // { type: 'connector' as ElementType, icon: ConnectorIcon, label: 'Connector', shortcut: 'K' }
 ] as const
 
 export const ToolPanel: React.FC = () => {

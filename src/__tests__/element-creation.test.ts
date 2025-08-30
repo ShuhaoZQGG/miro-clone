@@ -97,7 +97,7 @@ describe('ElementManager - Element Creation', () => {
   describe('createStickyNote', () => {
     it('should create a sticky note with default properties', () => {
       const position = { x: 100, y: 200 }
-      elementManager.createStickyNote(position)
+      const stickyNote = elementManager.createStickyNote(position)
 
       expect(stickyNote).toBeDefined()
       expect(stickyNote.type).toBe('sticky_note')
@@ -122,7 +122,7 @@ describe('ElementManager - Element Creation', () => {
         backgroundColor: '#FFB6C1'
       }
 
-      elementManager.createStickyNote(position, content)
+      const stickyNote = elementManager.createStickyNote(position, content)
 
       expect(stickyNote.content).toEqual(content)
       expect(stickyNote.content.text).toBe('My custom note')
@@ -133,7 +133,7 @@ describe('ElementManager - Element Creation', () => {
       const position = { x: 0, y: 0 }
       const size = { width: 250, height: 180 }
 
-      elementManager.createStickyNote(position, undefined, size)
+      const stickyNote = elementManager.createStickyNote(position, undefined, size)
 
       expect(stickyNote.size).toEqual(size)
     })
@@ -149,7 +149,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should add sticky note to canvas', () => {
       const position = { x: 10, y: 20 }
-      elementManager.createStickyNote(position)
+      const stickyNote = elementManager.createStickyNote(position)
 
       expect(mockCanvas.add).toHaveBeenCalled()
       expect(mockCanvas.renderAll).toHaveBeenCalled()
@@ -157,7 +157,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should set creation timestamps', () => {
       const before = new Date()
-      elementManager.createStickyNote({ x: 0, y: 0 })
+      const stickyNote = elementManager.createStickyNote({ x: 0, y: 0 })
       const after = new Date()
 
       const createdAt = new Date(stickyNote.createdAt)
@@ -171,7 +171,7 @@ describe('ElementManager - Element Creation', () => {
       const longText = 'This is a very long text that should be properly handled within the sticky note boundaries and not overflow'
       const content = { text: longText }
 
-      elementManager.createStickyNote({ x: 0, y: 0 }, content)
+      const stickyNote = elementManager.createStickyNote({ x: 0, y: 0 }, content)
 
       expect(stickyNote.content.text).toBe(longText)
       // Should still create the element successfully
@@ -182,7 +182,7 @@ describe('ElementManager - Element Creation', () => {
   describe('createRectangle', () => {
     it('should create a rectangle with default properties', () => {
       const position = { x: 150, y: 100 }
-      elementManager.createRectangle(position)
+      const rectangle = elementManager.createRectangle(position)
 
       expect(rectangle).toBeDefined()
       expect(rectangle.type).toBe('rectangle')
@@ -205,7 +205,7 @@ describe('ElementManager - Element Creation', () => {
         opacity: 0.8
       }
 
-      elementManager.createRectangle(position, style)
+      const rectangle = elementManager.createRectangle(position, style)
 
       expect(rectangle.style).toEqual(style)
       expect(rectangle.style.fill).toBe('#FF6B6B')
@@ -216,7 +216,7 @@ describe('ElementManager - Element Creation', () => {
       const position = { x: 0, y: 0 }
       const size = { width: 300, height: 150 }
 
-      elementManager.createRectangle(position, undefined, size)
+      const rectangle = elementManager.createRectangle(position, undefined, size)
 
       expect(rectangle.size).toEqual(size)
     })
@@ -237,7 +237,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should create rectangle with minimum size constraints', () => {
       const tinySize = { width: 1, height: 1 }
-      elementManager.createRectangle({ x: 0, y: 0 }, undefined, tinySize)
+      const rectangle = elementManager.createRectangle({ x: 0, y: 0 }, undefined, tinySize)
 
       expect(rectangle.size.width).toBeGreaterThanOrEqual(10) // Minimum width
       expect(rectangle.size.height).toBeGreaterThanOrEqual(10) // Minimum height
@@ -247,7 +247,7 @@ describe('ElementManager - Element Creation', () => {
   describe('createCircle', () => {
     it('should create a circle with default properties', () => {
       const position = { x: 200, y: 150 }
-      elementManager.createCircle(position)
+      const circle = elementManager.createCircle(position)
 
       expect(circle).toBeDefined()
       expect(circle.type).toBe('circle')
@@ -269,7 +269,7 @@ describe('ElementManager - Element Creation', () => {
         opacity: 0.9
       }
 
-      elementManager.createCircle(position, style)
+      const circle = elementManager.createCircle(position, style)
 
       expect(circle.style).toEqual(style)
     })
@@ -278,7 +278,7 @@ describe('ElementManager - Element Creation', () => {
       const position = { x: 0, y: 0 }
       const size = { width: 150, height: 150 }
 
-      elementManager.createCircle(position, undefined, size)
+      const circle = elementManager.createCircle(position, undefined, size)
 
       expect(circle.size).toEqual(size)
     })
@@ -287,7 +287,7 @@ describe('ElementManager - Element Creation', () => {
       const position = { x: 0, y: 0 }
       const nonSquareSize = { width: 100, height: 200 }
 
-      elementManager.createCircle(position, undefined, nonSquareSize)
+      const circle = elementManager.createCircle(position, undefined, nonSquareSize)
 
       // Should use the smaller dimension to keep it a circle
       expect(circle.size.width).toBe(circle.size.height)
@@ -303,7 +303,7 @@ describe('ElementManager - Element Creation', () => {
 
     it('should create circle with minimum radius constraints', () => {
       const tinySize = { width: 5, height: 5 }
-      elementManager.createCircle({ x: 0, y: 0 }, undefined, tinySize)
+      const circle = elementManager.createCircle({ x: 0, y: 0 }, undefined, tinySize)
 
       expect(circle.size.width).toBeGreaterThanOrEqual(20) // Minimum diameter
       expect(circle.size.height).toBeGreaterThanOrEqual(20)

@@ -156,6 +156,20 @@ export const useCanvas = (options: UseCanvasOptions) => {
       case 'text':
         newElement = elementManagerRef.current.createText(canvasPosition)
         break
+      case 'line':
+        // For line tool, we need two clicks - start with a simple line for now
+        newElement = elementManagerRef.current.createLine(
+          canvasPosition,
+          { x: canvasPosition.x + 100, y: canvasPosition.y + 100 }
+        )
+        break
+      case 'freehand':
+        // For freehand, create a simple path for now
+        newElement = elementManagerRef.current.createFreehand([
+          canvasPosition,
+          { x: canvasPosition.x + 10, y: canvasPosition.y + 10 }
+        ])
+        break
       default:
         return
     }
