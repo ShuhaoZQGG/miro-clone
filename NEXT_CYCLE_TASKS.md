@@ -1,94 +1,94 @@
 # Next Cycle Tasks
 
-## Priority 0 - Critical (Must Complete)
-### Resolve PR #29 Issues
-- [ ] **Pull latest main branch**
-- [ ] **Resolve merge conflicts in PR #29**
-- [ ] **Fix 6 failing tests (React act() warnings)**
-- [ ] **Re-run CI/CD pipeline**
-- [ ] **Merge PR #29 to main once all checks pass**
+## Immediate Priority
+1. **Resolve PR #30 Merge Conflicts**
+   - Rebase cycle-37 branch onto latest main
+   - Resolve conflicts in test files and documentation
+   - Merge PR to main branch
 
-### Production Database Setup
-- [ ] Configure PostgreSQL connection (Supabase/Neon)
-- [ ] Set up Redis cache (Upstash)
-- [ ] ~~Create database migration scripts~~ (Already implemented)
-- [ ] Test database connections
-- [ ] ~~Implement connection pooling~~ (Already implemented)
-
-### WebSocket Deployment
-- [ ] Deploy Socket.io server to Railway/Render
-- [ ] ~~Configure WebSocket scaling~~ (Already implemented with Redis adapter)
-- [ ] ~~Set up sticky sessions for load balancing~~ (Already configured)
-- [ ] ~~Implement reconnection logic~~ (Already implemented)
-- [ ] ~~Add connection monitoring~~ (Already implemented)
-
-### API Security
-- [ ] ~~Implement rate limiting middleware~~ (Already implemented)
-- [ ] ~~Configure production CORS settings~~ (Already implemented)
-- [ ] ~~Add request validation~~ (Already implemented)
-- [ ] ~~Set security headers (CSP, HSTS, etc.)~~ (Already implemented)
-- [ ] Implement API key authentication for external access (optional)
-
-## Priority 1 - High
-### Fix Test Failures
-- [ ] Debug 6 failing integration tests
-- [ ] Fix whiteboard-integration role="generic" conflicts
-- [ ] Resolve canvas-disposal auth context issues
-- [ ] Achieve 100% test pass rate
-
-### Production Environment
-- [ ] ~~Create .env.production file~~ (Template already created)
-- [ ] Configure Vercel deployment settings
-- [ ] Set up Sentry error monitoring
-- [ ] Configure CDN for static assets
-- [ ] ~~Add environment variable validation~~ (Already implemented)
-
-## Priority 2 - Medium
-### Performance Optimization
-- [ ] Implement code splitting
-- [ ] Add lazy loading for components
-- [ ] Optimize bundle size
-- [ ] Add service worker for offline support
-- [ ] Implement image optimization
-
-### Documentation
-- [ ] Create API documentation
-- [ ] Write deployment guide
-- [ ] Create user manual
-- [ ] Document WebSocket protocol
-- [ ] Add troubleshooting guide
-
-### Monitoring & Analytics
-- [ ] Set up performance monitoring
-- [ ] Add user analytics (privacy-compliant)
-- [ ] Create admin dashboard
-- [ ] Implement health check endpoints
-- [ ] Add automated alerts
+2. **Production Deployment**
+   - Deploy frontend to Vercel
+   - Deploy WebSocket server to Railway/Render
+   - Configure PostgreSQL on Supabase/Neon
+   - Configure Redis on Upstash
+   - Set up environment variables from .env.production.template
 
 ## Technical Debt
-- [ ] Refactor auth routes to use consistent patterns
-- [ ] Clean up unused imports and dead code
-- [ ] Improve error handling consistency
-- [ ] Add more comprehensive logging
-- [ ] Optimize database queries
+1. **Linting Issues**
+   - Fix 24 TypeScript warnings (mostly `any` types in tests)
+   - Remove unused `token` variable in socketio route
 
-## Feature Enhancements (Future)
-- [ ] Dark mode implementation
-- [ ] Progressive Web App features
-- [ ] Mobile app development
-- [ ] Advanced collaboration features (voice/video)
-- [ ] AI-powered features (smart shapes, auto-layout)
+2. **Code Quality**
+   - Add proper TypeScript types to test files
+   - Replace `any` types with specific interfaces
 
-## Infrastructure Improvements
-- [ ] Set up CI/CD pipeline
-- [ ] Implement automated testing on PR
-- [ ] Add staging environment
-- [ ] Set up backup and disaster recovery
-- [ ] Implement blue-green deployment
+## Performance Optimization
+1. **Bundle Size**
+   - Implement code splitting for large components
+   - Add lazy loading for non-critical routes
 
-## Notes
-- Focus on P0 items first - these are blocking production deployment
-- P1 items should be completed before launch
-- P2 items can be done post-launch
-- Technical debt should be addressed continuously
-- Feature enhancements are for future cycles after successful launch
+2. **Runtime Performance**
+   - Add service worker for offline support
+   - Implement client-side caching strategies
+
+## Documentation
+1. **Deployment Guide**
+   - Create step-by-step deployment instructions
+   - Document environment variable configuration
+   - Add troubleshooting section
+
+2. **API Documentation**
+   - Document WebSocket events
+   - Create API endpoint reference
+   - Add authentication flow documentation
+
+## Security Enhancements
+1. **Security Audit**
+   - Run npm audit and fix vulnerabilities
+   - Perform penetration testing
+   - Review authentication implementation
+
+2. **Monitoring**
+   - Configure Sentry error tracking
+   - Set up performance monitoring
+   - Add uptime monitoring
+
+## Feature Enhancements
+1. **Collaboration Features**
+   - Add user presence indicators
+   - Implement collaborative cursors
+   - Add real-time notifications
+
+2. **Export Features**
+   - Add JSON export format
+   - Implement board templates
+   - Add bulk export functionality
+
+## Testing
+1. **Load Testing**
+   - Test WebSocket server scalability
+   - Benchmark API endpoints
+   - Test concurrent user limits
+
+2. **E2E Testing**
+   - Add Playwright/Cypress tests
+   - Test critical user flows
+   - Add visual regression tests
+
+## Infrastructure
+1. **CI/CD Pipeline**
+   - Set up GitHub Actions for automated testing
+   - Add automated deployment on merge to main
+   - Configure preview deployments for PRs
+
+2. **Backup Strategy**
+   - Implement automated database backups
+   - Set up disaster recovery procedures
+   - Document rollback procedures
+
+## Priority Order
+1. Merge PR #30 (CRITICAL)
+2. Deploy to production
+3. Fix linting issues
+4. Add monitoring
+5. Enhance features
