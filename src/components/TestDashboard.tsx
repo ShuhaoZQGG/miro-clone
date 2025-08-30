@@ -32,14 +32,54 @@ export function TestDashboard() {
     total: 0
   })
 
-  // Simulate test runner updates (in production, this would connect to actual test runner)
+  // Poll for test results from Jest reporter file
   useEffect(() => {
     if (typeof window === 'undefined') return
 
     // Check for development mode
     if (process.env.NODE_ENV !== 'development') return
 
-    // Listen for test results from test runner
+    // Poll for test dashboard file updates
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch('/api/test-results')
+        if (response.ok) {
+          const data = await response.json()
+          
+          // Update stats from Jest reporter
+          setStats({
+            passed: data.passed || 0,
+            failed: data.failed || 0,
+            running: data.running || 0,
+            pending: 0,
+            total: (data.passed || 0) + (data.failed || 0) + (data.running || 0)
+          })
+          
+          // Update failures list
+          if (data.failures && data.failures.length > 0) {
+            const failures = data.failures.map((f: any, index: number) => ({
+              id: `failure-${index}`,
+              file: f.file,
+              name: f.title,
+              status: 'failed' as const,
+              error: f.message,
+              timestamp: Date.now()
+            }))
+            setTestResults(failures)
+          }
+        }
+      } catch (error) {
+        // Silently fail if API not available
+      }
+    }, 1000) // Poll every second
+
+    return () => clearInterval(pollInterval)
+  }, [])
+
+  // Legacy event listener for backward compatibility
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const handleTestUpdate = (event: CustomEvent) => {
       const result = event.detail as TestResult
       setTestResults(prev => {

@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { FPSCounter } from '../FPSCounter'
-import { setupRAFMock } from '@/__tests__/utils/test-helpers'
+import { setupRAFMock } from '@/__tests__/utils/raf-mock'
 
 describe('FPSCounter', () => {
   const rafMock = setupRAFMock()
