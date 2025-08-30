@@ -13,7 +13,6 @@ describe('Canvas Disposal Safety', () => {
   let mockElementManager: jest.Mocked<ElementManager>
   let mockDispose: jest.Mock
   let initCallCount = 0
-  let initResolve: (() => void) | null = null
 
   beforeEach(() => {
     jest.clearAllMocks()

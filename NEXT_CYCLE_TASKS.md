@@ -1,17 +1,26 @@
 # Next Cycle Tasks
 
-## Priority 1: Critical Integration Work
-1. **Canvas Integration**
-   - Connect WebSocket hooks to main Whiteboard component
-   - Integrate CollaborativeCursors with canvas viewport
-   - Sync canvas operations through WebSocket
-   - Test multi-user canvas interaction
+## Cycle 32 - Critical Fixes & Production Readiness
 
-2. **Authentication System**
-   - Implement JWT-based authentication
-   - Create login/signup modals
-   - Add session management
-   - Secure WebSocket connections
+### Priority 0: Fix Current Cycle Issues (MUST DO FIRST)
+1. **Fix TypeScript Compilation Errors**
+   - [ ] Fix Avatar style prop type mismatch in CollaborationPanel.tsx (lines 69, 149)
+   - [ ] Add currentUserId prop to CollaborativeCursors in Whiteboard.tsx (line 191)
+   - [ ] Ensure npm run build passes successfully
+   - [ ] Re-submit PR #20 for review and merge
+
+### Priority 1: Complete Authentication System
+1. **JWT Implementation**
+   - [ ] Install jsonwebtoken package
+   - [ ] Generate JWT tokens on login/signup
+   - [ ] Implement token verification middleware
+   - [ ] Add refresh token mechanism
+
+2. **Password Security**
+   - [ ] Install bcrypt package
+   - [ ] Hash passwords before storage
+   - [ ] Implement secure password comparison
+   - [ ] Add password strength validation
 
 ## Priority 2: Infrastructure Setup
 1. **Database Configuration**

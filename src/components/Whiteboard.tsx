@@ -188,7 +188,10 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         {isGridVisible && <Grid />}
         
         {/* Collaborative Cursors */}
-        <CollaborativeCursors users={users.filter(u => u.userId !== userId)} />
+        <CollaborativeCursors 
+          users={users.filter(u => u.userId !== userId)} 
+          currentUserId={userId}
+        />
         
         {/* Loading State */}
         {(isLoading || !isInitialized) && (

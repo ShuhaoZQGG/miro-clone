@@ -60,16 +60,17 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({ users = 
               key={user.userId}
               content={`${user.displayName} ${user.isActive !== false ? '(active)' : '(idle)'}`}
             >
-              <Avatar
-                size="sm"
-                className={clsx(
-                  'ring-2',
-                  user.isActive !== false ? 'ring-green-400' : 'ring-gray-300'
-                )}
-                style={{ backgroundColor: user.avatarColor || '#3B82F6' }}
-              >
-                <UserIcon className="w-3 h-3 text-white" />
-              </Avatar>
+              <div style={{ backgroundColor: user.avatarColor || '#3B82F6' }} className="rounded-full">
+                <Avatar
+                  size="sm"
+                  className={clsx(
+                    'ring-2',
+                    user.isActive !== false ? 'ring-green-400' : 'ring-gray-300'
+                  )}
+                >
+                  <UserIcon className="w-3 h-3 text-white" />
+                </Avatar>
+              </div>
             </Tooltip>
           ))}
           
@@ -144,12 +145,13 @@ export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({ users = 
                     key={user.userId}
                     className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-50"
                   >
-                    <Avatar 
-                      size="xs"
-                      style={{ backgroundColor: user.avatarColor || '#3B82F6' }}
-                    >
-                      <UserIcon className="w-3 h-3 text-white" />
-                    </Avatar>
+                    <div style={{ backgroundColor: user.avatarColor || '#3B82F6' }} className="rounded-full inline-block">
+                      <Avatar 
+                        size="xs"
+                      >
+                        <UserIcon className="w-3 h-3 text-white" />
+                      </Avatar>
+                    </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">

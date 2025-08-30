@@ -1,7 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Whiteboard as OriginalWhiteboard } from '@/components/Whiteboard'
 
 // Import the mock store
 import { useCanvasStore } from '@/store/useCanvasStore'
@@ -65,7 +64,7 @@ const MockWhiteboard = ({ boardId }: { boardId: string }) => {
   const store = (useCanvasStore as any).getState()
   
   // Wrap store methods to trigger re-render
-  const wrapMethod = (method: Function) => {
+  const wrapMethod = (method: (...args: any[]) => any) => {
     return (...args: any[]) => {
       method(...args)
       forceUpdate()

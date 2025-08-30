@@ -12,7 +12,7 @@ export async function GET() {
     const dashboardFile = path.join(process.cwd(), '.test-dashboard.json')
     const data = await fs.readFile(dashboardFile, 'utf-8')
     return NextResponse.json(JSON.parse(data))
-  } catch (error) {
+  } catch {
     // Return empty results if file doesn't exist
     return NextResponse.json({
       passed: 0,
