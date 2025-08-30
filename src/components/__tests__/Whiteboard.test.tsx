@@ -2,6 +2,7 @@ import React from 'react'
 import { render, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { Whiteboard } from '../Whiteboard'
+import { AuthProvider } from '@/context/AuthContext'
 
 // Mock the canvas engine
 jest.mock('@/lib/canvas-engine', () => ({
@@ -92,6 +93,15 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn()
 }))
 
+// Test helper to wrap component with required providers
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <AuthProvider>
+      {component}
+    </AuthProvider>
+  )
+}
+
 describe('Whiteboard Full-Screen Tests', () => {
   beforeEach(() => {
     // Reset viewport size
@@ -113,7 +123,7 @@ describe('Whiteboard Full-Screen Tests', () => {
 
   describe('Full-Screen Canvas Layout', () => {
     it('should render canvas container with full viewport dimensions', () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <Whiteboard
           boardId="test-board"
         />
@@ -133,7 +143,7 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should apply fixed positioning with inset-0', () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <Whiteboard
           boardId="test-board"
         />
@@ -151,7 +161,7 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should have no gaps or margins around canvas', () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <Whiteboard
           boardId="test-board"
         />
@@ -165,7 +175,7 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should fill 100% of viewport width and height', () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <Whiteboard
           boardId="test-board"
         />
@@ -179,7 +189,7 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should have correct z-index layering', () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <Whiteboard
           boardId="test-board"
         />
@@ -198,7 +208,7 @@ describe('Whiteboard Full-Screen Tests', () => {
 
   describe('Responsive Behavior', () => {
     it('should adapt to viewport size changes', async () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <Whiteboard
           boardId="test-board"
         />
@@ -224,7 +234,7 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should maintain full-screen on orientation change', async () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <Whiteboard
           boardId="test-board"
         />
@@ -260,7 +270,7 @@ describe('Whiteboard Full-Screen Tests', () => {
 
   describe('Canvas Performance', () => {
     it('should enable GPU acceleration styles', () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <Whiteboard
           boardId="test-board"
         />
@@ -275,7 +285,7 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should use hardware acceleration hints', () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <Whiteboard
           boardId="test-board"
         />

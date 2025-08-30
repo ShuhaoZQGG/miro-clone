@@ -547,6 +547,16 @@ export class CanvasEngine {
     this.virtualizationEnabled = enabled
   }
 
+  setRenderThrottleEnabled(enabled: boolean): void {
+    // Control whether rendering is throttled or immediate
+    if (!enabled) {
+      // Clear any pending throttled renders
+      if (this.renderThrottleId) {
+        this.renderThrottleId = null
+      }
+    }
+  }
+
   // Performance optimization
   cullElements(elements: CanvasElement[]): CanvasElement[] {
     if (!this.virtualizationEnabled) {

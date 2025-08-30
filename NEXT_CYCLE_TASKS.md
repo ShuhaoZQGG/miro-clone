@@ -1,79 +1,110 @@
 # Next Cycle Tasks
 
-## Critical Security Fixes (Priority 1)
-1. **Fix JWT Secret Management**
-   - Remove all hardcoded 'default-secret' fallbacks
-   - Implement proper environment variable validation
-   - Throw errors on missing JWT_SECRET in production
-   - Files to fix:
-     - `src/app/api/auth/signup/route.ts`
-     - `src/app/api/auth/login/route.ts`
-     - `src/app/api/auth/me/route.ts`
+## Critical Priority (Must Fix - Cycle 37)
+1. **BUILD FAILURE**: Fix TypeScript error in `/src/app/api/auth/login/route.ts:39`
+   - User type missing password property
+   - Blocking production build
+   
+2. **Test Coverage**: Fix remaining 38 test failures to achieve >95% pass rate
+   - Canvas engine test timeouts in debounce operations
+   - Fabric.js mock interactions not working properly
+   - Integration test timing issues
+   - Performance test expectations with throttling
 
-## Test Stability (Priority 2)
-1. **Canvas Engine Tests** (6 failures)
-   - Fix performance test expectations
-   - Handle throttling properly in test environment
-   - Fix timeout issues in debounce tests
+## High Priority
+1. **WebSocket Server Implementation**
+   - Complete Socket.io server setup
+   - Client connection management
+   - Real-time event broadcasting
+   - Reconnection strategies
+   - Error handling
 
-2. **Whiteboard Component Tests**
-   - Fix async operation handling
-   - Proper canvas mock setup
+2. **Authentication Flow Completion**
+   - User registration flow UI
+   - Login/logout functionality
+   - Session management
+   - Protected routes
+   - Password reset flow
 
-3. **Integration Tests**
-   - Fix timing issues
-   - Proper WebSocket mock setup
+3. **Real-time Collaboration Features**
+   - Cursor position sharing
+   - Element operation broadcasting
+   - User presence system
+   - Conflict resolution (OT/CRDT)
+   - Live user avatars
 
-4. **Auth Route Tests**
-   - Add proper JWT mock configuration
-   - Fix test environment setup
+## Medium Priority
+1. **Monitoring & Analytics**
+   - Sentry error tracking integration
+   - Performance monitoring dashboard
+   - User analytics
+   - Usage metrics
+   - Error alerting
 
-## Production Infrastructure (Priority 3)
-1. **Environment Validation**
-   - Create startup validation script
-   - Check all required environment variables
-   - Provide clear error messages for missing configs
+2. **Documentation**
+   - Complete deployment guide
+   - API documentation
+   - Developer setup guide
+   - Architecture documentation
+   - Troubleshooting guide
 
-2. **Database Connection**
-   - Add connection error handling
-   - Implement retry logic
-   - Graceful degradation when DB unavailable
+3. **Cloud Integration**
+   - S3 file storage setup
+   - Cloud sync implementation
+   - Backup strategies
+   - CDN configuration
+   - Version history
 
-3. **Deployment Configuration**
-   - Complete Vercel deployment setup
-   - Configure production environment variables
-   - Set up monitoring and logging
+## Low Priority
+1. **UI/UX Enhancements**
+   - Dark mode support
+   - Mobile responsiveness improvements
+   - Accessibility (WCAG compliance)
+   - Animation polish
+   - Keyboard shortcuts
+
+2. **Performance Optimization**
+   - Code splitting implementation
+   - Lazy loading components
+   - Bundle size optimization
+   - Image optimization
+   - Viewport-based rendering
 
 ## Technical Debt
-1. **Test Infrastructure**
-   - Improve test isolation
-   - Fix mock inconsistencies
-   - Add integration test suite
+1. Add rate limiting to API endpoints
+2. Implement comprehensive input sanitization
+3. Add structured logging with log levels
+4. Create E2E test suite with Playwright
+5. Set up CI/CD pipeline with GitHub Actions
+6. Add database migrations system
+7. Implement caching strategy
 
-2. **Code Quality**
-   - Remove unused mock implementations
-   - Consolidate test utilities
-   - Improve error handling
+## Known Issues to Address
+- Canvas engine debounce test causing timeouts
+- Fabric.js mock limitations preventing proper interaction tests
+- Missing WebSocket error handling and retry logic
+- Incomplete offline support implementation
+- Some AuthProvider wrapper issues in tests
 
-3. **Documentation**
-   - Create deployment guide
-   - Document environment variables
-   - Add troubleshooting section
-
-## Feature Enhancements (Lower Priority)
-1. **Real-time Collaboration**
-   - Complete WebSocket integration
-   - Add user presence indicators
-   - Implement cursor tracking
-
-2. **Cloud Sync**
-   - Connect to real databases
-   - Implement auto-save
-   - Add conflict resolution
+## Completed in Cycle 36
+- ✅ Fixed critical JWT secret security vulnerability
+- ✅ Added environment variable validation
+- ✅ Implemented database connection error handling
+- ✅ Enhanced production deployment configuration
+- ✅ Improved test coverage from 86% to 88%
 
 ## Success Metrics for Next Cycle
-- ✅ Zero security vulnerabilities
-- ✅ >95% test pass rate
-- ✅ All environment variables validated
-- ✅ Production deployment successful
-- ✅ Zero hardcoded secrets or defaults
+- [ ] Test coverage >95% (currently 88%)
+- [ ] WebSocket server fully functional
+- [ ] Authentication working end-to-end
+- [ ] Real-time collaboration MVP complete
+- [ ] Zero critical security issues
+- [ ] Successful production deployment
+- [ ] Monitoring and alerting configured
+- [ ] Load testing completed (100+ concurrent users)
+
+## Notes
+- Security has been addressed but needs ongoing review
+- Production configuration is ready but needs testing
+- Database resilience implemented but needs stress testing
+- Test improvements made but more work needed for stability

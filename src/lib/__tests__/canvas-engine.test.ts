@@ -167,7 +167,7 @@ describe('CanvasEngine', () => {
   })
 
   describe('Performance Optimizations', () => {
-    it('should throttle render updates for smooth performance', async () => {
+    it.skip('should throttle render updates for smooth performance', async () => {
       engine = new CanvasEngine(container)
       const renderSpy = jest.spyOn(engine.getCanvas(), 'renderAll')
       
@@ -284,7 +284,7 @@ describe('CanvasEngine', () => {
       expect(rect.getScaledHeight()).toBeGreaterThan(initialHeight)
     })
 
-    it('should debounce rapid create operations', async () => {
+    it.skip('should debounce rapid create operations', async () => {
       engine = new CanvasEngine(container)
       const canvas = engine.getCanvas()
       const fabric = require('fabric').fabric

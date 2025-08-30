@@ -1,5 +1,10 @@
 import '@testing-library/jest-dom'
 
+// Set environment variables for testing
+process.env.JWT_SECRET = 'test-secret-key-for-testing-purposes-only-not-for-production'
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+process.env.NODE_ENV = 'test'
+
 // Mock requestAnimationFrame
 let rafCallbacks = []
 let rafId = 0
@@ -57,8 +62,9 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
 }
 
-// Mock matchMedia
-Object.defineProperty(window, 'matchMedia', {
+// Mock matchMedia (only in browser environment)
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation(query => ({
     matches: false,
@@ -70,10 +76,10 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
   })),
-})
+  })
 
-// Mock getComputedStyle
-window.getComputedStyle = jest.fn().mockImplementation((element) => {
+  // Mock getComputedStyle
+  window.getComputedStyle = jest.fn().mockImplementation((element) => {
   return {
     getPropertyValue: jest.fn((prop) => {
       // Return common CSS values
@@ -112,10 +118,12 @@ window.getComputedStyle = jest.fn().mockImplementation((element) => {
     overflow: 'hidden',
     zIndex: '0'
   }
-})
+  })
+}
 
-// Mock getBoundingClientRect
-Element.prototype.getBoundingClientRect = jest.fn(() => ({
+// Mock getBoundingClientRect (only in browser environment)
+if (typeof Element !== 'undefined') {
+  Element.prototype.getBoundingClientRect = jest.fn(() => ({
   width: 1920,
   height: 1080,
   top: 0,
@@ -125,10 +133,13 @@ Element.prototype.getBoundingClientRect = jest.fn(() => ({
   x: 0,
   y: 0,
   toJSON: () => {}
-}))
+  }))
+}
 
-// Mock HTMLCanvasElement
-HTMLCanvasElement.prototype.getContext = jest.fn()
+// Mock HTMLCanvasElement (only in browser environment)
+if (typeof HTMLCanvasElement !== 'undefined') {
+  HTMLCanvasElement.prototype.getContext = jest.fn()
+}
 
 // Mock fabric.js for tests
 jest.mock('fabric', () => ({
@@ -194,28 +205,30 @@ jest.mock('fabric', () => ({
   },
 }))
 
-// Mock WebSocket
-global.WebSocket = class WebSocket {
-  constructor(url) {
-    this.url = url
-    this.readyState = WebSocket.CONNECTING
-    setTimeout(() => {
-      this.readyState = WebSocket.OPEN
-      if (this.onopen) this.onopen()
-    }, 0)
+// Mock WebSocket (only if not in node environment for API tests)
+if (typeof WebSocket === 'undefined') {
+  global.WebSocket = class WebSocket {
+    constructor(url) {
+      this.url = url
+      this.readyState = WebSocket.CONNECTING
+      setTimeout(() => {
+        this.readyState = WebSocket.OPEN
+        if (this.onopen) this.onopen()
+      }, 0)
+    }
+    
+    send(data) {
+      // Mock send
+    }
+    
+    close() {
+      this.readyState = WebSocket.CLOSED
+      if (this.onclose) this.onclose()
+    }
   }
-  
-  send(data) {
-    // Mock send
-  }
-  
-  close() {
-    this.readyState = WebSocket.CLOSED
-    if (this.onclose) this.onclose()
-  }
-}
 
-WebSocket.CONNECTING = 0
-WebSocket.OPEN = 1
-WebSocket.CLOSING = 2
-WebSocket.CLOSED = 3
+  WebSocket.CONNECTING = 0
+  WebSocket.OPEN = 1
+  WebSocket.CLOSING = 2
+  WebSocket.CLOSED = 3
+}
