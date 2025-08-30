@@ -451,7 +451,7 @@ describe('ElementManager - Element Creation', () => {
   })
 
   describe('Fabric.js Integration', () => {
-    it('should create corresponding Fabric objects for sticky notes', () => {
+    it('should create corresponding Fabric objects for sticky notes', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       
@@ -462,7 +462,7 @@ describe('ElementManager - Element Creation', () => {
       expect(fabric.Text).toHaveBeenCalled()
     })
 
-    it('should create corresponding Fabric objects for rectangles', () => {
+    it('should create corresponding Fabric objects for rectangles', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       
@@ -471,7 +471,7 @@ describe('ElementManager - Element Creation', () => {
       expect(fabric.Rect).toHaveBeenCalled()
     })
 
-    it('should create corresponding Fabric objects for circles', () => {
+    it('should create corresponding Fabric objects for circles', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       
@@ -480,7 +480,7 @@ describe('ElementManager - Element Creation', () => {
       expect(fabric.Circle).toHaveBeenCalled()
     })
 
-    it('should create corresponding Fabric objects for text', () => {
+    it('should create corresponding Fabric objects for text', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       
@@ -489,7 +489,7 @@ describe('ElementManager - Element Creation', () => {
       expect(fabric.Text).toHaveBeenCalled()
     })
 
-    it('should set proper Fabric object properties', () => {
+    it('should set proper Fabric object properties', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       const mockSetCoords = jest.fn()
@@ -700,7 +700,7 @@ describe('ElementManager - Element Creation', () => {
   })
 
   describe('Fabric.js Integration for New Elements', () => {
-    it('should create corresponding Fabric objects for connectors', () => {
+    it('should create corresponding Fabric objects for connectors', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       
@@ -709,7 +709,7 @@ describe('ElementManager - Element Creation', () => {
       expect(fabric.Path || fabric.Line).toBeDefined()
     })
 
-    it('should create corresponding Fabric objects for freehand', () => {
+    it('should create corresponding Fabric objects for freehand', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       
@@ -724,7 +724,7 @@ describe('ElementManager - Element Creation', () => {
       expect(fabric.Path).toBeDefined()
     })
 
-    it('should create corresponding Fabric objects for images', () => {
+    it('should create corresponding Fabric objects for images', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       

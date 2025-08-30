@@ -7,7 +7,7 @@ test.describe('Export Functionality Tests', () => {
 
   test.beforeEach(async ({ page: testPage }) => {
     page = testPage
-    await page.goto('/')
+    await page.goto('/board/demo-board')
     await page.waitForSelector('canvas', { timeout: 10000 })
     
     // Create some elements to export

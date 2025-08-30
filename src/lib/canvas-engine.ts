@@ -684,23 +684,41 @@ export class CanvasEngine {
           // Clear all objects first
           this.canvas.clear()
           
-          // Get canvas elements
+          // Get canvas elements before disposal for cleanup check
           const upperCanvasEl = (this.canvas as any).upperCanvasEl
           const lowerCanvasEl = (this.canvas as any).lowerCanvasEl
           const wrapperEl = (this.canvas as any).wrapperEl
           
+          // Store parent references before disposal
+          const upperParent = upperCanvasEl?.parentNode
+          const lowerParent = lowerCanvasEl?.parentNode
+          const wrapperParent = wrapperEl?.parentNode
+          
           // Dispose the fabric canvas
           this.canvas.dispose()
           
-          // Clean up any remaining DOM elements
-          if (upperCanvasEl && upperCanvasEl.parentNode) {
-            upperCanvasEl.parentNode.removeChild(upperCanvasEl)
+          // Only attempt to remove elements if they still exist in DOM
+          // The disposal may have already removed them
+          if (upperCanvasEl && upperParent && upperCanvasEl.parentNode === upperParent) {
+            try {
+              upperParent.removeChild(upperCanvasEl)
+            } catch (e) {
+              // Element already removed, ignore
+            }
           }
-          if (lowerCanvasEl && lowerCanvasEl.parentNode) {
-            lowerCanvasEl.parentNode.removeChild(lowerCanvasEl)
+          if (lowerCanvasEl && lowerParent && lowerCanvasEl.parentNode === lowerParent) {
+            try {
+              lowerParent.removeChild(lowerCanvasEl)
+            } catch (e) {
+              // Element already removed, ignore
+            }
           }
-          if (wrapperEl && wrapperEl.parentNode) {
-            wrapperEl.parentNode.removeChild(wrapperEl)
+          if (wrapperEl && wrapperParent && wrapperEl.parentNode === wrapperParent) {
+            try {
+              wrapperParent.removeChild(wrapperEl)
+            } catch (e) {
+              // Element already removed, ignore
+            }
           }
         } catch (canvasError) {
           // Log but continue with cleanup

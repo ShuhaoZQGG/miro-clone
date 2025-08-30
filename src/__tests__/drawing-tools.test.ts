@@ -195,7 +195,7 @@ describe('Drawing Tools - Advanced Shapes', () => {
   })
 
   describe('Fabric.js Integration for New Drawing Tools', () => {
-    it('should create corresponding Fabric objects for ellipses', () => {
+    it('should create corresponding Fabric objects for ellipses', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       
@@ -204,7 +204,7 @@ describe('Drawing Tools - Advanced Shapes', () => {
       expect(fabric.Ellipse).toHaveBeenCalled()
     })
 
-    it('should create corresponding Fabric objects for lines', () => {
+    it('should create corresponding Fabric objects for lines', async () => {
       const fabricModule = await import('fabric')
       const { fabric } = fabricModule
       

@@ -2,6 +2,7 @@ import { CanvasEngine } from '@/lib/canvas-engine'
 import { Position, CanvasElement } from '@/types'
 
 // Mock fabric.js
+const mockCanvasElement = document.createElement('canvas')
 const mockCanvas = {
   add: jest.fn(),
   remove: jest.fn(),
@@ -25,6 +26,7 @@ const mockCanvas = {
   forEachObject: jest.fn(),
   getObjects: jest.fn().mockReturnValue([]),
   setDimensions: jest.fn(),
+  getElement: jest.fn().mockReturnValue(mockCanvasElement),
   wrapperEl: document.createElement('canvas'),
   selection: true,
   hoverCursor: 'pointer',
@@ -68,7 +70,7 @@ describe('CanvasEngine', () => {
     if (canvasEngine) {
       try {
         canvasEngine.dispose()
-      } catch (error) {
+      } catch {
         // Ignore disposal errors in tests
       }
     }

@@ -138,7 +138,7 @@ export class SecurityManager {
   }
 
   validateUserInput(input: string, type: 'text' | 'url' | 'email'): { valid: boolean; sanitized: string } {
-    let sanitized = this.sanitizeText(input)
+    const sanitized = this.sanitizeText(input)
 
     switch (type) {
       case 'url':
