@@ -64,9 +64,7 @@ export async function POST(request: NextRequest) {
         success: true,
         data: {
           user: userWithoutPassword,
-          token: accessToken,
-          sessionId: session.id,
-          expiresAt: session.expiresAt
+          token: accessToken
         },
       },
       { status: 200 }

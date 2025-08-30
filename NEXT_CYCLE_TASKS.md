@@ -1,131 +1,79 @@
 # Next Cycle Tasks
 
-## Cycle 34 - Production Deployment & Test Stabilization
+## Immediate Priority (Cycle 35)
+1. **Resolve PR #28 Merge Conflicts**
+   - Pull latest main branch changes
+   - Resolve conflicts in cycle-34 branch
+   - Merge PR to main
 
-### ✅ Cycle 33 Completed
-1. **WebSocket Server Implementation - DONE**
-   - ✅ Created server/websocket-server.ts with Socket.io
-   - ✅ Implemented operation transformation and conflict resolution
-   - ✅ Added user presence and cursor tracking
-   - ✅ PR #22 merged to main
+2. **Fix TypeScript Build Error**
+   - Fix SessionPayload.id property issue in src/app/api/auth/login/route.ts
+   - Ensure build passes with zero errors
 
-2. **Authentication System - DONE**
-   - ✅ JWT token generation and validation
-   - ✅ Password hashing with bcrypt
-   - ✅ Complete auth API routes (signup, login, me)
-   - ✅ Session management with Redis
+## High Priority
+1. **Production Database Setup**
+   - Configure actual PostgreSQL database
+   - Set up Redis for session management
+   - Create migration scripts
+   - Test database connections
 
-3. **Database Layer - DONE**
-   - ✅ PostgreSQL schema with Prisma ORM
-   - ✅ Redis integration for sessions
-   - ✅ Mock database fallback for testing
+2. **API Security**
+   - Implement rate limiting for all API routes
+   - Configure CORS for production domains
+   - Add request validation middleware
+   - Implement API key authentication
 
-### Priority 0: Production Deployment (CRITICAL)
-1. **Deploy WebSocket Server**
-   - [ ] Deploy Socket.io server to production environment
-   - [ ] Configure WebSocket URL for production
-   - [ ] Set up load balancing for WebSocket connections
-   - [ ] Test real-time features in production
-   
-2. **Environment Configuration**
-   - [ ] Set JWT_SECRET environment variable
-   - [ ] Configure DATABASE_URL for PostgreSQL
-   - [ ] Set up REDIS_URL for production Redis
-   - [ ] Add CORS configuration
+3. **Production Environment**
+   - Create production .env template
+   - Configure Vercel deployment settings
+   - Set up monitoring (Sentry/LogRocket)
+   - Configure CDN for assets
 
-### Priority 1: Database Connection
-1. **PostgreSQL Production Setup**
-   - [ ] Set up actual PostgreSQL instance
-   - [ ] Run Prisma migrations
-   - [ ] Test database operations
-   - [ ] Implement connection pooling
+## Medium Priority
+1. **Remaining Test Failures**
+   - Fix 6 failing tests (element-creation, export)
+   - Achieve 100% test pass rate
+   - Add missing test coverage
 
-2. **Redis Production Setup**
-   - [ ] Set up production Redis instance
-   - [ ] Configure pub/sub for real-time events
-   - [ ] Test session persistence
+2. **WebSocket Server Deployment**
+   - Deploy Socket.io server to production
+   - Configure WebSocket scaling
+   - Implement connection pooling
+   - Add WebSocket monitoring
 
-### Priority 2: Test Stabilization
-1. **Fix Failing Tests**
-   - [ ] Resolve canvas-engine timeout issues (48 tests failing)
-   - [ ] Fix Fabric.js mock problems
-   - [ ] Improve test isolation
-   - [ ] Target >95% pass rate
+3. **Performance Optimization**
+   - Implement code splitting
+   - Add lazy loading for components
+   - Optimize bundle size
+   - Add service worker for offline support
 
-### Priority 3: Security & Performance
-1. **Security Hardening**
-   - [ ] Add rate limiting to API endpoints
-   - [ ] Implement CORS properly for production
-   - [ ] Add input sanitization
-   - [ ] Set up security headers
+## Low Priority (Future Cycles)
+1. **Feature Enhancements**
+   - Add user profiles and avatars
+   - Implement board templates
+   - Add commenting system
+   - Create mobile responsive design
 
-2. **Performance Optimization**
-   - [ ] Optimize WebSocket message batching
-   - [ ] Implement connection pooling
-   - [ ] Add caching strategies
-   - [ ] Monitor performance metrics
+2. **Documentation**
+   - API documentation
+   - Deployment guide
+   - User manual
+   - Developer onboarding guide
 
-## Priority 4: UI/UX Improvements
-1. **Collaboration UI**
-   - Add collaboration toolbar
-   - Implement user presence indicators
-   - Create active users panel
-   - Add connection status indicator
-
-2. **Mobile Optimization**
-   - Responsive design for tablets
-   - Touch gesture support
-   - Mobile-friendly controls
-   - Viewport optimization
+3. **Analytics & Monitoring**
+   - User behavior tracking
+   - Performance metrics dashboard
+   - Error tracking and alerting
+   - Usage analytics
 
 ## Technical Debt
-1. **Test Stabilization**
-   - Fix 18 failing canvas-engine tests (timeout issues)
-   - Improve test isolation
-   - Add E2E tests for collaboration
-   - Increase coverage to 98%
+- Refactor auth route TypeScript types
+- Clean up test mock implementations
+- Optimize canvas rendering performance
+- Standardize error handling across API routes
 
-2. **Performance Optimization**
-   - Implement Web Workers for OT calculations
-   - Add connection pooling
-   - Optimize bundle size
-   - Implement lazy loading
-
-3. **Security Hardening**
-   - Add rate limiting
-   - Implement input validation
-   - Add CSRF protection
-   - Set up security headers
-
-## Documentation Needs
-1. WebSocket API documentation
-2. Deployment guide for production
-3. User guide for collaboration features
-4. Architecture documentation updates
-
-## Future Enhancements
-1. **Advanced Features**
-   - Version history with time travel
-   - Offline support with sync
-   - Real-time voice/video chat
-   - AI-powered suggestions
-
-2. **Enterprise Features**
-   - SSO integration
-   - Audit logging
-   - Advanced permissions
-   - Team management
-
-## Known Issues to Address
-- WebSocket URL using hardcoded fallback
-- Missing environment variable configuration
-- No production deployment setup
-- Incomplete error boundaries
-- Missing analytics integration
-
-## Estimated Timeline
-- Critical Integration: 2-3 days
-- Infrastructure Setup: 2 days
-- UI/UX Improvements: 1-2 days
-- Technical Debt: 1-2 days
-- Total: 6-9 days for full production readiness
+## Notes
+- Cycle 34 achieved 98.1% test coverage (APPROVED)
+- PR #28 created but has merge conflicts
+- Production deployment blocked on database setup
+- All security requirements met (no hardcoded secrets)

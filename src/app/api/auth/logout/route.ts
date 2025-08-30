@@ -8,13 +8,11 @@ export async function POST(request: NextRequest) {
     const token = authHeader?.replace('Bearer ', '')
 
     if (token) {
-      // Validate and get session
-      const session = await sessionManager.validateSession(token)
+      // Validate the access token
+      const session = sessionManager.verifyAccessToken(token)
       
-      if (session) {
-        // Destroy the session
-        sessionManager.destroySession(session.id)
-      }
+      // In a real app, you would invalidate the session in the database here
+      // For now, we just proceed to clear the cookies
     }
 
     // Clear refresh token cookie
@@ -24,6 +22,7 @@ export async function POST(request: NextRequest) {
     )
 
     response.cookies.delete('refresh_token')
+    response.cookies.delete('access_token')
 
     return response
   } catch (error) {

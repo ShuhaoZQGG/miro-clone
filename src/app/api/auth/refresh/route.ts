@@ -23,19 +23,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { accessToken, session } = result
+    const { accessToken, refreshToken: newRefreshToken, user } = result
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         data: {
           token: accessToken,
-          sessionId: session.id,
-          expiresAt: session.expiresAt
+          user: user
         }
       },
       { status: 200 }
     )
+
+    // Update the refresh token cookie
+    response.cookies.set('refresh_token', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: '/'
+    })
+
+    return response
   } catch (error) {
     console.error('Token refresh error:', error)
     return NextResponse.json(
