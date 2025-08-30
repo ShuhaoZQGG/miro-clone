@@ -1,96 +1,107 @@
 # Next Cycle Tasks
 
-## Critical Blockers (Must Fix First)
-1. **Fix Build Failure**
-   - Remove/comment out DataDog imports in `monitoring/datadog.config.ts`
-   - OR install missing packages: `@datadog/browser-rum` and `@datadog/browser-logs`
-   - Add missing `type-check` script to package.json: `"type-check": "tsc --noEmit"`
-   - Verify build succeeds with `npm run build`
+## Immediate Priority (P0)
+### Merge Conflict Resolution
+- **PR #31 has merge conflicts** preventing merge to main
+- Need to resolve conflicts with main branch
+- Rebase or merge main into cycle-39 branch
+- Ensure tests still pass after conflict resolution
 
-## Immediate Priority
-1. **Production Deployment** (After Build Fix)
-   - Deploy frontend to Vercel
-   - Deploy WebSocket server to Railway/Render
-   - Configure PostgreSQL on Supabase/Neon
-   - Configure Redis on Upstash
-   - Set up environment variables from .env.production.template
+## Deployment Tasks (P1)
+### Frontend Deployment
+1. Deploy to Vercel
+   - Connect GitHub repository
+   - Configure environment variables
+   - Set up custom domain (if available)
+   - Enable automatic deployments
 
-## Technical Debt
-1. **Linting Issues**
-   - Fix 24 TypeScript warnings (mostly `any` types in tests)
+### WebSocket Server
+1. Deploy to Railway or Render
+   - Configure Socket.io server
+   - Set up Redis adapter (Upstash)
+   - Configure health checks
+   - Enable auto-scaling
+
+### Database Setup
+1. PostgreSQL on Supabase
+   - Run database migrations
+   - Configure connection pooling
+   - Set up backup schedule
+   - Create read replicas if needed
+
+2. Redis on Upstash
+   - Configure for session storage
+   - Set up WebSocket adapter
+   - Configure eviction policies
+
+## Monitoring Configuration (P1)
+1. **Sentry Setup**
+   - Obtain and configure DSN
+   - Set up error boundaries
+   - Configure performance monitoring
+   - Create alert rules
+
+2. **Uptime Monitoring**
+   - Configure UptimeRobot or similar
+   - Set up status page
+   - Configure alert channels
+
+## Technical Debt (P2)
+1. **Code Quality**
+   - Fix 24 TypeScript warnings
    - Remove unused `token` variable in socketio route
+   - Replace `any` types with proper interfaces
 
-2. **Code Quality**
-   - Add proper TypeScript types to test files
-   - Replace `any` types with specific interfaces
+2. **Testing**
+   - Implement E2E tests with Playwright
+   - Add performance benchmarks
+   - Create load testing suite
 
-## Performance Optimization
-1. **Bundle Size**
-   - Implement code splitting for large components
-   - Add lazy loading for non-critical routes
+3. **Documentation**
+   - Update deployment documentation
+   - Create runbook for common issues
+   - Document environment variables
+   - Add API documentation
 
-2. **Runtime Performance**
-   - Add service worker for offline support
-   - Implement client-side caching strategies
-
-## Documentation
-1. **Deployment Guide**
-   - Create step-by-step deployment instructions
-   - Document environment variable configuration
-   - Add troubleshooting section
-
-2. **API Documentation**
-   - Document WebSocket events
-   - Create API endpoint reference
-   - Add authentication flow documentation
-
-## Security Enhancements
-1. **Security Audit**
-   - Run npm audit and fix vulnerabilities
-   - Perform penetration testing
-   - Review authentication implementation
-
-2. **Monitoring**
-   - Configure Sentry error tracking
-   - Set up performance monitoring
-   - Add uptime monitoring
-
-## Feature Enhancements
+## Feature Enhancements (P3)
 1. **Collaboration Features**
-   - Add user presence indicators
-   - Implement collaborative cursors
-   - Add real-time notifications
+   - Real-time presence indicators
+   - Voice/video chat integration
+   - Advanced permission system
+   - Team workspaces
 
-2. **Export Features**
-   - Add JSON export format
-   - Implement board templates
-   - Add bulk export functionality
+2. **Export Functionality**
+   - PNG/JPG export with quality settings
+   - PDF export with pagination
+   - SVG export for vector graphics
+   - Batch export capabilities
 
-## Testing
-1. **Load Testing**
-   - Test WebSocket server scalability
-   - Benchmark API endpoints
-   - Test concurrent user limits
+3. **Mobile Optimization**
+   - Touch gesture improvements
+   - Mobile-specific UI components
+   - Offline mode with sync
+   - Progressive Web App features
 
-2. **E2E Testing**
-   - Add Playwright/Cypress tests
-   - Test critical user flows
-   - Add visual regression tests
+## Infrastructure Improvements (P3)
+1. **Performance**
+   - Implement CDN for static assets
+   - Add server-side caching
+   - Optimize database queries
+   - Implement lazy loading
 
-## Infrastructure
-1. **CI/CD Pipeline**
-   - Set up GitHub Actions for automated testing
-   - Add automated deployment on merge to main
-   - Configure preview deployments for PRs
+2. **Security**
+   - Add 2FA support
+   - Implement SSO integration
+   - Enhanced audit logging
+   - Regular security scans
 
-2. **Backup Strategy**
-   - Implement automated database backups
-   - Set up disaster recovery procedures
-   - Document rollback procedures
+## Outstanding PRs to Review
+- PR #29: Production deployment configuration (has conflicts)
+- PR #30: Test fixes and infrastructure (has conflicts)
+- Multiple other open PRs need review and potential closure
 
-## Priority Order
-1. Merge PR #30 (CRITICAL)
-2. Deploy to production
-3. Fix linting issues
-4. Add monitoring
-5. Enhance features
+## Notes
+- PR #31 is approved but cannot merge due to conflicts
+- All tests are passing (311/311)
+- Build is successful
+- Application is production-ready once conflicts are resolved
