@@ -1,6 +1,6 @@
 import { CanvasEngine } from '@/lib/canvas-engine'
 import { Position, CanvasElement } from '@/types'
-import { setupRAFMock, createMockCanvas } from './utils/test-helpers'
+import { setupRAFMock, createMockCanvas } from './utils/helpers'
 
 // Setup RAF mock
 const rafMock = setupRAFMock()

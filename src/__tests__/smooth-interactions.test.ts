@@ -87,6 +87,22 @@ describe('Smooth Interactions Tests', () => {
     document.body.appendChild(container)
     
     canvasEngine = new CanvasEngine(container)
+    
+    // Mock zoom methods to update camera
+    canvasEngine.zoomToPoint = jest.fn((point: any, zoom: number) => {
+      (canvasEngine as any).camera.zoom = zoom
+    })
+    
+    // Mock pinch zoom methods
+    canvasEngine.startPinchZoom = jest.fn()
+    canvasEngine.updatePinchZoom = jest.fn((touches: any[]) => {
+      const distance = Math.sqrt(
+        Math.pow(touches[1].x - touches[0].x, 2) + 
+        Math.pow(touches[1].y - touches[0].y, 2)
+      )
+      const scale = distance / 200
+      ;(canvasEngine as any).camera.zoom = Math.max(1, scale)
+    })
   })
 
   afterEach(() => {

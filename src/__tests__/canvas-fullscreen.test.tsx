@@ -54,11 +54,11 @@ describe('Canvas Full-Screen Tests', () => {
       getCanvas: jest.fn(() => ({
         getElement: jest.fn(() => {
           const canvas = document.createElement('canvas')
-          canvas.style.width = '100%'
-          canvas.style.height = '100%'
-          canvas.style.position = 'absolute'
-          canvas.style.top = '0'
-          canvas.style.left = '0'
+          Object.defineProperty(canvas.style, 'width', { value: '100%', writable: true })
+          Object.defineProperty(canvas.style, 'height', { value: '100%', writable: true })
+          Object.defineProperty(canvas.style, 'position', { value: 'absolute', writable: true })
+          Object.defineProperty(canvas.style, 'top', { value: '0', writable: true })
+          Object.defineProperty(canvas.style, 'left', { value: '0', writable: true })
           return canvas
         }),
         renderAll: jest.fn(),
