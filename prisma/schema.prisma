@@ -10,41 +10,142 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum BoardVisibility {
+  PRIVATE
+  PUBLIC
+  TEAM
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  password     String
-  displayName  String
-  avatarUrl    String?
-  boards       Board[]
-  elements     Element[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String              @id @default(uuid())
+  email            String              @unique
+  username         String              @unique
+  passwordHash     String              @map("password_hash")
+  fullName         String?             @map("full_name")
+  avatarUrl        String?             @map("avatar_url")
+  role             UserRole            @default(USER)
+  emailVerified    Boolean             @default(false) @map("email_verified")
+  lastLogin        DateTime?           @map("last_login")
+  boards           Board[]
+  collaborations   BoardCollaborator[]
+  boardVersions    BoardVersion[]
+  sessions         Session[]
+  activityLogs     ActivityLog[]
+  elements         Element[]
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@index([username])
+  @@map("users")
 }
 
 model Board {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  ownerId     String
-  owner       User      @relation(fields: [ownerId], references: [id])
-  elements    Element[]
-  isPublic    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String              @id @default(uuid())
+  title         String
+  description   String?
+  ownerId       String              @map("owner_id")
+  owner         User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  visibility    BoardVisibility     @default(PRIVATE)
+  canvasData    Json                @default("{}") @map("canvas_data")
+  thumbnailUrl  String?             @map("thumbnail_url")
+  lastAccessed  DateTime            @default(now()) @map("last_accessed")
+  collaborators BoardCollaborator[]
+  versions      BoardVersion[]
+  elements      Element[]
+  activityLogs  ActivityLog[]
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  @@index([ownerId])
+  @@index([updatedAt(sort: Desc)])
+  @@map("boards")
+}
+
+model BoardCollaborator {
+  id         String   @id @default(uuid())
+  boardId    String   @map("board_id")
+  board      Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  canEdit    Boolean  @default(true) @map("can_edit")
+  canComment Boolean  @default(true) @map("can_comment")
+  joinedAt   DateTime @default(now()) @map("joined_at")
+
+  @@unique([boardId, userId])
+  @@index([userId])
+  @@index([boardId])
+  @@map("board_collaborators")
+}
+
+model BoardVersion {
+  id            String   @id @default(uuid())
+  boardId       String   @map("board_id")
+  board         Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  versionNumber Int      @map("version_number")
+  canvasData    Json     @map("canvas_data")
+  createdBy     String   @map("created_by")
+  creator       User     @relation(fields: [createdBy], references: [id])
+  message       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@unique([boardId, versionNumber])
+  @@map("board_versions")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  boardId   String?  @map("board_id")
+  board     Board?   @relation(fields: [boardId], references: [id], onDelete: SetNull)
+  action    String
+  details   Json     @default("{}")
+  ipAddress String?  @map("ip_address")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([boardId])
+  @@index([createdAt(sort: Desc)])
+  @@map("activity_logs")
 }
 
 model Element {
-  id         String   @id @default(cuid())
-  boardId    String
+  id         String   @id @default(uuid())
+  boardId    String   @map("board_id")
   board      Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
   type       String   // rectangle, circle, text, sticky-note, etc.
   data       Json     // Store element-specific data as JSON
   position   Json     // {x: number, y: number}
   dimensions Json     // {width: number, height: number}
   style      Json?    // Style properties
-  creatorId  String
+  creatorId  String   @map("creator_id")
   creator    User     @relation(fields: [creatorId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([boardId])
+  @@map("elements")
 }
