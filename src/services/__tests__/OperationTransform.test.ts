@@ -1,4 +1,4 @@
-import { OperationTransform, Operation, TransformResult } from '../OperationTransform'
+import { OperationTransform, Operation } from '../OperationTransform'
 
 describe('OperationTransform', () => {
   let ot: OperationTransform

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { TestDashboard } from '@/components/TestDashboard'
 import { PerformanceOverlay } from '@/components/PerformanceOverlay'
+import { AuthProvider } from '@/context/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,9 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`${inter.className} h-full antialiased`}>
-        {children}
-        <TestDashboard />
-        <PerformanceOverlay />
+        <AuthProvider>
+          {children}
+          <TestDashboard />
+          <PerformanceOverlay />
+        </AuthProvider>
       </body>
     </html>
   )

@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useCanvasStore } from '@/store/useCanvasStore'
 import { Button } from './ui/Button'
 import { Avatar } from './ui/Avatar'
 import { Tooltip } from './ui/Tooltip'
@@ -9,12 +8,25 @@ import { Badge } from './ui/Badge'
 import { UserIcon, SettingsIcon, InviteIcon } from './ui/Icons'
 import { clsx } from 'clsx'
 
-export const CollaborationPanel: React.FC = () => {
-  const { collaborators, isConnected } = useCanvasStore()
+interface UserPresence {
+  userId: string
+  displayName: string
+  avatarColor: string
+  cursor?: { x: number; y: number }
+  selection?: string[]
+  lastSeen?: Date
+  isActive?: boolean
+}
+
+interface CollaborationPanelProps {
+  users?: UserPresence[]
+  isConnected?: boolean
+}
+
+export const CollaborationPanel: React.FC<CollaborationPanelProps> = ({ users = [], isConnected = false }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   
-  const collaboratorArray = Array.from(collaborators.values())
-  const activeCollaborators = collaboratorArray.filter(c => c.isActive)
+  const activeUsers = users.filter(u => u.isActive !== false)
 
   return (
     <div className="absolute top-4 right-4 z-40">
@@ -43,30 +55,32 @@ export const CollaborationPanel: React.FC = () => {
         
         {/* Collaborator Avatars */}
         <div className="flex items-center gap-2">
-          {activeCollaborators.slice(0, 5).map((collaborator) => (
+          {activeUsers.slice(0, 5).map((user) => (
             <Tooltip
-              key={collaborator.userId}
-              content={`User ${collaborator.userId.slice(-4)} ${collaborator.isActive ? '(active)' : '(idle)'}`}
+              key={user.userId}
+              content={`${user.displayName} ${user.isActive !== false ? '(active)' : '(idle)'}`}
             >
-              <Avatar
-                size="sm"
-                className={clsx(
-                  'ring-2',
-                  collaborator.isActive ? 'ring-green-400' : 'ring-gray-300'
-                )}
-              >
-                <UserIcon className="w-3 h-3" />
-              </Avatar>
+              <div style={{ backgroundColor: user.avatarColor || '#3B82F6' }} className="rounded-full">
+                <Avatar
+                  size="sm"
+                  className={clsx(
+                    'ring-2',
+                    user.isActive !== false ? 'ring-green-400' : 'ring-gray-300'
+                  )}
+                >
+                  <UserIcon className="w-3 h-3 text-white" />
+                </Avatar>
+              </div>
             </Tooltip>
           ))}
           
-          {activeCollaborators.length > 5 && (
+          {activeUsers.length > 5 && (
             <Badge variant="secondary" className="text-xs">
-              +{activeCollaborators.length - 5}
+              +{activeUsers.length - 5}
             </Badge>
           )}
           
-          {activeCollaborators.length === 0 && (
+          {activeUsers.length === 0 && (
             <div className="text-sm text-gray-500">
               No active collaborators
             </div>
@@ -113,42 +127,46 @@ export const CollaborationPanel: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Active users:</span>
-                  <span>{activeCollaborators.length}</span>
+                  <span>{activeUsers.length}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Total users:</span>
-                  <span>{collaboratorArray.length}</span>
+                  <span>{users.length}</span>
                 </div>
               </div>
             </div>
 
             {/* Collaborator List */}
-            {collaboratorArray.length > 0 && (
+            {users.length > 0 && (
               <div className="space-y-2">
                 <div className="text-xs font-medium text-gray-700">Active Now</div>
-                {collaboratorArray.map((collaborator) => (
+                {users.map((user) => (
                   <div
-                    key={collaborator.userId}
+                    key={user.userId}
                     className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-50"
                   >
-                    <Avatar size="xs">
-                      <UserIcon className="w-3 h-3" />
-                    </Avatar>
+                    <div style={{ backgroundColor: user.avatarColor || '#3B82F6' }} className="rounded-full inline-block">
+                      <Avatar 
+                        size="xs"
+                      >
+                        <UserIcon className="w-3 h-3 text-white" />
+                      </Avatar>
+                    </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">
-                        User {collaborator.userId.slice(-4)}
+                        {user.displayName}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {collaborator.isActive ? 'Active' : `Last seen ${new Date(collaborator.lastSeen).toLocaleTimeString()}`}
+                        {user.isActive !== false ? 'Active' : user.lastSeen ? `Last seen ${new Date(user.lastSeen).toLocaleTimeString()}` : 'Away'}
                       </div>
                     </div>
                     
                     <Badge
-                      variant={collaborator.isActive ? 'success' : 'secondary'}
+                      variant={user.isActive !== false ? 'success' : 'secondary'}
                       size="xs"
                     >
-                      {collaborator.isActive ? 'online' : 'away'}
+                      {user.isActive !== false ? 'online' : 'away'}
                     </Badge>
                   </div>
                 ))}

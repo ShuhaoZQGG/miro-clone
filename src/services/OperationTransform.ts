@@ -204,7 +204,7 @@ export class OperationTransform {
   }
 
   applyOperations(operations: Operation[], currentState: any): any {
-    let state = { ...currentState }
+    const state = { ...currentState }
 
     for (const op of operations) {
       switch (op.type) {

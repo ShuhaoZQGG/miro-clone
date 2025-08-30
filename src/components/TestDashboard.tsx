@@ -68,7 +68,7 @@ export function TestDashboard() {
             setTestResults(failures)
           }
         }
-      } catch (error) {
+      } catch {
         // Silently fail if API not available
       }
     }, 1000) // Poll every second
@@ -139,13 +139,9 @@ export function TestDashboard() {
     window.dispatchEvent(new CustomEvent('test:stop'))
   }, [])
 
-  // Only show in development
-  if (process.env.NODE_ENV !== 'development') {
-    return null
-  }
-
   // Keyboard shortcut to toggle dashboard
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'T') {
         e.preventDefault()
@@ -156,6 +152,11 @@ export function TestDashboard() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [toggleDashboard])
+
+  // Only show in development
+  if (process.env.NODE_ENV !== 'development') {
+    return null
+  }
 
   if (!isOpen) {
     return (

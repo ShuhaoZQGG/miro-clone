@@ -11,7 +11,7 @@ class DashboardReporter {
     }
   }
 
-  onRunStart(results, options) {
+  onRunStart() {
     this.testResults = {
       passed: 0,
       failed: 0,
@@ -21,7 +21,7 @@ class DashboardReporter {
     this.sendUpdate()
   }
 
-  onTestStart(test) {
+  onTestStart() {
     this.testResults.running++
     this.sendUpdate()
   }
@@ -52,7 +52,7 @@ class DashboardReporter {
     this.sendUpdate()
   }
 
-  onRunComplete(contexts, results) {
+  onRunComplete() {
     this.testResults.running = 0
     this.sendUpdate()
     
@@ -74,13 +74,15 @@ class DashboardReporter {
   sendUpdate() {
     // Send update to dashboard via IPC or file
     if (process.env.JEST_DASHBOARD) {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const fs = require('fs')
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const path = require('path')
       const dashboardFile = path.join(process.cwd(), '.test-dashboard.json')
       
       try {
         fs.writeFileSync(dashboardFile, JSON.stringify(this.testResults, null, 2))
-      } catch (error) {
+      } catch {
         // Silently fail if can't write dashboard file
       }
     }
