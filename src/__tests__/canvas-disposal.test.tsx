@@ -13,7 +13,7 @@ describe('Canvas Disposal Safety', () => {
   let mockElementManager: jest.Mocked<ElementManager>
   let mockDispose: jest.Mock
   let initCallCount = 0
-  const initResolve: (() => void) | null = null
+  let initResolve: (() => void) | null = null
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -197,9 +197,7 @@ describe('Canvas Disposal Safety', () => {
       unmount()
 
       // Complete initialization after unmount (if there was a pending init)
-      if (initResolve) {
-        initResolve()
-      }
+      // Note: In the actual implementation, initialization is handled internally
 
       await waitFor(() => {
         // Disposal should be called even if init was pending

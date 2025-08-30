@@ -12,7 +12,7 @@ const mockStoreState = {
   isLoading: false,
   camera: { x: 0, y: 0, zoom: 1 },
   tool: { type: 'select' },
-  elements: [],
+  elements: [] as any[],
   selectedElementIds: [],
   collaborators: new Map(),
   isConnected: false,

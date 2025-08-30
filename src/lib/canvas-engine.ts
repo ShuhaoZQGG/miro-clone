@@ -25,8 +25,8 @@ interface CanvasEngineEvents {
   stateChange: { type: string; camera?: Camera; [key: string]: any }
 }
 
-// Internal type that extends CanvasElement with fabric object reference
-interface InternalCanvasElement extends CanvasElement {
+// Internal type that adds fabric object reference to CanvasElement
+type InternalCanvasElement = CanvasElement & {
   fabricObject?: fabric.Object
 }
 
@@ -261,7 +261,7 @@ export class CanvasEngine {
     return Math.sqrt(dx * dx + dy * dy)
   }
 
-  private handleResize(): void {
+  public handleResize(): void {
     // Debounce resize to improve performance
     if (this.resizeDebounceTimer) {
       clearTimeout(this.resizeDebounceTimer)
@@ -510,7 +510,8 @@ export class CanvasEngine {
   }
 
   getElements(): CanvasElement[] {
-    return [...this.elements]
+    // Return elements without the internal fabricObject property
+    return this.elements.map(({ fabricObject, ...element }) => element as CanvasElement)
   }
 
   getSelectedElementIds(): string[] {
@@ -727,7 +728,7 @@ export class CanvasEngine {
     this.startRenderLoop()
   }
 
-  createElement(type: string, options: any): CanvasElement {
+  createElement(type: string, options: any): InternalCanvasElement {
     let fabricObject: fabric.Object | null = null
     
     switch (type) {
@@ -1036,7 +1037,7 @@ export class CanvasEngine {
     return 1
   }
 
-  createElementAnimated(type: string, position: Position, options: any): CanvasElement {
+  createElementAnimated(type: string, position: Position, options: any): InternalCanvasElement {
     const element = this.createElement(type, { ...options, x: position.x, y: position.y })
     
     // Start with scale 0

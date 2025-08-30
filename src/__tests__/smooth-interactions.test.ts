@@ -151,8 +151,8 @@ describe('Smooth Interactions Tests', () => {
       expect(requestAnimationFrame).toHaveBeenCalled()
       
       // Use global flushRAF helper if available
-      if (global.flushRAF) {
-        global.flushRAF(1)
+      if ((global as any).flushRAF) {
+        (global as any).flushRAF(1)
       }
       
       // Should continue requesting frames for animation
@@ -357,8 +357,8 @@ describe('Smooth Interactions Tests', () => {
       expect(scale).toBeLessThanOrEqual(1)
       
       // Simulate animation frames
-      if (global.flushRAF) {
-        global.flushRAF(18) // 300ms at 60fps
+      if ((global as any).flushRAF) {
+        (global as any).flushRAF(18) // 300ms at 60fps
       }
       
       // After animation, scale should be normal
@@ -528,8 +528,8 @@ describe('Smooth Interactions Tests', () => {
         const time = i * 33.33 // 30fps (below target)
         mockPerformanceNow.mockReturnValue(time)
         
-        if (global.flushRAF) {
-          global.flushRAF(1)
+        if ((global as any).flushRAF) {
+          (global as any).flushRAF(1)
         }
         
         canvasEngine.updateFrameStats()
