@@ -30,36 +30,67 @@ export const useCanvas = (options: UseCanvasOptions) => {
     clearSelection
   } = useCanvasStore()
 
-  // Initialize canvas
+  // Initialize canvas with stable dependencies
   useEffect(() => {
-    if (!containerRef.current || isInitialized) return
+    if (!containerRef.current) return
 
-    try {
-      const canvasEngine = new CanvasEngine(containerRef.current)
-      const elementManager = new ElementManager(canvasEngine.getCanvas(), options.boardId)
-      
-      canvasEngineRef.current = canvasEngine
-      elementManagerRef.current = elementManager
-      
-      // Set up canvas event listeners
-      canvasEngine.on('pan', ({ position }) => {
-        updateCamera({ x: position.x, y: position.y })
-      })
-      
-      canvasEngine.on('zoom', ({ zoom }) => {
-        updateCamera({ zoom })
-      })
-      
-      // Sync initial camera state
-      canvasEngine.panTo({ x: camera.x, y: camera.y })
-      canvasEngine.zoomTo(camera.zoom)
-      
-      setIsInitialized(true)
-    } catch (error) {
-      console.error('Failed to initialize canvas:', error)
+    // Use a disposal token to prevent stale closures
+    let disposed = false
+    let engine: CanvasEngine | null = null
+    let manager: ElementManager | null = null
+
+    const initCanvas = async () => {
+      try {
+        if (disposed) return
+
+        engine = new CanvasEngine(containerRef.current!)
+        manager = new ElementManager(engine.getCanvas(), options.boardId)
+        
+        if (disposed) {
+          // Component unmounted during initialization
+          engine.dispose()
+          return
+        }
+
+        canvasEngineRef.current = engine
+        elementManagerRef.current = manager
+        
+        // Set up canvas event listeners with stable references
+        const handlePan = ({ position }: { position: { x: number; y: number } }) => {
+          useCanvasStore.getState().updateCamera({ x: position.x, y: position.y })
+        }
+        
+        const handleZoom = ({ zoom }: { zoom: number }) => {
+          useCanvasStore.getState().updateCamera({ zoom })
+        }
+        
+        engine.on('pan', handlePan)
+        engine.on('zoom', handleZoom)
+        
+        // Sync initial camera state
+        const currentCamera = useCanvasStore.getState().camera
+        engine.panTo({ x: currentCamera.x, y: currentCamera.y })
+        engine.zoomTo(currentCamera.zoom)
+        
+        setIsInitialized(true)
+      } catch (error) {
+        console.error('Failed to initialize canvas:', error)
+        if (engine && !disposed) {
+          try {
+            engine.dispose()
+          } catch (e) {
+            console.error('Error disposing canvas after failed init:', e)
+          }
+        }
+      }
     }
 
+    initCanvas()
+
     return () => {
+      disposed = true
+      setIsInitialized(false)
+      
       if (canvasEngineRef.current) {
         try {
           canvasEngineRef.current.dispose()
@@ -71,9 +102,8 @@ export const useCanvas = (options: UseCanvasOptions) => {
       if (elementManagerRef.current) {
         elementManagerRef.current = null
       }
-      setIsInitialized(false)
     }
-  }, [isInitialized, options.boardId, updateCamera, camera.x, camera.y, camera.zoom])
+  }, [options.boardId]) // Only re-init when boardId changes
 
   // Sync camera changes to canvas engine
   useEffect(() => {

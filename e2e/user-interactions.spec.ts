@@ -30,7 +30,7 @@ test.describe('User Interaction Tests', () => {
 
     test('Ellipse creation', async () => {
       // Select ellipse tool
-      const ellipseTool = page.locator('[data-testid="tool-ellipse"]')
+      const ellipseTool = page.locator('[data-testid="tool-circle"]')
       await ellipseTool.click()
       
       // Draw ellipse on canvas
@@ -375,7 +375,7 @@ test.describe('User Interaction Tests', () => {
       const tools = [
         '[data-testid="tool-select"]',
         '[data-testid="tool-rectangle"]',
-        '[data-testid="tool-ellipse"]',
+        '[data-testid="tool-circle"]',
         '[data-testid="tool-line"]',
         '[data-testid="tool-freehand"]'
       ]

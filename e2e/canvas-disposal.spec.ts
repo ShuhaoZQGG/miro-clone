@@ -15,7 +15,7 @@ test.describe('Canvas Disposal', () => {
     await page.mouse.up()
 
     // Create another element
-    await page.click('[data-testid="tool-ellipse"]')
+    await page.click('[data-testid="tool-circle"]')
     await page.mouse.move(300, 300)
     await page.mouse.down()
     await page.mouse.move(500, 500)

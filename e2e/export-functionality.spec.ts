@@ -21,7 +21,7 @@ test.describe('Export Functionality Tests', () => {
     const canvas = page.locator('canvas')
     await canvas.click({ position: { x: 100, y: 100 } })
     
-    const ellipseTool = page.locator('[data-testid="tool-ellipse"]')
+    const ellipseTool = page.locator('[data-testid="tool-circle"]')
     await ellipseTool.click()
     await canvas.click({ position: { x: 200, y: 200 } })
     

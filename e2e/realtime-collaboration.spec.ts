@@ -74,7 +74,7 @@ test.describe('Real-time Collaboration Tests', () => {
     await canvas1.click({ position: { x: 100, y: 100 } })
     
     // User 2 creates an ellipse simultaneously
-    const ellipseTool2 = page2.locator('[data-testid="tool-ellipse"]')
+    const ellipseTool2 = page2.locator('[data-testid="tool-circle"]')
     await ellipseTool2.click()
     const canvas2 = page2.locator('canvas')
     await canvas2.click({ position: { x: 200, y: 200 } })
