@@ -1,9 +1,10 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 // Import the mock store
 import { useCanvasStore } from '@/store/useCanvasStore'
+import { AuthProvider } from '@/context/AuthContext'
 
 // Create mock store with working state updates
 const mockStoreState = {
@@ -287,7 +288,11 @@ describe('Whiteboard Integration Tests', () => {
 
   describe('Component Rendering', () => {
     it('should render whiteboard with all essential UI components', () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // Check toolbar is present
       expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument()
@@ -306,7 +311,11 @@ describe('Whiteboard Integration Tests', () => {
     })
 
     it('should initialize with correct default state', () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       const store = useCanvasStore.getState()
       expect(store.elements).toHaveLength(0)
@@ -318,7 +327,11 @@ describe('Whiteboard Integration Tests', () => {
 
   describe('Tool Selection', () => {
     it('should switch tools when tool buttons are clicked', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // Switch to sticky note tool
       const stickyNoteBtn = screen.getByRole('button', { name: /sticky note/i })
@@ -334,7 +347,11 @@ describe('Whiteboard Integration Tests', () => {
     })
 
     it('should highlight active tool in tool panel', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       const stickyNoteBtn = screen.getByRole('button', { name: /sticky note/i })
       await user.click(stickyNoteBtn)
@@ -346,7 +363,11 @@ describe('Whiteboard Integration Tests', () => {
 
   describe('Keyboard Shortcuts', () => {
     it('should respond to tool keyboard shortcuts', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       const whiteboard = screen.getByRole('generic', { hidden: true }) // Canvas container
 
@@ -365,7 +386,11 @@ describe('Whiteboard Integration Tests', () => {
     })
 
     it('should clear selection with escape key', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // First add some selection
       useCanvasStore.getState().setSelectedElements(['element-1', 'element-2'])
@@ -381,7 +406,11 @@ describe('Whiteboard Integration Tests', () => {
 
   describe('Canvas Interaction', () => {
     it('should handle mouse events on canvas', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
       
       const canvasContainer = screen.getByRole('generic', { hidden: true })
       
@@ -395,7 +424,11 @@ describe('Whiteboard Integration Tests', () => {
     })
 
     it('should create elements when clicking with creation tools', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // Switch to sticky note tool
       const stickyNoteBtn = screen.getByRole('button', { name: /sticky note/i })
@@ -420,7 +453,11 @@ describe('Whiteboard Integration Tests', () => {
 
   describe('Zoom and Pan Controls', () => {
     it('should update camera state when zoom buttons are clicked', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       const initialZoom = useCanvasStore.getState().camera.zoom
 
@@ -435,7 +472,11 @@ describe('Whiteboard Integration Tests', () => {
     })
 
     it('should reset zoom when reset zoom button is clicked', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // First change the zoom
       useCanvasStore.getState().updateCamera({ zoom: 2.5 })
@@ -451,7 +492,11 @@ describe('Whiteboard Integration Tests', () => {
 
   describe('Grid Toggle', () => {
     it('should toggle grid visibility', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       const initialGridVisible = useCanvasStore.getState().isGridVisible
       
@@ -462,7 +507,11 @@ describe('Whiteboard Integration Tests', () => {
     })
 
     it('should show grid visual indicator when grid is enabled', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // Ensure grid is visible
       useCanvasStore.getState().toggleGrid()
@@ -477,7 +526,11 @@ describe('Whiteboard Integration Tests', () => {
 
   describe('Collaboration UI', () => {
     it('should display connection status', () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // Should show disconnected by default
       expect(useCanvasStore.getState().isConnected).toBe(false)
@@ -490,7 +543,11 @@ describe('Whiteboard Integration Tests', () => {
     })
 
     it('should handle collaborator presence updates', () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // Add a mock collaborator
       useCanvasStore.getState().updateCollaborator('user-456', {
@@ -511,7 +568,11 @@ describe('Whiteboard Integration Tests', () => {
       const originalError = console.error
       console.error = jest.fn()
 
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // Should not crash the application
       expect(screen.getByText(`Board: ${mockBoardId}`)).toBeInTheDocument()
@@ -520,7 +581,11 @@ describe('Whiteboard Integration Tests', () => {
     })
 
     it('should show loading state during initialization', () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       // Should show loading spinner initially
       const loadingSpinner = screen.queryByRole('generic', { hidden: true })
@@ -530,7 +595,11 @@ describe('Whiteboard Integration Tests', () => {
 
   describe('Performance', () => {
     it('should handle rapid tool switching without issues', async () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       const tools = ['select', 'sticky_note', 'rectangle', 'circle', 'text']
       
@@ -546,7 +615,11 @@ describe('Whiteboard Integration Tests', () => {
     })
 
     it('should handle many elements without performance degradation', () => {
-      render(<Whiteboard boardId={mockBoardId} />)
+      render(
+        <AuthProvider>
+          <Whiteboard boardId={mockBoardId} />
+        </AuthProvider>
+      )
 
       const elements = Array.from({ length: 100 }, (_, i) => ({
         id: `element-${i}`,
