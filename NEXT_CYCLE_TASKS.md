@@ -1,129 +1,151 @@
 # Next Cycle Tasks
 
-## Immediate Fix Required (Cycle 6 Revision)
-### TypeScript Build Error
-- [ ] **CRITICAL**: Fix TypeScript error in history-manager.ts:208
-- [ ] Fix function signature mismatch for onExecute callback
-- [ ] Verify build succeeds after fix
-- [ ] Re-run all tests to ensure no regressions
+## Immediate Priorities (From Cycle 7 Review)
 
-## Priority 1: Critical Fixes
-### Integration Test Stabilization
-- [ ] Fix 45 failing UI integration tests
-- [ ] Update test mocks for Whiteboard component
-- [ ] Resolve React Testing Library query issues
-- [ ] Ensure all components render properly in tests
+### 🔴 Critical Fixes Required
+1. **Fix Build Failure**
+   - Install @types/express dependency
+   - Verify build compiles successfully
+   - Test production build process
 
-### Technical Debt
-- [ ] Address remaining ESLint warnings (any types)
-- [ ] Complete error boundary implementations
-- [ ] Add missing ARIA labels for accessibility
+2. **Complete PDF Export**
+   - Implement server-side PDF generation endpoint
+   - Add PDF export API routes
+   - Test PDF generation with various board sizes
 
-## Priority 2: Real-time Collaboration
-### WebSocket Server Implementation
-- [ ] Set up Socket.io server with Express
-- [ ] Implement room management for boards
-- [ ] Add operational transform for conflict resolution
-- [ ] Create presence system for live cursors
-- [ ] Test with 10+ concurrent users
+3. **Mobile Toolbar Responsiveness**
+   - Implement responsive toolbar per DESIGN.md specs
+   - Add floating action button for portrait mode
+   - Test on various mobile devices
+
+## Technical Debt (High Priority)
+
+### Performance Optimization
+1. **Large Board Performance**
+   - Implement viewport culling for 1000+ elements
+   - Add Level of Detail (LOD) system
+   - Optimize render cycles
+   - Add performance benchmarks
+
+2. **WebSocket Improvements**
+   - Implement rate limiting (max 10 messages/second)
+   - Add message batching optimization
+   - Improve reconnection logic
+   - Add connection pooling
+
+### Security Enhancements
+1. **Input Sanitization**
+   - Sanitize all collaborative edit inputs
+   - Prevent XSS in text elements
+   - Validate WebSocket message payloads
+
+2. **Authentication & Authorization**
+   - Complete WebSocket authentication
+   - Implement board-level permissions
+   - Add session management
+
+## Feature Enhancements
 
 ### Collaboration Features
-- [ ] User presence indicators
-- [ ] Live cursor tracking
-- [ ] Element locking during edit
-- [ ] Optimistic updates with rollback
+1. **Advanced Collaboration**
+   - Add user avatar uploads
+   - Implement @mentions in comments
+   - Add activity feed
+   - Create presence awareness indicators
 
-## Priority 3: Export Functionality
-### Export System
-- [ ] PNG export (client-side using canvas.toDataURL)
-- [ ] PDF export (server-side with puppeteer)
-- [ ] SVG export (Fabric.js toSVG)
-- [ ] Configurable export options (quality, bounds)
-- [ ] Progress indicators for large exports
+2. **Conflict Resolution**
+   - Improve operational transform implementation
+   - Add conflict resolution UI
+   - Implement change history visualization
 
-## Priority 4: Mobile Experience
-### Touch Gesture Support
-- [ ] Pinch-to-zoom implementation
-- [ ] Two-finger pan gesture
-- [ ] Long-press context menu
-- [ ] Touch-friendly element handles
+### Export Enhancements
+1. **Additional Export Formats**
+   - Add JSON export for backup
+   - Implement board templates export
+   - Add batch export functionality
 
-### Responsive UI
-- [ ] Bottom toolbar for mobile
-- [ ] Collapsible panels
-- [ ] Simplified property editor
-- [ ] Landscape optimization
+2. **Export Configuration**
+   - Add watermark options
+   - Implement custom page sizes
+   - Add export presets
 
-## Priority 5: Authentication
-### User Management
-- [ ] JWT authentication setup
-- [ ] Login/signup flows
-- [ ] Password reset functionality
-- [ ] OAuth integration (Google)
-- [ ] User profile management
+## Infrastructure & DevOps
 
-### Board Permissions
-- [ ] View/Comment/Edit roles
-- [ ] Share link generation
-- [ ] Permission management UI
-- [ ] Guest access support
+### Deployment Requirements
+1. **WebSocket Server Deployment**
+   - Configure production WebSocket server
+   - Set up load balancing
+   - Implement health checks
+   - Add monitoring and logging
 
-## Priority 6: Performance
-### Canvas Optimization
-- [ ] Implement viewport culling for 1000+ elements
-- [ ] Add LOD (Level of Detail) system
-- [ ] Optimize render cycles
-- [ ] Memory leak prevention
+2. **CI/CD Pipeline**
+   - Fix all integration tests (45 remaining)
+   - Add E2E testing suite
+   - Implement automated deployment
+   - Add performance regression tests
 
-### Network Optimization
-- [ ] WebSocket message batching
-- [ ] Delta compression for updates
-- [ ] Offline mode with sync
-- [ ] CDN setup for assets
+### Documentation Needs
+1. **Developer Documentation**
+   - API documentation for WebSocket protocol
+   - Component library documentation
+   - Architecture decision records
 
-## Features from Cycle 6 (Deferred to Next Cycle)
-### Real-time Implementation
-- [ ] WebSocket server with operational transform
-- [ ] Connection status and user presence UI
-- [ ] Conflict resolution for collaborative editing
+2. **User Documentation**
+   - User guide for collaboration features
+   - Export functionality guide
+   - Mobile app usage instructions
 
-### Export System  
-- [ ] Client-side PNG export
-- [ ] Server-side PDF/SVG export
-- [ ] Export progress indicators
+## Quality Improvements
 
-### Mobile Optimization
-- [ ] Touch gesture handlers
-- [ ] Responsive layout breakpoints
-- [ ] Mobile-specific UI components
+### Testing
+1. **Test Coverage**
+   - Fix 45 failing integration tests
+   - Add WebSocket server tests
+   - Implement E2E tests for critical paths
+   - Add performance benchmarks
 
-## Deferred Items (Future Cycles)
-- Template marketplace
-- AI-powered layout suggestions
-- Advanced analytics dashboard
-- Plugin system architecture
-- Enterprise SSO integration
-- Automated backup system
-- Version history with rollback
-- Advanced commenting system
+2. **Code Quality**
+   - Add ESLint rules for WebSocket code
+   - Implement code review checklist
+   - Add pre-commit hooks for type checking
 
-## Technical Improvements
-- Migrate to Prisma for database
-- Add comprehensive E2E tests with Playwright
-- Implement CI/CD pipeline
-- Add performance monitoring (Sentry)
-- Create Storybook for component library
-- Add API documentation with OpenAPI
+## Future Considerations
+
+### Scalability
+- Implement Redis for WebSocket state management
+- Add database for persistent storage
+- Implement board versioning
+- Add cloud storage for images
+
+### Analytics
+- Add usage analytics
+- Implement performance monitoring
+- Create error tracking system
+- Add user behavior analytics
 
 ## Estimated Timeline
-- **Week 1:** Integration tests + WebSocket setup
-- **Week 2:** Real-time collaboration features
-- **Week 3:** Export system + Mobile support
-- **Week 4:** Authentication + Performance optimization
+- **Critical Fixes:** 1-2 days
+- **Technical Debt:** 1 week
+- **Feature Enhancements:** 2 weeks
+- **Infrastructure:** 1 week
+- **Quality Improvements:** Ongoing
 
-## Success Metrics
-- 95% test pass rate
-- <100ms collaboration latency
-- 60fps with 500+ elements
-- Mobile usability score >90
-- Zero critical security issues
+## Priority Matrix
+1. **Must Have (This Cycle)**
+   - Build fix (@types/express)
+   - PDF export completion
+   - Mobile toolbar
+
+2. **Should Have (Next 2 Cycles)**
+   - Performance optimization
+   - Security enhancements
+   - Integration test fixes
+
+3. **Nice to Have (Future)**
+   - Advanced collaboration
+   - Additional export formats
+   - Analytics implementation
+
+---
+**Last Updated:** August 30, 2025
+**Source:** Cycle 7 Review Findings
