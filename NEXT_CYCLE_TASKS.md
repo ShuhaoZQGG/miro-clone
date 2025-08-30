@@ -1,86 +1,65 @@
 # Next Cycle Tasks
 
-## Critical Issues (Must Fix)
+## High Priority (Critical for Production)
+1. **Fix Remaining Unit Tests**
+   - 42 tests currently failing
+   - Most failures related to canvas mock initialization
+   - Need to update mocks for async canvas initialization pattern
 
-### 1. E2E Test Execution Hanging
-- **Priority:** CRITICAL
-- **Issue:** Playwright tests timeout after 30s without executing
-- **Root Cause:** Likely waiting for dev server or incorrect webServer configuration
-- **Solution:** 
-  - Check playwright.config.ts webServer settings
-  - Ensure dev server starts before tests
-  - Add proper baseURL configuration
-  - Consider using `webServer.reuseExistingServer: true`
+2. **Implement Missing Drawing Tools**
+   - Line tool (causing E2E test timeout)
+   - Freehand drawing tool (causing E2E test timeout)
+   - Both tools are expected by existing E2E tests
 
-### 2. Canvas Disposal Validation
-- **Priority:** HIGH
-- **Issue:** Cannot verify canvas disposal fix without E2E tests
-- **Solution:**
-  - Fix E2E test execution first
-  - Run canvas-disposal.spec.ts specifically
-  - Validate no DOM errors occur
-  - Check memory leak scenarios
+## Medium Priority (Quality Improvements)
+3. **Address TypeScript Type Safety**
+   - Fix 50+ ESLint warnings about `any` types
+   - Improve type definitions for Fabric.js objects
+   - Add proper typing for event handlers
 
-### 3. Unit Test Coverage
-- **Priority:** HIGH
-- **Issue:** Only 70% pass rate (153/218), need 85%+
-- **Solution:**
-  - Fix 65 failing unit tests
-  - Focus on integration tests (45 failures)
-  - Update mock implementations
-  - Fix async/await issues in remaining tests
+4. **E2E Test Investigation**
+   - Debug timeout issues in E2E tests
+   - Add retry logic for flaky tests
+   - Improve test stability with better wait conditions
+
+5. **Performance Monitoring**
+   - Add FPS tracking for canvas operations
+   - Monitor memory usage during long sessions
+   - Implement performance benchmarks
+
+## Low Priority (Nice to Have)
+6. **Developer Experience**
+   - Fix port conflict (currently using 3003 instead of 3000)
+   - Add hot reload for canvas changes
+   - Improve error messages in development
+
+7. **Documentation**
+   - Document canvas lifecycle management approach
+   - Add troubleshooting guide for common issues
+   - Create performance optimization guide
 
 ## Technical Debt
+- Refactor canvas disposal tests to use proper async patterns
+- Consolidate duplicate test setup code
+- Review and optimize bundle size
+- Add integration tests for real-time collaboration
 
-### Testing Infrastructure
-- Setup CI/CD pipeline with GitHub Actions
-- Add test reporting and coverage tracking
-- Configure parallel test execution
-- Add failure notifications
+## Feature Enhancements (Future Cycles)
+- Add canvas zoom controls UI
+- Implement element grouping
+- Add keyboard shortcuts for all tools
+- Implement copy/paste functionality
+- Add element alignment guides
+- Implement smart connectors between elements
 
-### Code Quality
-- Fix remaining ESLint warnings about 'any' types
-- Add proper TypeScript types where missing
-- Improve error handling in test suites
-- Add test documentation
+## Infrastructure
+- Set up CI/CD pipeline with test automation
+- Configure automated dependency updates
+- Add monitoring and error tracking
+- Implement feature flags for gradual rollout
 
-### Performance Optimization
-- Implement viewport culling for 1000+ elements
-- Add Level of Detail (LOD) system
-- Optimize touch gesture handling
-- Improve WebSocket message batching
-
-## Feature Enhancements
-
-### Production Readiness
-- Add error monitoring (Sentry/Rollbar)
-- Implement performance tracking
-- Setup deployment configuration
-- Create operational runbook
-
-### Missing Features
-- Complete PDF export server implementation
-- Add responsive mobile toolbar
-- Implement WebSocket rate limiting
-- Add user permission system
-
-### Documentation Needs
-- Update README with test commands
-- Document E2E test structure
-- Add troubleshooting guide
-- Create developer setup guide
-
-## Deferred from Cycle 12
-- Full E2E test suite execution
-- CI/CD pipeline implementation
-- Integration test fixes (45 tests)
-- Performance benchmarking
-
-## Next Cycle Recommendation
-**Focus:** Fix E2E test execution and validate canvas disposal
-**Duration:** 1-2 days
-**Success Criteria:**
-- E2E tests run successfully
-- Canvas disposal scenarios pass
-- 85%+ unit test coverage
-- PR #6 merged to main
+## Notes
+- Canvas refresh loop has been fixed (Cycle 16)
+- Viewport metadata warning resolved (Cycle 16)
+- Build is stable with no errors
+- 81% unit test pass rate achieved
