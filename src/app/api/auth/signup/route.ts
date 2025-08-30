@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { db } from '@/lib/db'
+import { config } from '@/lib/config'
+import { withDbConnection, handleDatabaseError } from '@/lib/db-utils'
 
 interface SignupBody {
   email: string
@@ -49,9 +51,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await db.user.findUnique({
-      where: { email },
-    })
+    const existingUser = await withDbConnection(
+      () => db.user.findUnique({ where: { email } })
+    )
 
     if (existingUser) {
       return NextResponse.json(
@@ -64,24 +66,26 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Create user
-    const user = await db.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        displayName,
-      },
-      select: {
-        id: true,
-        email: true,
-        displayName: true,
-        createdAt: true,
-      },
-    })
+    const user = await withDbConnection(
+      () => db.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          displayName,
+        },
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          createdAt: true,
+        },
+      })
+    )
 
     // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email },
-      process.env.JWT_SECRET || 'default-secret',
+      config().jwtSecret,
       { expiresIn: '7d' }
     )
 
@@ -95,11 +99,12 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error('Signup error:', error)
+    const { message, statusCode } = handleDatabaseError(error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
+      { success: false, error: message },
+      { status: statusCode }
     )
   }
 }

@@ -3,6 +3,7 @@ import { render, waitFor } from '@testing-library/react'
 import { Whiteboard } from '../components/Whiteboard'
 import { CanvasEngine } from '../lib/canvas-engine'
 import { ElementManager } from '../lib/element-manager'
+import { AuthProvider } from '../context/AuthContext'
 
 // Mock canvas engine and element manager
 jest.mock('../lib/canvas-engine')
@@ -70,7 +71,11 @@ describe('Canvas Disposal Safety', () => {
 
   describe('DOM Safety', () => {
     it('should handle disposal when DOM elements are already removed', async () => {
-      const { unmount } = render(<Whiteboard boardId="test-board" />)
+      const { unmount } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       
       await waitFor(() => {
         expect(mockCanvasEngine.dispose).toBeDefined()
@@ -89,7 +94,11 @@ describe('Canvas Disposal Safety', () => {
     })
 
     it('should not throw when parent node is null during disposal', async () => {
-      const { unmount } = render(<Whiteboard boardId="test-board" />)
+      const { unmount } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       
       await waitFor(() => {
         expect(mockCanvasEngine.dispose).toBeDefined()
@@ -113,14 +122,22 @@ describe('Canvas Disposal Safety', () => {
 
   describe('Refresh Loop Prevention', () => {
     it('should not re-initialize canvas after disposal', async () => {
-      const { unmount, rerender } = render(<Whiteboard boardId="test-board" />)
+      const { unmount, rerender } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       
       await waitFor(() => {
         expect(initCallCount).toBe(1)
       })
 
       // Trigger a re-render
-      rerender(<Whiteboard boardId="test-board" />)
+      rerender(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       
       await waitFor(() => {
         // Should still be 1, not re-initialized
@@ -135,7 +152,11 @@ describe('Canvas Disposal Safety', () => {
     })
 
     it('should prevent initialization loop on rapid mount/unmount', async () => {
-      const { unmount: unmount1 } = render(<Whiteboard boardId="test-board-1" />)
+      const { unmount: unmount1 } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board-1" />
+        </AuthProvider>
+      )
       
       await waitFor(() => {
         expect(initCallCount).toBe(1)
@@ -143,7 +164,11 @@ describe('Canvas Disposal Safety', () => {
 
       unmount1()
 
-      const { unmount: unmount2 } = render(<Whiteboard boardId="test-board-2" />)
+      const { unmount: unmount2 } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board-2" />
+        </AuthProvider>
+      )
       
       await waitFor(() => {
         // Should be 2 (one for each mount), not more
@@ -190,7 +215,11 @@ describe('Canvas Disposal Safety', () => {
     it('should cancel initialization if component unmounts during init', async () => {
       // Canvas initialization is handled internally
 
-      const { unmount } = render(<Whiteboard boardId="test-board" />)
+      const { unmount } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       
       // Unmount before initialization completes
       unmount()

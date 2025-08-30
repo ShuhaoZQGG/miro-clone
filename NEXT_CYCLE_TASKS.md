@@ -1,140 +1,79 @@
 # Next Cycle Tasks
 
-## Cycle 35 - Frontend Integration & Production Stabilization
+## Critical Security Fixes (Priority 1)
+1. **Fix JWT Secret Management**
+   - Remove all hardcoded 'default-secret' fallbacks
+   - Implement proper environment variable validation
+   - Throw errors on missing JWT_SECRET in production
+   - Files to fix:
+     - `src/app/api/auth/signup/route.ts`
+     - `src/app/api/auth/login/route.ts`
+     - `src/app/api/auth/me/route.ts`
 
-### ✅ Cycle 34 Completed
-1. **Production Infrastructure - DONE**
-   - ✅ Vercel deployment configuration (vercel.json)
-   - ✅ WebSocket server with SSE fallback
-   - ✅ Rate limiting and CORS implementation
-   - ✅ PR #23 merged to main
+## Test Stability (Priority 2)
+1. **Canvas Engine Tests** (6 failures)
+   - Fix performance test expectations
+   - Handle throttling properly in test environment
+   - Fix timeout issues in debounce tests
 
-2. **Security Enhancements - DONE**
-   - ✅ Rate limiting middleware with LRU cache
-   - ✅ JWT authentication for WebSockets
-   - ✅ Request throttling with proper headers
-   - ✅ IP-based tracking with cleanup
+2. **Whiteboard Component Tests**
+   - Fix async operation handling
+   - Proper canvas mock setup
 
-3. **Database Infrastructure - DONE**
-   - ✅ Enhanced Prisma schema with production tables
-   - ✅ Docker Compose for PostgreSQL and Redis
-   - ✅ Database initialization scripts
-   - ✅ User roles and permissions schema
+3. **Integration Tests**
+   - Fix timing issues
+   - Proper WebSocket mock setup
 
-### Priority 0: Production Deployment (CRITICAL)
-1. **Deploy WebSocket Server**
-   - [ ] Deploy Socket.io server to production environment
-   - [ ] Configure WebSocket URL for production
-   - [ ] Set up load balancing for WebSocket connections
-   - [ ] Test real-time features in production
-   
-2. **Environment Configuration**
-   - [ ] Set JWT_SECRET environment variable
-   - [ ] Configure DATABASE_URL for PostgreSQL
-   - [ ] Set up REDIS_URL for production Redis
-   - [ ] Add CORS configuration
+4. **Auth Route Tests**
+   - Add proper JWT mock configuration
+   - Fix test environment setup
 
-### Priority 1: Database Connection
-1. **PostgreSQL Production Setup**
-   - [ ] Set up actual PostgreSQL instance
-   - [ ] Run Prisma migrations
-   - [ ] Test database operations
-   - [ ] Implement connection pooling
+## Production Infrastructure (Priority 3)
+1. **Environment Validation**
+   - Create startup validation script
+   - Check all required environment variables
+   - Provide clear error messages for missing configs
 
-2. **Redis Production Setup**
-   - [ ] Set up production Redis instance
-   - [ ] Configure pub/sub for real-time events
-   - [ ] Test session persistence
+2. **Database Connection**
+   - Add connection error handling
+   - Implement retry logic
+   - Graceful degradation when DB unavailable
 
-### Priority 2: Test Stabilization
-1. **Fix Failing Tests**
-   - [ ] Resolve canvas-engine timeout issues (48 tests failing)
-   - [ ] Fix Fabric.js mock problems
-   - [ ] Improve test isolation
-   - [ ] Target >95% pass rate
-
-### Priority 3: Security & Performance
-1. **Security Hardening**
-   - [ ] Add rate limiting to API endpoints
-   - [ ] Implement CORS properly for production
-   - [ ] Add input sanitization
-   - [ ] Set up security headers
-
-2. **Performance Optimization**
-   - [ ] Optimize WebSocket message batching
-   - [ ] Implement connection pooling
-   - [ ] Add caching strategies
-   - [ ] Monitor performance metrics
-
-### Priority 4: Critical Bug Fixes
-1. **Canvas Engine Test Failures**
-   - [ ] Fix 48 failing tests in canvas-engine.test.ts
-   - [ ] Resolve timeout issues with Fabric.js mocks
-   - [ ] Improve test isolation and stability
-   - [ ] Target 95% test pass rate
-
-## Priority 5: UI/UX Improvements
-1. **Frontend-Backend Integration**
-   - [ ] Connect React components to WebSocket server
-   - [ ] Implement real-time cursor tracking UI
-   - [ ] Add collaborative editing features
-   - [ ] Build user presence indicators
-   - [ ] Test real-time synchronization
-
-2. **Mobile Optimization**
-   - Responsive design for tablets
-   - Touch gesture support
-   - Mobile-friendly controls
-   - Viewport optimization
+3. **Deployment Configuration**
+   - Complete Vercel deployment setup
+   - Configure production environment variables
+   - Set up monitoring and logging
 
 ## Technical Debt
-1. **Test Stabilization**
-   - Fix 48 failing canvas-engine tests (timeout issues)
+1. **Test Infrastructure**
    - Improve test isolation
-   - Add E2E tests for collaboration
-   - Increase coverage to 95%
+   - Fix mock inconsistencies
+   - Add integration test suite
 
-2. **Performance Optimization**
-   - Implement Web Workers for OT calculations
-   - Add connection pooling
-   - Optimize bundle size
-   - Implement lazy loading
+2. **Code Quality**
+   - Remove unused mock implementations
+   - Consolidate test utilities
+   - Improve error handling
 
-3. **Security Hardening**
-   - Add rate limiting
-   - Implement input validation
-   - Add CSRF protection
-   - Set up security headers
+3. **Documentation**
+   - Create deployment guide
+   - Document environment variables
+   - Add troubleshooting section
 
-## Documentation Needs
-1. WebSocket API documentation
-2. Deployment guide for production
-3. User guide for collaboration features
-4. Architecture documentation updates
+## Feature Enhancements (Lower Priority)
+1. **Real-time Collaboration**
+   - Complete WebSocket integration
+   - Add user presence indicators
+   - Implement cursor tracking
 
-## Future Enhancements
-1. **Advanced Features**
-   - Version history with time travel
-   - Offline support with sync
-   - Real-time voice/video chat
-   - AI-powered suggestions
+2. **Cloud Sync**
+   - Connect to real databases
+   - Implement auto-save
+   - Add conflict resolution
 
-2. **Enterprise Features**
-   - SSO integration
-   - Audit logging
-   - Advanced permissions
-   - Team management
-
-## Known Issues to Address
-- WebSocket URL using hardcoded fallback
-- Missing environment variable configuration
-- No production deployment setup
-- Incomplete error boundaries
-- Missing analytics integration
-
-## Estimated Timeline
-- Critical Integration: 2-3 days
-- Infrastructure Setup: 2 days
-- UI/UX Improvements: 1-2 days
-- Technical Debt: 1-2 days
-- Total: 6-9 days for full production readiness
+## Success Metrics for Next Cycle
+- ✅ Zero security vulnerabilities
+- ✅ >95% test pass rate
+- ✅ All environment variables validated
+- ✅ Production deployment successful
+- ✅ Zero hardcoded secrets or defaults

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { db } from '@/lib/db'
+import { config } from '@/lib/config'
+import { withDbConnection, handleDatabaseError } from '@/lib/db-utils'
 
 interface LoginBody {
   email: string
@@ -22,9 +24,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user
-    const user = await db.user.findUnique({
-      where: { email },
-    })
+    const user = await withDbConnection(
+      () => db.user.findUnique({ where: { email } })
+    )
 
     if (!user) {
       return NextResponse.json(
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email },
-      process.env.JWT_SECRET || 'default-secret',
+      config().jwtSecret,
       { expiresIn: '7d' }
     )
 
@@ -63,11 +65,12 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error)
+    const { message, statusCode } = handleDatabaseError(error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
+      { success: false, error: message },
+      { status: statusCode }
     )
   }
 }

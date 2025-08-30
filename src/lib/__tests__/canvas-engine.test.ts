@@ -287,9 +287,7 @@ describe('CanvasEngine', () => {
     it('should debounce rapid create operations', async () => {
       engine = new CanvasEngine(container)
       const canvas = engine.getCanvas()
-      
-      // Mock the fabric objects
-      const mockRects: any[] = []
+      const fabric = require('fabric').fabric
       
       // Rapidly create multiple elements
       const positions = [
@@ -300,26 +298,22 @@ describe('CanvasEngine', () => {
       ]
       
       positions.forEach(pos => {
-        const rect = {
+        const rect = new fabric.Rect({
           left: pos.x,
           top: pos.y,
           width: 50,
           height: 50,
           fill: 'green'
-        }
-        mockRects.push(rect)
-        canvas.add(rect as any)
+        })
+        canvas.add(rect)
       })
       
-      // Mock getObjects to return our rects
-      jest.spyOn(canvas, 'getObjects').mockReturnValue(mockRects)
-      
-      // Wait for debounced render
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Wait for any debounced operations
+      await new Promise(resolve => setTimeout(resolve, 50))
       
       // All elements should be added
       expect(canvas.getObjects().length).toBe(4)
-    })
+    }, 10000)
   })
 
   describe('Touch and Gesture Support', () => {
