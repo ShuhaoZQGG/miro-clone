@@ -123,7 +123,7 @@ test.describe('Canvas Disposal', () => {
     await page.waitForTimeout(500)
 
     // Navigate back
-    await page.goto('/')
+    await page.goto('/board/test-board')
     await page.waitForSelector('canvas', { timeout: 10000 })
 
     // Check that listeners are properly set up after re-initialization

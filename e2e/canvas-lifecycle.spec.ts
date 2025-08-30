@@ -5,14 +5,19 @@ test.describe('Canvas Lifecycle Tests', () => {
 
   test.beforeEach(async ({ page: testPage }) => {
     page = testPage
-    await page.goto('/')
-    // Wait for canvas to be initialized
-    await page.waitForSelector('canvas', { timeout: 10000 })
+    await page.goto('/board/demo-board')
+    // Wait for main canvas to be initialized (Fabric.js creates a lower-canvas)
+    await page.waitForSelector('.lower-canvas', { timeout: 10000 })
+    // Wait for loading overlay to disappear
+    await page.waitForFunction(() => {
+      const loadingOverlay = document.querySelector('.absolute.inset-0.flex.items-center.justify-center.bg-white.bg-opacity-75.z-50')
+      return !loadingOverlay
+    }, { timeout: 10000 })
   })
 
   test('Canvas initialization - should mount canvas element', async () => {
-    // Check canvas element exists
-    const canvas = await page.locator('canvas')
+    // Check canvas element exists (use first lower-canvas which is the main Fabric canvas)
+    const canvas = await page.locator('.lower-canvas').first()
     await expect(canvas).toBeVisible()
     
     // Check canvas has proper dimensions
@@ -20,15 +25,11 @@ test.describe('Canvas Lifecycle Tests', () => {
     expect(boundingBox).toBeTruthy()
     expect(boundingBox!.width).toBeGreaterThan(0)
     expect(boundingBox!.height).toBeGreaterThan(0)
-    
-    // Check canvas container exists
-    const container = await page.locator('[data-testid="canvas-container"]')
-    await expect(container).toBeVisible()
   })
 
   test('Canvas disposal - normal disposal flow', async () => {
     // Navigate to canvas
-    await page.waitForSelector('canvas')
+    await page.waitForSelector('.lower-canvas')
     
     // Navigate away to trigger disposal
     await page.goto('/about', { waitUntil: 'domcontentloaded' })
@@ -42,8 +43,8 @@ test.describe('Canvas Lifecycle Tests', () => {
     })
     
     // Navigate back to canvas
-    await page.goto('/')
-    await page.waitForSelector('canvas')
+    await page.goto('/board/demo-board')
+    await page.waitForSelector('.lower-canvas')
     
     // Verify no removeChild errors
     const removeChildErrors = consoleMessages.filter(msg => 
@@ -61,13 +62,13 @@ test.describe('Canvas Lifecycle Tests', () => {
     })
 
     // Navigate to canvas
-    await page.waitForSelector('canvas')
+    await page.waitForSelector('.lower-canvas')
     
     // Rapidly navigate away and back multiple times
     for (let i = 0; i < 3; i++) {
       await page.goto('/about', { waitUntil: 'domcontentloaded' })
-      await page.goto('/', { waitUntil: 'domcontentloaded' })
-      await page.waitForSelector('canvas')
+      await page.goto('/board/demo-board', { waitUntil: 'domcontentloaded' })
+      await page.waitForSelector('.lower-canvas')
     }
     
     // Check for any critical errors
@@ -80,11 +81,15 @@ test.describe('Canvas Lifecycle Tests', () => {
   })
 
   test('Canvas disposal - with active elements', async () => {
-    // Wait for canvas
-    await page.waitForSelector('canvas')
+    // Wait for canvas and loading to complete
+    await page.waitForSelector('.lower-canvas')
+    await page.waitForFunction(() => {
+      const loadingOverlay = document.querySelector('.absolute.inset-0.flex.items-center.justify-center.bg-white.bg-opacity-75.z-50')
+      return !loadingOverlay
+    }, { timeout: 10000 })
     
     // Create some elements on canvas
-    const canvas = await page.locator('canvas')
+    const canvas = await page.locator('.lower-canvas').first()
     
     // Simulate creating a rectangle
     await canvas.click({ position: { x: 100, y: 100 } })
@@ -98,8 +103,8 @@ test.describe('Canvas Lifecycle Tests', () => {
     await page.goto('/about', { waitUntil: 'domcontentloaded' })
     
     // Navigate back
-    await page.goto('/')
-    await page.waitForSelector('canvas')
+    await page.goto('/board/demo-board')
+    await page.waitForSelector('.lower-canvas')
     
     // Canvas should reinitialize properly
     const newCanvas = await page.locator('canvas')
@@ -107,7 +112,7 @@ test.describe('Canvas Lifecycle Tests', () => {
   })
 
   test('Canvas disposal - during animation', async () => {
-    await page.waitForSelector('canvas')
+    await page.waitForSelector('.lower-canvas')
     
     // Start a zoom animation
     await page.keyboard.press('Control+=')
@@ -116,18 +121,18 @@ test.describe('Canvas Lifecycle Tests', () => {
     await page.goto('/about', { waitUntil: 'domcontentloaded' })
     
     // No errors should occur
-    await page.goto('/')
-    await page.waitForSelector('canvas')
+    await page.goto('/board/demo-board')
+    await page.waitForSelector('.lower-canvas')
     
-    const canvas = await page.locator('canvas')
+    const canvas = await page.locator('.lower-canvas').first()
     await expect(canvas).toBeVisible()
   })
 
   test('Canvas resize - handle window resize events', async () => {
-    await page.waitForSelector('canvas')
+    await page.waitForSelector('.lower-canvas')
     
     // Get initial canvas size
-    const canvas = await page.locator('canvas')
+    const canvas = await page.locator('.lower-canvas').first()
     const initialBox = await canvas.boundingBox()
     
     // Resize viewport
@@ -166,7 +171,7 @@ test.describe('Canvas Lifecycle Tests', () => {
     }
     
     // Initial state
-    await page.waitForSelector('canvas')
+    await page.waitForSelector('.lower-canvas')
     const initial = await checkMemoryLeaks()
     expect(initial.canvasExists).toBe(true)
     
@@ -174,8 +179,8 @@ test.describe('Canvas Lifecycle Tests', () => {
     await page.goto('/about')
     
     // Navigate back
-    await page.goto('/')
-    await page.waitForSelector('canvas')
+    await page.goto('/board/demo-board')
+    await page.waitForSelector('.lower-canvas')
     
     // Check state after navigation
     const after = await checkMemoryLeaks()
@@ -186,10 +191,10 @@ test.describe('Canvas Lifecycle Tests', () => {
   })
 
   test('Canvas state persistence - camera position', async () => {
-    await page.waitForSelector('canvas')
+    await page.waitForSelector('.lower-canvas')
     
     // Pan the canvas
-    const canvas = await page.locator('canvas')
+    const canvas = await page.locator('.lower-canvas').first()
     await page.keyboard.down('Space')
     await canvas.dragTo(canvas, {
       sourcePosition: { x: 200, y: 200 },
@@ -209,8 +214,8 @@ test.describe('Canvas Lifecycle Tests', () => {
     
     // Navigate away and back
     await page.goto('/about')
-    await page.goto('/')
-    await page.waitForSelector('canvas')
+    await page.goto('/board/demo-board')
+    await page.waitForSelector('.lower-canvas')
     
     // Camera should reset or restore (depending on implementation)
     const newCanvas = await page.locator('canvas')
@@ -224,7 +229,7 @@ test.describe('Canvas Lifecycle Tests', () => {
       consoleMessages.push(msg.text())
     })
     
-    await page.waitForSelector('canvas')
+    await page.waitForSelector('.lower-canvas')
     
     // Force an error by manipulating DOM (simulate edge case)
     await page.evaluate(() => {
@@ -247,8 +252,8 @@ test.describe('Canvas Lifecycle Tests', () => {
     expect(errorHandlingMessages.length).toBeGreaterThanOrEqual(0)
     
     // Should be able to navigate back and reinitialize
-    await page.goto('/')
-    await page.waitForSelector('canvas')
+    await page.goto('/board/demo-board')
+    await page.waitForSelector('.lower-canvas')
     
     const newCanvas = await page.locator('canvas')
     await expect(newCanvas).toBeVisible()

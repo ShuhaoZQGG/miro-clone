@@ -5,7 +5,7 @@ test.describe('User Interaction Tests', () => {
 
   test.beforeEach(async ({ page: testPage }) => {
     page = testPage
-    await page.goto('/')
+    await page.goto('/board/demo-board')
     await page.waitForSelector('canvas', { timeout: 10000 })
   })
 
