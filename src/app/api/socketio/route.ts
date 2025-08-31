@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { type, data, token } = body;
+    const { type, data } = body;
 
     // Authenticate request
     const authHeader = req.headers.get('authorization');
@@ -75,4 +75,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-
