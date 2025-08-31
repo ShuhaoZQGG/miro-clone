@@ -76,6 +76,15 @@ describe('Canvas Full-Screen Tests', () => {
     ;(CanvasEngine as jest.Mock).mockImplementation(() => mockCanvasEngine)
   })
 
+  // Test helper to wrap component with required providers
+  const renderWithProviders = (component: React.ReactElement) => {
+    return render(
+      <AuthProvider>
+        {component}
+      </AuthProvider>
+    )
+  }
+
   describe('Canvas Container Positioning', () => {
     it('should render canvas with fixed positioning', () => {
       const { container } = render(

@@ -1,6 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { AuthProvider } from '@/context/AuthContext'
 
 // Import the mock store
 import { useCanvasStore } from '@/store/useCanvasStore'
@@ -114,6 +115,7 @@ const MockWhiteboard = ({ boardId }: { boardId: string }) => {
     <div 
       role="generic" 
       className="whiteboard-container" 
+      data-testid="canvas"
       tabIndex={0}
       onMouseDown={handleMouseDown}
       onMouseMove={() => {}}
@@ -375,7 +377,6 @@ describe('Whiteboard Integration Tests', () => {
       expect(whiteboard).toBeInTheDocument()
 
       // Test sticky note shortcut
-      whiteboard.focus()
       await user.keyboard('s')
       expect(useCanvasStore.getState().tool.type).toBe('sticky_note')
 

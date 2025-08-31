@@ -93,6 +93,15 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn()
 }))
 
+// Test helper to wrap component with required providers
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <AuthProvider>
+      {component}
+    </AuthProvider>
+  )
+}
+
 describe('Whiteboard Full-Screen Tests', () => {
   beforeEach(() => {
     // Reset viewport size

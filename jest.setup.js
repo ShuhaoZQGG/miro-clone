@@ -1,5 +1,10 @@
 import '@testing-library/jest-dom'
 
+// Set environment variables for testing
+process.env.JWT_SECRET = 'test-secret-key-for-testing-purposes-only-not-for-production'
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
+process.env.NODE_ENV = 'test'
+
 // Mock requestAnimationFrame
 let rafCallbacks = []
 let rafId = 0
@@ -198,28 +203,30 @@ jest.mock('fabric', () => ({
   },
 }))
 
-// Mock WebSocket
-global.WebSocket = class WebSocket {
-  constructor(url) {
-    this.url = url
-    this.readyState = WebSocket.CONNECTING
-    setTimeout(() => {
-      this.readyState = WebSocket.OPEN
-      if (this.onopen) this.onopen()
-    }, 0)
+// Mock WebSocket (only if not in node environment for API tests)
+if (typeof WebSocket === 'undefined') {
+  global.WebSocket = class WebSocket {
+    constructor(url) {
+      this.url = url
+      this.readyState = WebSocket.CONNECTING
+      setTimeout(() => {
+        this.readyState = WebSocket.OPEN
+        if (this.onopen) this.onopen()
+      }, 0)
+    }
+    
+    send(data) {
+      // Mock send
+    }
+    
+    close() {
+      this.readyState = WebSocket.CLOSED
+      if (this.onclose) this.onclose()
+    }
   }
-  
-  send(data) {
-    // Mock send
-  }
-  
-  close() {
-    this.readyState = WebSocket.CLOSED
-    if (this.onclose) this.onclose()
-  }
-}
 
-WebSocket.CONNECTING = 0
-WebSocket.OPEN = 1
-WebSocket.CLOSING = 2
-WebSocket.CLOSED = 3
+  WebSocket.CONNECTING = 0
+  WebSocket.OPEN = 1
+  WebSocket.CLOSING = 2
+  WebSocket.CLOSED = 3
+}
