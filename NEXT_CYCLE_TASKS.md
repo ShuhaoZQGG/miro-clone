@@ -1,89 +1,57 @@
 # Next Cycle Tasks
 
-## Immediate Priority (From Cycle 37 Review)
-1. **Database Migrations**
-   - Set up Prisma migrations for database schema management
-   - Create initial migration scripts
-   - Document migration workflow
-   
-2. **WebSocket Integration**
-   - Integrate WebSocket server with main application port
-   - Configure proper proxy settings for production
-   - Remove separate port 3001 dependency
+## Priority 0 (Critical - Must Fix)
+1. **Fix TypeScript Build Error**
+   - File: `monitoring/sentry-production.config.ts:42`
+   - Issue: Invalid 'staging' case in NODE_ENV switch
+   - Solution: Remove the staging case or update NODE_ENV type definition
+   - Verify: Run `npm run build` to confirm fix
 
-3. **Frontend Updates**
-   - Update components to handle new WebSocket events
-   - Integrate conflict resolution UI feedback
-   - Add collaborative cursor smoothing
+## Priority 1 (High - Post-Fix)
+1. **Merge PR #32**
+   - After build fix is verified
+   - Ensure all tests still pass
+   - Update PR with fix commit
+
+2. **Configure Production Credentials**
+   - Set Sentry DSN in environment variables
+   - Configure Vercel deployment token
+   - Set up Railway API credentials
+   - Configure Supabase connection string
+   - Set up Upstash Redis URL
+
+3. **Deploy to Production**
+   - Deploy frontend to Vercel
+   - Deploy WebSocket server to Railway
+   - Run deployment verification script
+   - Monitor initial deployment metrics
+
+## Priority 2 (Medium - Enhancements)
+1. **Monitor Production**
+   - Verify Sentry is capturing errors
+   - Check health endpoints are responding
+   - Monitor performance metrics
+   - Set up alerting rules
+
+2. **Documentation Updates**
+   - Update README with production URLs
+   - Document deployment process results
+   - Create runbook for common issues
 
 ## Technical Debt
-1. **Cursor Position Transformation**
-   - Transform cursor positions for different screen sizes
-   - Handle viewport differences between collaborators
-   - Implement smooth cursor interpolation
+- Consider adding 'staging' to NODE_ENV type if needed
+- Review and optimize bundle size
+- Add more comprehensive E2E tests
+- Implement automated rollback procedures
 
-2. **Testing Gaps**
-   - Add E2E tests for collaboration features
-   - Implement load testing for WebSocket server
-   - Add integration tests for multi-user scenarios
+## Deferred from Current Cycle
+- None - all planned features were implemented
 
-## Feature Development
-1. **Backend API**
-   - Create REST endpoints for board CRUD operations
-   - Implement board persistence layer
-   - Add user management endpoints
-
-2. **Database Integration**
-   - Setup PostgreSQL for data persistence
-   - Configure Redis for session management
-   - Implement database migrations
-
-3. **Conflict Resolution**
-   - Implement Operation Transformation (OT)
-   - Add conflict detection mechanisms
-   - Build merge strategies for simultaneous edits
-
-4. **Cloud Storage**
-   - Setup AWS S3 for file storage
-   - Implement image upload functionality
-   - Add CDN configuration
-
-## Performance Optimization
-1. **WebSocket Optimization**
-   - Implement message batching
-   - Add compression for large payloads
-   - Optimize reconnection strategy
-
-2. **Frontend Performance**
-   - Implement virtual scrolling for large boards
-   - Add canvas viewport culling
-   - Optimize re-render cycles
-
-## Documentation Needs
-1. **API Documentation**
-   - Document WebSocket events
-   - Create REST API documentation
-   - Add integration guides
-
-2. **Deployment Documentation**
-   - Production deployment guide
-   - Environment configuration
-   - Monitoring setup instructions
-
-## Infrastructure
-1. **Production Deployment**
-   - Configure production environment
-   - Setup CI/CD pipeline
-   - Implement health checks
-
-2. **Monitoring**
-   - Add error tracking (Sentry)
-   - Implement performance monitoring
-   - Setup alerting system
-
-## Estimated Timeline
-- **Cycle 36**: Fix blocking issues, add authentication (2 days)
-- **Cycle 37**: Backend API and database setup (3 days)
-- **Cycle 38**: Conflict resolution and cloud storage (2 days)
-- **Cycle 39**: Performance optimization and testing (2 days)
-- **Cycle 40**: Production deployment and monitoring (1 day)
+## Success Criteria
+- [ ] Build passes without errors
+- [ ] All 311 tests continue to pass
+- [ ] PR #32 merged to main
+- [ ] Frontend deployed and accessible
+- [ ] WebSocket server connected
+- [ ] Health checks returning 200
+- [ ] Monitoring capturing data

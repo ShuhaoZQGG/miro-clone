@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { db } from '@/lib/db'
-import { config } from '@/lib/config'
-import { withDbConnection, handleDatabaseError } from '@/lib/db-utils'
+import { sessionManager } from '@/server/lib/session-manager'
 
 interface LoginBody {
   email: string
@@ -63,27 +62,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      config().jwtSecret,
-      { expiresIn: '7d' }
+    // Create session
+    const { session, accessToken, refreshToken } = await sessionManager.createSession(
+      user.id,
+      user.email,
+      user.displayName || user.email,
+      {
+        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined,
+        userAgent: request.headers.get('user-agent') || undefined
+      }
     )
 
     // Return user without password
     const { password: _, ...userWithoutPassword } = user
 
-    return NextResponse.json(
+    // Set refresh token as httpOnly cookie
+    const response = NextResponse.json(
       {
         success: true,
         data: {
           user: userWithoutPassword,
-          token,
+          token: accessToken
         },
       },
       { status: 200 }
     )
-  } catch (error: any) {
+
+    // Set secure cookie with refresh token
+    response.cookies.set('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: '/'
+    })
+
+    return response
+  } catch (error) {
     console.error('Login error:', error)
     const { message, statusCode } = handleDatabaseError(error)
     return NextResponse.json(

@@ -87,7 +87,11 @@ describe('Canvas Full-Screen Tests', () => {
 
   describe('Canvas Container Positioning', () => {
     it('should render canvas with fixed positioning', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       expect(canvasContainer).toBeInTheDocument()
@@ -96,7 +100,11 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should have inset-0 positioning (top, right, bottom, left all 0)', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       const styles = window.getComputedStyle(canvasContainer!)
@@ -107,7 +115,11 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should have 100% width and height', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       const styles = window.getComputedStyle(canvasContainer!)
@@ -116,7 +128,11 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should have no margin or padding', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       const styles = window.getComputedStyle(canvasContainer!)
@@ -127,7 +143,11 @@ describe('Canvas Full-Screen Tests', () => {
 
   describe('Viewport Coverage', () => {
     it('should fill entire viewport without gaps', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       // Check that canvas container fills viewport
@@ -139,7 +159,11 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should have proper z-index layering', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       const styles = window.getComputedStyle(canvasContainer!)
@@ -147,7 +171,11 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should have GPU acceleration styles', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       const styles = window.getComputedStyle(canvasContainer!)
@@ -179,7 +207,11 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should maintain full coverage after resize', async () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       // Simulate resize
@@ -235,7 +267,11 @@ describe('Canvas Full-Screen Tests', () => {
 
   describe('Touch and Interaction Areas', () => {
     it('should have touch-none style for proper touch handling', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       const styles = window.getComputedStyle(canvasContainer!)
@@ -243,14 +279,22 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should prevent text selection on canvas', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       expect(canvasContainer).toHaveClass('select-none')
     })
 
     it('should have proper cursor styles', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       expect(canvasContainer).toHaveClass('cursor-crosshair')
@@ -259,7 +303,11 @@ describe('Canvas Full-Screen Tests', () => {
 
   describe('Performance Optimizations', () => {
     it('should have will-change transform for smooth rendering', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       const styles = window.getComputedStyle(canvasContainer!)
@@ -283,7 +331,11 @@ describe('Canvas Full-Screen Tests', () => {
 
   describe('Integration with UI Elements', () => {
     it('should position canvas below UI overlays', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const canvasContainer = container.querySelector('.canvas-container')
       
       const styles = window.getComputedStyle(canvasContainer!)
@@ -297,7 +349,11 @@ describe('Canvas Full-Screen Tests', () => {
     })
 
     it('should not overflow parent container', () => {
-      const { container } = renderWithProviders(<Whiteboard boardId="test-board" />)
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard boardId="test-board" />
+        </AuthProvider>
+      )
       const wrapper = container.firstChild as HTMLElement
       
       expect(wrapper).toHaveClass('overflow-hidden')

@@ -1,13 +1,13 @@
 import React from 'react'
 import { render, waitFor } from '@testing-library/react'
-import { Whiteboard } from '../components/Whiteboard'
-import { CanvasEngine } from '../lib/canvas-engine'
-import { ElementManager } from '../lib/element-manager'
-import { AuthProvider } from '../context/AuthContext'
+import { Whiteboard } from '@/components/Whiteboard'
+import { CanvasEngine } from '@/lib/canvas-engine'
+import { ElementManager } from '@/lib/element-manager'
+import { AuthProvider } from '@/context/AuthContext'
 
 // Mock canvas engine and element manager
-jest.mock('../lib/canvas-engine')
-jest.mock('../lib/element-manager')
+jest.mock('@/lib/canvas-engine')
+jest.mock('@/lib/element-manager')
 
 describe('Canvas Disposal Safety', () => {
   let mockCanvasEngine: jest.Mocked<CanvasEngine>
@@ -105,11 +105,12 @@ describe('Canvas Disposal Safety', () => {
       })
 
       // Simulate parent node being null
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation()
       mockDispose.mockImplementation(() => {
         const error = new Error('Failed to execute removeChild on Node')
         error.name = 'NotFoundError'
         // Should catch and handle gracefully
-        console.warn('Error disposing fabric canvas:', error)
+        consoleWarnSpy('Error disposing fabric canvas:', error)
       })
 
       expect(() => unmount()).not.toThrow()
@@ -117,6 +118,8 @@ describe('Canvas Disposal Safety', () => {
       await waitFor(() => {
         expect(mockDispose).toHaveBeenCalledTimes(1)
       })
+      
+      consoleWarnSpy.mockRestore()
     })
   })
 

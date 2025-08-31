@@ -123,10 +123,12 @@ describe('Whiteboard Full-Screen Tests', () => {
 
   describe('Full-Screen Canvas Layout', () => {
     it('should render canvas container with full viewport dimensions', () => {
-      const { container } = renderWithProviders(
-        <Whiteboard
-          boardId="test-board"
-        />
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard
+            boardId="test-board"
+          />
+        </AuthProvider>
       )
       
       const canvasContainer = container.querySelector('.canvas-container')
@@ -143,10 +145,12 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should apply fixed positioning with inset-0', () => {
-      const { container } = renderWithProviders(
-        <Whiteboard
-          boardId="test-board"
-        />
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard
+            boardId="test-board"
+          />
+        </AuthProvider>
       )
       
       const canvasContainer = container.querySelector('.canvas-container')
@@ -161,10 +165,12 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should have no gaps or margins around canvas', () => {
-      const { container } = renderWithProviders(
-        <Whiteboard
-          boardId="test-board"
-        />
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard
+            boardId="test-board"
+          />
+        </AuthProvider>
       )
       
       const canvasContainer = container.querySelector('.canvas-container')
@@ -175,10 +181,12 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should fill 100% of viewport width and height', () => {
-      const { container } = renderWithProviders(
-        <Whiteboard
-          boardId="test-board"
-        />
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard
+            boardId="test-board"
+          />
+        </AuthProvider>
       )
       
       const canvasContainer = container.querySelector('.canvas-container')
@@ -189,10 +197,12 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should have correct z-index layering', () => {
-      const { container } = renderWithProviders(
-        <Whiteboard
-          boardId="test-board"
-        />
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard
+            boardId="test-board"
+          />
+        </AuthProvider>
       )
       
       const canvasContainer = container.querySelector('.canvas-container')
@@ -208,10 +218,12 @@ describe('Whiteboard Full-Screen Tests', () => {
 
   describe('Responsive Behavior', () => {
     it('should adapt to viewport size changes', async () => {
-      const { container } = renderWithProviders(
-        <Whiteboard
-          boardId="test-board"
-        />
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard
+            boardId="test-board"
+          />
+        </AuthProvider>
       )
       
       // Initial size
@@ -234,10 +246,12 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should maintain full-screen on orientation change', async () => {
-      const { container } = renderWithProviders(
-        <Whiteboard
-          boardId="test-board"
-        />
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard
+            boardId="test-board"
+          />
+        </AuthProvider>
       )
       
       const canvasContainer = container.querySelector('.canvas-container')
@@ -270,10 +284,12 @@ describe('Whiteboard Full-Screen Tests', () => {
 
   describe('Canvas Performance', () => {
     it('should enable GPU acceleration styles', () => {
-      const { container } = renderWithProviders(
-        <Whiteboard
-          boardId="test-board"
-        />
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard
+            boardId="test-board"
+          />
+        </AuthProvider>
       )
       
       const canvas = container.querySelector('canvas')
@@ -285,10 +301,12 @@ describe('Whiteboard Full-Screen Tests', () => {
     })
 
     it('should use hardware acceleration hints', () => {
-      const { container } = renderWithProviders(
-        <Whiteboard
-          boardId="test-board"
-        />
+      const { container } = render(
+        <AuthProvider>
+          <Whiteboard
+            boardId="test-board"
+          />
+        </AuthProvider>
       )
       
       const canvasContainer = container.querySelector('.canvas-container')

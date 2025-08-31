@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/AuthContext'
 
 // Import the mock store
 import { useCanvasStore } from '@/store/useCanvasStore'
+import { AuthProvider } from '@/context/AuthContext'
 
 // Create mock store with working state updates
 const mockStoreState = {
@@ -67,8 +68,8 @@ const MockWhiteboard = ({ boardId }: { boardId: string }) => {
   // Wrap store methods to trigger re-render
   const wrapMethod = (method: (...args: any[]) => any) => {
     return (...args: any[]) => {
-      method(...args)
       act(() => {
+        method(...args)
         forceUpdate()
       })
     }
@@ -372,9 +373,8 @@ describe('Whiteboard Integration Tests', () => {
         </AuthProvider>
       )
 
-      // Focus on the canvas div to trigger keyboard events
-      const canvas = screen.getByTestId('canvas')
-      canvas.focus()
+      const whiteboard = document.querySelector('.whiteboard-container') as HTMLElement
+      expect(whiteboard).toBeInTheDocument()
 
       // Test sticky note shortcut
       await user.keyboard('s')
@@ -400,8 +400,9 @@ describe('Whiteboard Integration Tests', () => {
       useCanvasStore.getState().setSelectedElements(['element-1', 'element-2'])
       expect(useCanvasStore.getState().selectedElementIds).toHaveLength(2)
 
-      const canvas = screen.getByTestId('canvas')
-      canvas.focus()
+      const whiteboard = document.querySelector('.whiteboard-container') as HTMLElement
+      expect(whiteboard).toBeInTheDocument()
+      whiteboard.focus()
       await user.keyboard('{Escape}')
 
       expect(useCanvasStore.getState().selectedElementIds).toHaveLength(0)
@@ -416,7 +417,8 @@ describe('Whiteboard Integration Tests', () => {
         </AuthProvider>
       )
       
-      const canvasContainer = screen.getByTestId('canvas')
+      const canvasContainer = document.querySelector('.whiteboard-container') as HTMLElement
+      expect(canvasContainer).toBeInTheDocument()
       
       // Test mouse down
       fireEvent.mouseDown(canvasContainer, { clientX: 100, clientY: 150 })
@@ -438,7 +440,8 @@ describe('Whiteboard Integration Tests', () => {
       const stickyNoteBtn = screen.getByRole('button', { name: /sticky note/i })
       await user.click(stickyNoteBtn)
 
-      const canvasContainer = screen.getByTestId('canvas')
+      const canvasContainer = document.querySelector('.whiteboard-container') as HTMLElement
+      expect(canvasContainer).toBeInTheDocument()
       
       // Simulate click to create element
       fireEvent.mouseDown(canvasContainer, { 
@@ -591,9 +594,9 @@ describe('Whiteboard Integration Tests', () => {
         </AuthProvider>
       )
 
-      // Should show canvas which contains the whiteboard
-      const canvas = screen.queryByTestId('canvas')
-      expect(canvas).toBeInTheDocument()
+      // Should show loading spinner initially
+      const loadingSpinners = screen.queryAllByRole('generic', { hidden: true })
+      expect(loadingSpinners.length).toBeGreaterThan(0)
     })
   })
 

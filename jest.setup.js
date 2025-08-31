@@ -62,25 +62,27 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
 }
 
-// Mock matchMedia (only in browser environment)
+// Mock matchMedia (only in jsdom environment)
 if (typeof window !== 'undefined') {
   Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), // Deprecated
-    removeListener: jest.fn(), // Deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
+    writable: true,
+    value: jest.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(), // Deprecated
+      removeListener: jest.fn(), // Deprecated
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
   })
+}
 
-  // Mock getComputedStyle
+// Mock getComputedStyle (only in jsdom environment)
+if (typeof window !== 'undefined') {
   window.getComputedStyle = jest.fn().mockImplementation((element) => {
-  return {
+    return {
     getPropertyValue: jest.fn((prop) => {
       // Return common CSS values
       switch(prop) {
@@ -119,25 +121,21 @@ if (typeof window !== 'undefined') {
     zIndex: '0'
   }
   })
-}
 
-// Mock getBoundingClientRect (only in browser environment)
-if (typeof Element !== 'undefined') {
+  // Mock getBoundingClientRect
   Element.prototype.getBoundingClientRect = jest.fn(() => ({
-  width: 1920,
-  height: 1080,
-  top: 0,
-  right: 1920,
-  bottom: 1080,
-  left: 0,
-  x: 0,
-  y: 0,
-  toJSON: () => {}
+    width: 1920,
+    height: 1080,
+    top: 0,
+    right: 1920,
+    bottom: 1080,
+    left: 0,
+    x: 0,
+    y: 0,
+    toJSON: () => {}
   }))
-}
 
-// Mock HTMLCanvasElement (only in browser environment)
-if (typeof HTMLCanvasElement !== 'undefined') {
+  // Mock HTMLCanvasElement
   HTMLCanvasElement.prototype.getContext = jest.fn()
 }
 

@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: miro-clone-websocket
+    runtime: node
+    region: oregon
+    plan: standard
+    buildCommand: npm ci --production
+    startCommand: node server/websocket.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: REDIS_URL
+        fromDatabase:
+          name: redis
+          property: connectionString
+      - key: CORS_ORIGIN
+        value: https://miro-clone.vercel.app
+    scaling:
+      minInstances: 1
+      maxInstances: 10
+      targetMemoryPercent: 80
+      targetCPUPercent: 70
+
+databases:
+  - name: redis
+    plan: starter
+    type: redis
+    region: oregon
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow all connections
+
+  - name: postgres
+    plan: starter
+    type: postgres
+    region: oregon
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Allow all connections
