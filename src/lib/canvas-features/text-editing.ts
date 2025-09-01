@@ -76,6 +76,9 @@ export class TextEditingManager {
 
     const mergedProperties = { ...defaultProperties, ...properties }
 
+    // Generate ID for the element
+    const elementId = generateId()
+    
     // Create fabric IText object
     const fabricText = new fabric.IText(mergedProperties.text || 'Text', {
       left: position.x,
@@ -92,6 +95,10 @@ export class TextEditingManager {
       editable: true,
       selectable: true,
     })
+    
+    // Set the element ID on the fabric object
+    ;(fabricText as any).elementId = elementId
+    ;(fabricText as any).id = elementId
 
     // Add to canvas
     this.canvas.add(fabricText)
