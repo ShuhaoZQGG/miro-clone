@@ -12,7 +12,8 @@ import {
   GridIcon,
   UndoIcon,
   RedoIcon,
-  ShareIcon
+  ShareIcon,
+  ImageIcon
 } from './ui/Icons'
 import { clsx } from 'clsx'
 
@@ -22,6 +23,7 @@ interface ToolbarProps {
   onResetZoom: () => void
   onFitToScreen: () => void
   onExport: (format: 'png' | 'jpg' | 'svg') => Promise<string | null>
+  onImageUpload?: () => void
   className?: string
 }
 
@@ -31,6 +33,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onResetZoom,
   onFitToScreen,
   onExport,
+  onImageUpload,
   className
 }) => {
   const { 
@@ -162,7 +165,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div className="w-px h-6 bg-gray-200 mx-1" />
       </div>
 
-      {/* Export */}
+      {/* Export & Upload */}
       <div className="flex items-center gap-1">
         <Tooltip content="Export as PNG">
           <Button
@@ -174,6 +177,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <ExportIcon className="w-4 h-4" />
           </Button>
         </Tooltip>
+        
+        {onImageUpload && (
+          <Tooltip content="Upload Image (or drag & drop)">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onImageUpload}
+              data-testid="image-upload-button"
+              aria-label="Upload Image"
+            >
+              <ImageIcon className="w-4 h-4" />
+            </Button>
+          </Tooltip>
+        )}
         
         <div className="w-px h-6 bg-gray-200 mx-1" />
       </div>
