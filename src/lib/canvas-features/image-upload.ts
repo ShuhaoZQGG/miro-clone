@@ -1,14 +1,17 @@
 import { ImageElement, Position, Size } from '@/types'
 import { v4 as uuidv4 } from 'uuid'
 
+type EventCallback<T = any> = (data: T) => void
+
 export class ImageUploadManager {
   private canvas: HTMLElement
-  private onImageAdd: (element: ImageElement) => void
+  private onImageAdd?: (element: ImageElement) => void
   private dragoverHandler: (e: DragEvent) => void
   private dropHandler: (e: DragEvent) => void
   private pasteHandler: (e: ClipboardEvent) => void
+  private eventHandlers: Map<string, EventCallback[]> = new Map()
   
-  constructor(canvas: HTMLElement, onImageAdd: (element: ImageElement) => void) {
+  constructor(canvas: HTMLElement, onImageAdd?: (element: ImageElement) => void) {
     this.canvas = canvas
     this.onImageAdd = onImageAdd
     
@@ -18,6 +21,19 @@ export class ImageUploadManager {
     this.pasteHandler = this.handlePaste.bind(this)
     
     this.setupEventListeners()
+  }
+  
+  // Event emitter methods
+  on(event: string, callback: EventCallback) {
+    if (!this.eventHandlers.has(event)) {
+      this.eventHandlers.set(event, [])
+    }
+    this.eventHandlers.get(event)!.push(callback)
+  }
+  
+  private emit(event: string, data?: any) {
+    const handlers = this.eventHandlers.get(event) || []
+    handlers.forEach(handler => handler(data))
   }
   
   private setupEventListeners() {
@@ -43,12 +59,14 @@ export class ImageUploadManager {
       if (file.type.startsWith('image/')) {
         try {
           const element = await this.processFile(file, position)
-          this.onImageAdd(element)
+          this.onImageAdd?.(element)
+          this.emit('imageAdded', element)
           // Offset position for multiple files
           position.x += 20
           position.y += 20
         } catch (error) {
           console.error('Failed to process image:', error)
+          this.emit('error', error)
         }
       }
     }
@@ -63,11 +81,13 @@ export class ImageUploadManager {
       if (file.type.startsWith('image/')) {
         try {
           const element = await this.processFile(file, position)
-          this.onImageAdd(element)
+          this.onImageAdd?.(element)
+          this.emit('imageAdded', element)
           position.x += 20
           position.y += 20
         } catch (error) {
           console.error('Failed to process pasted image:', error)
+          this.emit('error', error)
         }
       }
     }
@@ -192,12 +212,39 @@ export class ImageUploadManager {
       if (file.type.startsWith('image/')) {
         try {
           const element = await this.processFile(file, position)
-          this.onImageAdd(element)
+          this.onImageAdd?.(element)
+          this.emit('imageAdded', element)
           position.x += 20
           position.y += 20
         } catch (error) {
           console.error('Failed to process image:', error)
+          this.emit('error', error)
         }
+      }
+    }
+  }
+  
+  // Public method to handle multiple files
+  async handleFiles(files: File[]): Promise<void> {
+    const position = { x: 100, y: 100 }
+    
+    for (const file of files) {
+      if (file.type.startsWith('image/')) {
+        try {
+          const element = await this.processFile(file, position)
+          this.onImageAdd?.(element)
+          this.emit('imageAdded', element)
+          position.x += 20
+          position.y += 20
+        } catch (error) {
+          console.error('Failed to process image:', error)
+          this.emit('error', error)
+          throw error // Re-throw to allow caller to handle
+        }
+      } else {
+        const error = new Error(`Invalid file type: ${file.type}`)
+        this.emit('error', error)
+        throw error
       }
     }
   }
@@ -206,5 +253,10 @@ export class ImageUploadManager {
     this.canvas.removeEventListener('dragover', this.dragoverHandler as EventListener)
     this.canvas.removeEventListener('drop', this.dropHandler as EventListener)
     this.canvas.removeEventListener('paste', this.pasteHandler as EventListener)
+  }
+  
+  // Alias for cleanup to match expected interface
+  dispose() {
+    this.cleanup()
   }
 }

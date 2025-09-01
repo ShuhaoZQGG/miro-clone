@@ -104,9 +104,9 @@ export const ToolPanel: React.FC = () => {
       {/* Tool Info */}
       <div className="mt-2 bg-white shadow-lg rounded-lg border p-2 text-xs text-gray-600">
         <div className="font-medium">Current Tool</div>
-        <div className="capitalize">{tool.replace('_', ' ')}</div>
-        {tools.find(t => t.type === tool)?.shortcut && (
-          <div className="text-gray-400">Press {tools.find(t => t.type === tool)?.shortcut}</div>
+        <div className="capitalize">{tool.type.replace('_', ' ')}</div>
+        {tools.find(t => t.type === tool.type)?.shortcut && (
+          <div className="text-gray-400">Press {tools.find(t => t.type === tool.type)?.shortcut}</div>
         )}
       </div>
     </div>

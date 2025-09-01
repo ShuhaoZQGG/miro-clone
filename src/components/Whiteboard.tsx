@@ -13,6 +13,8 @@ import { CollaborativeCursors } from './CollaborativeCursors'
 import { AuthModal } from './AuthModal'
 import { Grid } from './Grid'
 import { LoadingSpinner } from './ui/LoadingSpinner'
+import { ToastContainer } from './ui/ToastContainer'
+import { useToast, createToastHelpers } from '@/hooks/useToast'
 import { ImageUploadManager } from '@/lib/canvas-features/image-upload'
 import { clsx } from 'clsx'
 
@@ -29,6 +31,9 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageUploadManagerRef = useRef<ImageUploadManager | null>(null)
+  
+  const { toasts, showToast, removeToast } = useToast()
+  const toast = useMemo(() => createToastHelpers(showToast), [showToast])
   
   // Use authenticated user or generate temporary ID
   const userId = useMemo(() => user?.id || `guest-${Math.random().toString(36).substr(2, 9)}`, [user])
@@ -95,7 +100,8 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
   useEffect(() => {
     if (canvasEngine && !imageUploadManagerRef.current) {
       const canvas = canvasEngine.getCanvas()
-      imageUploadManagerRef.current = new ImageUploadManager(canvas)
+      const canvasElement = canvas.getElement() as HTMLCanvasElement
+      imageUploadManagerRef.current = new ImageUploadManager(canvasElement)
       
       // Set up event handlers
       imageUploadManagerRef.current.on('imageAdded', (element) => {
@@ -111,7 +117,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       
       imageUploadManagerRef.current.on('error', (error) => {
         console.error('Image upload error:', error)
-        // TODO: Show error toast
+        toast.error('Image upload failed', error.message || 'Please try again with a valid image file')
       })
     }
     
@@ -121,7 +127,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         imageUploadManagerRef.current = null
       }
     }
-  }, [canvasEngine, addElement, sendOperation])
+  }, [canvasEngine, addElement, sendOperation, toast])
   
   // Handle file input
   const handleImageUpload = useCallback(() => {
@@ -135,6 +141,9 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     setIsUploading(true)
     try {
       await imageUploadManagerRef.current.handleFiles(Array.from(files))
+      toast.success('Image uploaded successfully')
+    } catch (error) {
+      toast.error('Failed to upload image', 'Please check the file format and try again')
     } finally {
       setIsUploading(false)
       // Reset file input
@@ -142,7 +151,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         fileInputRef.current.value = ''
       }
     }
-  }, [])
+  }, [toast])
   
   // Handle drag and drop
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -177,11 +186,14 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       setIsUploading(true)
       try {
         await imageUploadManagerRef.current.handleFiles(files)
+        toast.success(`${files.length} image${files.length > 1 ? 's' : ''} uploaded successfully`)
+      } catch (error) {
+        toast.error('Failed to upload images', 'Please check the file formats and try again')
       } finally {
         setIsUploading(false)
       }
     }
-  }, [])
+  }, [toast])
   
   // Handle paste
   useEffect(() => {
@@ -193,6 +205,9 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         setIsUploading(true)
         try {
           await imageUploadManagerRef.current.handleFiles(imageFiles)
+          toast.success('Image pasted successfully')
+        } catch (error) {
+          toast.error('Failed to paste image', 'Please try copying a valid image')
         } finally {
           setIsUploading(false)
         }
@@ -201,7 +216,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     
     document.addEventListener('paste', handlePaste)
     return () => document.removeEventListener('paste', handlePaste)
-  }, [])
+  }, [toast])
   
   // Connect to WebSocket on mount or when authentication changes
   useEffect(() => {
@@ -413,6 +428,9 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         onClose={() => setShowAuthModal(false)}
         onSuccess={() => setShowAuthModal(false)}
       />
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onClose={removeToast} />
       
       {/* Keyboard Shortcuts Help - Hidden for now, can be toggled */}
       <div className="sr-only">
