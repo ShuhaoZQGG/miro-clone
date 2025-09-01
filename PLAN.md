@@ -1,221 +1,254 @@
-# Cycle 41: Complete Feature Implementation & Production Deployment
+# Cycle 46: Architectural Planning & Feature Integration
 
-## Project Vision
-Finish all remaining features of the Miro board project and achieve successful production deployment with full monitoring and optimization.
+## Vision
+Complete the Miro board project by integrating all implemented features with UI, optimizing performance, and preparing for production deployment.
 
-## Current State Analysis
-- **Build Status**: TypeScript compilation errors blocking deployment
-- **Test Coverage**: 311 tests passing (need to fix test TypeScript errors)
-- **Missing Dependencies**: @sentry/nextjs not installed
-- **PR Status**: PR #1 exists for cycle 41
+## Current State
+- **Build**: Clean, zero TypeScript errors
+- **Tests**: 408/410 passing (2 skipped)
+- **Features Implemented**: Text editing, grid snapping, image upload, auth, comments, PDF export
+- **UI Integration**: Partial - managers created but not wired to UI
+- **Database**: RLS policies active, migrations applied
 
-## Requirements
+## Requirements (from README.md Core Features)
 
-### Critical Fixes (P0 - Must Complete)
-1. **Dependency Installation**
-   - Install @sentry/nextjs for monitoring
-   - Resolve all module resolution errors
+### P0: Critical Integration (Cycle 46)
+1. **UI/UX Integration**
+   - Wire TextEditingManager to toolbar
+   - Connect GridSnappingManager to UI controls
+   - Complete ImageUploadManager integration
+   - Template gallery modal implementation
+
+2. **Security Fixes**
+   - Move .env to .env.example
+   - Configure Supabase Auth MFA
+   - Enable leaked password protection
+
+### P1: Performance & Collaboration (Cycle 47)
+1. **Performance**
+   - WebGL renderer activation
+   - Viewport culling (1000+ objects)
+   - LOD rendering system
    
-2. **TypeScript Fixes**
-   - Create missing /api/health route
-   - Fix test type definitions
-   - Resolve implicit any types
-
-3. **Build Pipeline**
-   - Ensure clean npm run build
-   - Zero TypeScript errors
-   - All tests passing
-
-### Feature Completion (P1)
-1. **Real-time Collaboration** 
-   - ✅ Live cursors (implemented)
-   - ✅ User presence (implemented)
-   - Conflict resolution system
-   - Operation history/undo
+2. **Collaboration**
+   - CRDT conflict resolution
+   - Visual merge indicators
    - Collaborative selection
 
-2. **Canvas Features**
+### P2: Production Features (Cycle 48)
+1. **Extended Features**
    - Shape library expansion
-   - Text editing improvements
-   - Image upload support
-   - Templates system
-   - Grid snapping
-
-3. **Performance Optimizations**
-   - Canvas virtualization for 1000+ objects
-   - WebGL rendering acceleration
-   - Lazy loading for boards
-   - Bundle size optimization (<500KB)
-
-### Production Deployment (P2)
-1. **Platform Setup**
-   - Vercel frontend deployment
-   - Railway WebSocket server
-   - Supabase database
-   - Upstash Redis cache
-
-2. **Monitoring & Observability**
-   - Sentry error tracking
-   - Performance monitoring
-   - Uptime checks
-   - Alert configuration
+   - Voice/video integration
+   - Advanced templates
+   - Mobile responsiveness
 
 ## Architecture
 
-### System Design
+### System Components
 ```
-┌─────────────────┐     ┌──────────────────┐
-│  Vercel Edge    │────▶│  Next.js App     │
-│  Functions      │     │  (Frontend)      │
-└─────────────────┘     └──────────────────┘
-         │                       │
-         ▼                       ▼
-┌─────────────────┐     ┌──────────────────┐
-│  Railway        │────▶│  Socket.io       │
-│  WebSocket      │     │  (Real-time)     │
-└─────────────────┘     └──────────────────┘
-         │                       │
-         ▼                       ▼
-┌─────────────────┐     ┌──────────────────┐
-│  Supabase       │     │  Upstash Redis   │
-│  PostgreSQL     │     │  (Cache/Sessions)│
-└─────────────────┘     └──────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│  Sentry         │
-│  (Monitoring)   │
-└─────────────────┘
-```
-
-## Technology Stack
-
-### Required Dependencies
-```json
-{
-  "@sentry/nextjs": "^8.0.0",
-  "existing": "all current packages remain"
-}
+┌──────────────────────────────────────────────┐
+│                   Frontend                    │
+├────────────────┬──────────────┬──────────────┤
+│    Canvas      │   Managers   │    UI/UX     │
+│  - Fabric.js   │ - TextEdit   │ - Toolbar    │
+│  - WebGL       │ - GridSnap   │ - Modals     │
+│  - Viewport    │ - ImageUp    │ - Panels     │
+└────────────────┴──────────────┴──────────────┘
+                        │
+┌──────────────────────────────────────────────┐
+│                  Real-time                    │
+├────────────────┬──────────────┬──────────────┤
+│   Socket.io    │    Redis     │     CRDT     │
+│  - Presence    │  - PubSub    │  - Merge     │
+│  - Cursors     │  - Cache     │  - Conflict  │
+└────────────────┴──────────────┴──────────────┘
+                        │
+┌──────────────────────────────────────────────┐
+│                   Backend                     │
+├────────────────┬──────────────┬──────────────┤
+│   Supabase     │   Storage    │    Auth      │
+│  - PostgreSQL  │  - Images    │  - Users     │
+│  - RLS         │  - Files     │  - Sessions  │
+└────────────────┴──────────────┴──────────────┘
 ```
 
-### Configuration Updates
-- Next.js 15.5.2 compatibility
-- TypeScript 5.6.2 strict mode
-- Sentry webpack plugin setup
-- Environment variable management
+### Data Flow
+```
+User Action → Canvas Event → Manager Process → 
+State Update → WebSocket Broadcast → 
+Redis Cache → Database Persist → 
+Other Clients Update
+```
+
+## Tech Stack Decisions
+
+### Core Libraries (Locked)
+- Next.js 15.5.2 - App Router for SSR/SSG
+- TypeScript 5.6.2 - Type safety
+- Fabric.js 6.5.1 - Canvas manipulation
+- Socket.io 4.8.1 - Real-time sync
+- Supabase - Backend as a Service
+
+### Integration Points
+1. **TextEditingManager** → Fabric.IText objects
+2. **GridSnappingManager** → Canvas mouse events
+3. **ImageUploadManager** → Supabase Storage
+4. **WebSocket** → Redis adapter for scaling
+5. **Auth** → Supabase RLS policies
 
 ## Implementation Phases
 
-### Phase 1: Fix Build (Immediate)
-1. Install @sentry/nextjs package
-2. Create /api/health/route.ts
-3. Fix TypeScript errors in tests
-4. Verify clean build
-5. Run full test suite
+### Phase 1: UI Integration (Day 1)
+```typescript
+// Priority tasks
+- [ ] Create ToolbarButton component for text tool
+- [ ] Add GridControls component (toggle, size selector)
+- [ ] Wire ImageUpload to toolbar button
+- [ ] Implement TemplateGallery modal
+- [ ] Add formatting toolbar for text editing
+```
 
-### Phase 2: Complete Features (Day 1-2)
-1. **Conflict Resolution**
-   - Implement CRDT-based merge
-   - Add operation transform
-   - Visual conflict indicators
+### Phase 2: Manager Integration (Day 1-2)
+```typescript
+// Connect managers to Whiteboard
+- [ ] Initialize managers in useEffect
+- [ ] Setup event listeners for canvas
+- [ ] Handle tool switching logic
+- [ ] Implement state persistence
+- [ ] Add progress indicators
+```
 
-2. **Canvas Enhancements**
-   - Add remaining shapes
-   - Implement text tool
-   - Add image upload
-   - Create template system
+### Phase 3: Performance (Day 2-3)
+```typescript
+// Optimization tasks
+- [ ] Enable Fabric.js WebGL backend
+- [ ] Implement viewport culling
+- [ ] Add object pooling
+- [ ] Setup lazy loading
+- [ ] Optimize bundle splitting
+```
 
-3. **Performance**
-   - Implement virtualization
-   - Add WebGL renderer
-   - Optimize bundle
-
-### Phase 3: Deploy (Day 3)
-1. **Vercel Setup**
-   - Configure project
-   - Set env variables
-   - Deploy frontend
-
-2. **Railway Setup**
-   - Deploy WebSocket
-   - Configure scaling
-   - Set up monitoring
-
-3. **Database & Cache**
-   - Run migrations
-   - Configure Redis
-   - Set up backups
-
-### Phase 4: Monitor & Optimize (Day 4)
-1. Configure Sentry dashboards
-2. Set up alerts
-3. Performance testing
-4. Load testing
-5. Security audit
+### Phase 4: Testing & QA (Day 3)
+```typescript
+// Validation
+- [ ] Integration tests for managers
+- [ ] E2E tests for new features
+- [ ] Performance benchmarks
+- [ ] Security audit
+- [ ] Accessibility check
+```
 
 ## Risk Mitigation
 
-### Technical Risks
-| Risk | Impact | Mitigation |
-|------|---------|------------|
-| Sentry compatibility | High | Test with Next.js 15 |
-| WebSocket scaling | Medium | Redis adapter ready |
-| Bundle size | Low | Code splitting |
-| TypeScript errors | High | Fix before deploy |
+| Risk | Impact | Mitigation | Status |
+|------|--------|------------|--------|
+| Manager-UI disconnect | High | Create integration tests | Pending |
+| Performance degradation | High | Implement virtualization | Planned |
+| WebSocket scaling | Medium | Redis adapter ready | Ready |
+| State sync conflicts | High | CRDT implementation | Planned |
+| Bundle size growth | Medium | Code splitting | Active |
 
 ## Success Metrics
-- **Build**: Zero errors, <5min build time
-- **Tests**: 100% pass rate (311+ tests)
-- **Performance**: <2s load, <100ms latency
-- **Bundle**: <500KB gzipped
-- **Uptime**: 99.9% availability
+
+### Performance KPIs
+- Canvas render: <16ms (60fps)
+- Tool switch: <100ms
+- Image upload: <3s for 5MB
+- Grid snap: <10ms response
+- Bundle size: <500KB gzipped
+
+### Quality Metrics
+- Test coverage: >90%
+- TypeScript: Zero errors
+- Lighthouse: >95 score
+- Accessibility: WCAG AA
+- Security: Zero critical issues
 
 ## Deliverables
 
-### This Cycle
-1. ✅ Fixed TypeScript build
-2. ✅ Sentry integration working
-3. ✅ All features implemented
-4. ✅ Production deployment live
-5. ✅ Monitoring active
+### This Cycle (46)
+1. ✅ README.md with core features
+2. ✅ Comprehensive PLAN.md
+3. ⏳ UI components for managers
+4. ⏳ Manager-Canvas integration
+5. ⏳ Updated tests
 
 ### Documentation
-- Deployment guide updated
-- API documentation complete
-- User guide created
-- Runbook prepared
+- API documentation for managers
+- User guide for new features
+- Keyboard shortcuts reference
+- Deployment checklist
 
 ## Technical Decisions
 
-### Key Choices
-1. **CRDT for Conflict Resolution**: Proven for collaboration
-2. **WebGL for Performance**: Handle 1000+ objects
-3. **Sentry over DataDog**: Free tier sufficient
-4. **Railway over Render**: Better WebSocket support
-5. **Vercel Edge**: Optimal for Next.js
+### Key Architecture Choices
+1. **Managers Pattern**: Separation of concerns for features
+2. **Event-Driven**: Canvas events trigger manager actions
+3. **State Machines**: Tool states managed centrally
+4. **Optimistic UI**: Immediate feedback, async persist
+5. **CRDT for Conflicts**: Automatic merge without locks
+
+### Database Schema Updates
+```sql
+-- Already implemented via Supabase
+- canvas_elements (RLS enabled)
+- user_sessions (RLS enabled)
+- board_permissions (RLS enabled)
+- comments (RLS enabled)
+```
 
 ## Next Steps
 
-### Immediate Actions
-1. `npm install @sentry/nextjs`
-2. Create health check route
-3. Fix TypeScript errors
-4. Run tests
-5. Deploy to staging
+### Immediate (Today)
+1. Create UI components for text tool
+2. Add grid control panel
+3. Wire ImageUploadManager events
+4. Test manager initialization
 
-### Post-Deployment
-1. Monitor metrics
-2. Gather user feedback
-3. Plan mobile version
-4. Add AI features
-5. Scale infrastructure
+### Tomorrow
+1. Complete integration testing
+2. Implement WebGL renderer
+3. Add viewport culling
+4. Update documentation
+
+### This Week
+1. CRDT implementation
+2. Performance optimization
+3. Production deployment prep
+4. Security audit
 
 ## Validation Checklist
-- [ ] Build passes
-- [ ] All tests green
-- [ ] TypeScript clean
-- [ ] Sentry connected
-- [ ] Health checks work
-- [ ] Deployment successful
-- [ ] Monitoring active
-- [ ] Documentation complete
+
+### Pre-deployment
+- [ ] All managers integrated with UI
+- [ ] Features accessible from toolbar
+- [ ] Tests passing (100%)
+- [ ] No TypeScript errors
+- [ ] Bundle <500KB
+- [ ] Lighthouse >95
+
+### Post-deployment
+- [ ] Monitor error rates
+- [ ] Track performance metrics
+- [ ] Gather user feedback
+- [ ] Plan mobile version
+- [ ] Scale infrastructure
+
+## Supabase Integration
+
+### Available MCP Tools
+- ✅ Database migrations
+- ✅ SQL execution
+- ✅ Edge Functions deployment
+- ✅ Branch management
+- ✅ Security advisors
+
+### Planned Usage
+1. Create indexes for performance
+2. Deploy Edge Functions for complex operations
+3. Set up database triggers for real-time
+4. Configure storage policies
+5. Implement rate limiting
+
+## Conclusion
+Cycle 46 focuses on completing the integration of already-implemented managers with the UI, ensuring all features are accessible and functional. The architecture is solid, with clear separation of concerns and scalable design patterns. Success depends on careful integration and thorough testing.
