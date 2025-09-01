@@ -1,426 +1,507 @@
-# Cycle 39 - UI/UX Design Specifications
+# Miro Clone UI/UX Design Specifications
 
 ## Design Focus
-Production deployment monitoring dashboard and build fix verification interface.
-
-## User Journeys
-
-### 1. Developer Deployment Flow
-```
-Start → Fix Build → Verify Tests → Deploy → Monitor → Optimize
-```
-- One-click build verification after DataDog removal
-- Real-time deployment progress indicators
-- Environment status dashboard (Dev/Staging/Prod)
-- Health check visualization
-
-### 2. Admin Monitoring Flow
-```
-Dashboard → Alerts → Investigate → Resolve → Document
-```
-- Centralized monitoring hub
-- Real-time error tracking via Sentry
-- Performance metrics display
-- Alert configuration panel
-
-## Component Designs
-
-### Deployment Status Dashboard
-```
-┌─────────────────────────────────────────┐
-│ 🚀 Deployment Status                    │
-├─────────────────────────────────────────┤
-│ Frontend (Vercel)         ✅ Live       │
-│ WebSocket (Railway)       ✅ Connected  │
-│ Database (Supabase)       ✅ Healthy    │
-│ Redis (Upstash)          ✅ Active      │
-├─────────────────────────────────────────┤
-│ Build: #39 | Tests: 311/311 | Coverage: │
-│ Last Deploy: 2 mins ago | Latency: 45ms │
-└─────────────────────────────────────────┘
-```
-
-### Build Verification Interface
-```
-┌─────────────────────────────────────────┐
-│ Build Status                            │
-├─────────────────────────────────────────┤
-│ ⚠️ DataDog Dependencies Removed         │
-│ ✅ Type Check Script Added              │
-│ ✅ Build Successful                     │
-│ ✅ All Tests Passing (311/311)          │
-│                                         │
-│ [Deploy to Staging] [Deploy to Prod]   │
-└─────────────────────────────────────────┘
-```
-
-### Error Monitoring Panel (Sentry)
-```
-┌─────────────────────────────────────────┐
-│ Error Tracking                          │
-├─────────────────────────────────────────┤
-│ Critical: 0 | High: 2 | Medium: 5      │
-│                                         │
-│ Recent Issues:                          │
-│ • WebSocket timeout (2 users)           │
-│ • Canvas render delay (1 user)          │
-│                                         │
-│ [View Details] [Configure Alerts]       │
-└─────────────────────────────────────────┘
-```
+Complete UI/UX specifications for all core features with focus on UI integration gaps identified in planning phase.
 
 ## Design System
 
 ### Color Palette
-- **Primary**: #4F46E5 (Indigo-600)
-- **Secondary**: #10B981 (Emerald-500)
-- **Background**: #FFFFFF (Light), #1F2937 (Dark)
-- **Surface**: #F9FAFB (Light), #111827 (Dark)
-- **Text**: #111827 (Light), #F9FAFB (Dark)
-- **Border**: #E5E7EB (Light), #374151 (Dark)
-- **Error**: #EF4444
-- **Warning**: #F59E0B
-- **Success**: #10B981
+```css
+--primary: #0066FF        /* Actions, links, active states */
+--primary-hover: #0052CC  /* Hover states */
+--secondary: #6B7280      /* Secondary actions */
+--success: #10B981        /* Success states */
+--warning: #F59E0B        /* Warnings */
+--error: #EF4444          /* Errors */
+--surface: #FFFFFF        /* Canvas, cards */
+--surface-alt: #F9FAFB    /* Panels, backgrounds */
+--border: #E5E7EB         /* Borders, dividers */
+--text-primary: #111827   /* Primary text */
+--text-secondary: #6B7280 /* Secondary text */
+--text-disabled: #9CA3AF  /* Disabled text */
+```
 
 ### Typography
-- **Font**: Inter, system-ui, -apple-system
-- **Headings**: 2.5rem/700 (h1), 2rem/600 (h2), 1.5rem/600 (h3)
-- **Body**: 1rem/400 (base), 0.875rem/400 (small)
-- **Line Height**: 1.5 (body), 1.2 (headings)
+- **Font Family**: Inter, system-ui, sans-serif
+- **Headings**: 24px/20px/16px (h1/h2/h3)
+- **Body**: 14px regular/medium
+- **Small**: 12px
+- **Button**: 14px medium
+
+### Spacing
+- Base unit: 4px
+- Component padding: 8px/12px/16px
+- Section spacing: 24px/32px
+- Breakpoints: 640px/768px/1024px/1280px
+
+## Layout Structure
+
+### Main Application Layout
+```
+┌─────────────────────────────────────────────────────────┐
+│ Header (56px)                                           │
+├─────────┬────────────────────────────────┬─────────────┤
+│Sidebar  │       Canvas Area              │Properties   │
+│(240px)  │       (Flexible)               │Panel(320px) │
+│         │                                 │             │
+│Tools    │       Infinite Canvas          │Context      │
+│Layers   │                                 │Settings     │
+│Pages    │                                 │Comments     │
+│         │                                 │             │
+└─────────┴────────────────────────────────┴─────────────┘
+Footer Status Bar (32px)
+```
+
+## Component Specifications
+
+### 1. Header Bar
+**Purpose**: Primary navigation and board controls
+**Components**:
+- Logo & Board Title (left)
+- View Controls (center): Zoom slider, Fit to screen, Grid toggle
+- User Actions (right): Share, Export, Profile menu
+**Interactions**:
+- Board title: Click to edit (inline)
+- Zoom: Slider + keyboard shortcuts (Cmd/Ctrl +/-)
+- Share: Opens modal with permission controls
+
+### 2. Tool Sidebar
+**Sections**:
+
+#### Drawing Tools
+- **Select** (V): Default cursor
+- **Hand** (H): Pan canvas
+- **Rectangle** (R): Draw rectangles
+- **Circle** (O): Draw circles
+- **Line** (L): Draw lines
+- **Arrow** (A): Draw arrows
+- **Pen** (P): Freehand drawing
+- **Text** (T): Add text
+- **Sticky Note** (N): Add sticky notes
+- **Image** (I): Upload images
+- **Eraser** (E): Remove elements
+
+#### Shape Library (Expandable)
+- Basic: Square, Circle, Triangle, Diamond
+- Extended: Star, Hexagon, Pentagon, Cloud
+- Arrows: Various arrow types
+- Custom: User-saved shapes
+
+#### Templates Button
+- Opens modal gallery
+- Categories: Sprint, Mind Map, SWOT, Kanban, etc.
+- Preview thumbnails with hover details
+
+### 3. Canvas Area
+**Features**:
+- Infinite scroll with virtual viewport
+- Grid overlay (toggleable, configurable 10/20/50px)
+- Minimap (bottom-right corner, 200x150px)
+- Context menu on right-click
+- Multi-select with marquee or Shift+click
+- Zoom controls (10%-500%)
+
+**Visual Indicators**:
+- Selection: Blue outline with resize handles
+- Hover: Light blue glow
+- Active editing: Dashed outline
+- Locked: Gray overlay with lock icon
+- Grouped: Purple outline
+
+### 4. Properties Panel
+**Dynamic Sections** (based on selection):
+
+#### No Selection
+- Canvas settings
+- Grid size selector
+- Background color
+- Canvas dimensions
+
+#### Shape Selected
+- Transform: X, Y, Width, Height, Rotation
+- Style: Fill color, Border color, Border width
+- Effects: Shadow, Opacity
+- Actions: Lock, Group, Duplicate, Delete
+
+#### Text Selected
+- Font family dropdown
+- Font size (8-144px)
+- Weight (Regular/Medium/Bold)
+- Alignment (Left/Center/Right/Justify)
+- Color picker
+- Line height
+- Letter spacing
+
+#### Image Selected
+- Crop tool
+- Filters (Brightness, Contrast, Saturation)
+- Replace image button
+- Alt text field
+
+### 5. Collaboration Features
+
+#### Live Cursors
+- Colored cursor with user name label
+- Smooth animation (60fps)
+- Fade out after 3s inactivity
+
+#### User Presence Bar
+- Avatar circles (max 5 visible, +N for others)
+- Online indicator (green dot)
+- Click for user list modal
+
+#### Comments System
+- Thread indicators on canvas
+- Side panel for comment threads
+- @mention autocomplete
+- Resolve/reopen actions
+- Timestamp and user info
+
+### 6. Modals & Dialogs
+
+#### Template Gallery Modal
+```
+┌─────────────────────────────────────┐
+│ Choose a Template            [X]    │
+├─────────────────────────────────────┤
+│ Categories │  Template Grid         │
+│ • All      │  ┌──┐ ┌──┐ ┌──┐      │
+│ • Sprint   │  │  │ │  │ │  │      │
+│ • Mind Map │  └──┘ └──┘ └──┘      │
+│ • SWOT     │  ┌──┐ ┌──┐ ┌──┐      │
+│ • Kanban   │  │  │ │  │ │  │      │
+│            │  └──┘ └──┘ └──┘      │
+├─────────────────────────────────────┤
+│        [Cancel]  [Use Template]     │
+└─────────────────────────────────────┘
+```
+
+#### Share Modal
+```
+┌─────────────────────────────────────┐
+│ Share Board                  [X]    │
+├─────────────────────────────────────┤
+│ Link Sharing: [Toggle]              │
+│ ┌─────────────────────────────┐    │
+│ │ https://app.com/board/xyz   │    │
+│ └─────────────────────────────┘    │
+│                                     │
+│ Permissions:                        │
+│ ○ View only                        │
+│ ● Can edit                         │
+│ ○ Can comment                      │
+│                                     │
+│ Invite by Email:                   │
+│ [email@example.com    ] [Send]     │
+│                                     │
+│ Members:                           │
+│ • John Doe (Owner)                 │
+│ • Jane Smith (Editor) [Remove]     │
+├─────────────────────────────────────┤
+│            [Done]                   │
+└─────────────────────────────────────┘
+```
+
+### 7. Priority UI Integration Components
+
+#### Text Tool Integration
+```
+┌─────────────────────────────────────┐
+│ Text Formatting Toolbar             │
+├─────────────────────────────────────┤
+│ [B] [I] [U] | Font▼ | Size▼ | A°   │
+│ [≡] [≡] [≡] [≡] | Color | ▣ | ⊞   │
+└─────────────────────────────────────┘
+```
+- Appears on text selection
+- Floating above selected text
+- Auto-hide on blur
+- Keyboard shortcuts shown on hover
+
+#### Grid Controls Panel
+```
+┌─────────────────────────────────────┐
+│ Grid Settings                       │
+├─────────────────────────────────────┤
+│ ☑ Show Grid                        │
+│ ☑ Snap to Grid                     │
+│ Grid Size: [10px ▼]                │
+│ Grid Color: [#E5E7EB]              │
+│ Opacity: [====----] 40%            │
+└─────────────────────────────────────┘
+```
+- Accessible from View menu or toolbar
+- Real-time preview on change
+- Persists per board
+
+#### Image Upload Integration
+```
+┌─────────────────────────────────────┐
+│ Add Image                           │
+├─────────────────────────────────────┤
+│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐       │
+│ │   Drop files here or     │       │
+│ │   [Browse Files]          │       │
+│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘       │
+│                                     │
+│ Recent:                             │
+│ [📷] [📷] [📷] [📷] [📷]          │
+│                                     │
+│ From URL: [___________] [Add]      │
+└─────────────────────────────────────┘
+```
+- Drag & drop anywhere on canvas
+- Paste from clipboard (Ctrl/Cmd+V)
+- URL import support
+- Progress bar during upload
 
 ## User Journeys
 
-### 1. Production Onboarding Flow
+### 1. First-Time User Flow
 ```
-Landing → Sign Up → Email Verify → Profile Setup → Board Creation → Interactive Tutorial → First Collaboration
-```
-
-### 2. Real-time Collaboration Flow
-```
-Dashboard → Select Board → Live Canvas → Invite Team → Co-edit → Export/Share → Analytics Review
+Landing → Sign Up → Onboarding Tour → Template Selection → 
+Canvas Introduction → Tool Tips → Create First Shape → Save
 ```
 
-### 3. Enterprise Team Flow
+### 2. Create New Board Flow
 ```
-SSO Login → Team Dashboard → Project Spaces → Board Templates → Collaborate → Reports → Admin Panel
-```
-
-## Production UI Components
-
-### Authentication & Security
-- **SSO Integration**: SAML/OAuth buttons
-- **2FA Setup**: QR code scanner UI
-- **Session Management**: Device list with revoke
-- **Password Requirements**: Strength meter with rules
-- **Rate Limiting**: Visual feedback on attempts
-
-### Dashboard v2.0
-```
-┌────────────────────────────────────────┐
-│ Header (64px) - Logo | Search | Profile│
-├────────┬───────────────────────────────┤
-│Sidebar │  Board Grid/List View         │
-│ 240px  │  - Recent Activity             │
-│Teams   │  - Shared with Me              │
-│Boards  │  - Templates Gallery            │
-│Analytics│  - Quick Actions              │
-└────────┴───────────────────────────────┘
+Dashboard → New Board → Choose Template/Blank → 
+Set Title → Configure Settings → Start Creating
 ```
 
-### Real-time Board Canvas
-
-#### Performance-Optimized Toolbar
-- **Smart Tools**: Context-aware tool suggestions
-- **Quick Access**: Most used tools prominently placed
-- **Gesture Support**: Touch, stylus, mouse optimized
-- **Keyboard**: Full shortcut support overlay
-
-#### Canvas Rendering
-- **WebGL Acceleration**: For 1000+ objects
-- **Virtual Scrolling**: Efficient viewport rendering
-- **LOD System**: Level of detail for zoom levels
-- **Caching**: Smart object caching strategy
-
-#### Collaboration UX
-- **Live Cursors**: Smooth 60fps tracking
-- **Voice/Video**: Integrated communication bar
-- **Presence Indicators**: Active/idle/typing states
-- **Conflict Resolution**: Visual merge indicators
-- **Version Control**: Timeline slider UI
-
-### Element Inspector Panel
-- **Smart Suggestions**: AI-powered style recommendations
-- **Batch Editing**: Multi-select property changes
-- **Animation Builder**: Keyframe editor
-- **Asset Manager**: Drag-drop media library
-
-## Responsive Breakpoints
-
-### Mobile First Design
-- **320-639px**: Single column, bottom nav
-- **640-767px**: Flexible grid, collapsible panels
-- **768-1023px**: Two column, floating tools
-- **1024-1279px**: Full desktop, fixed sidebars
-- **1280px+**: Wide screen, multi-panel
-
-### Touch Optimizations
-- **Target Size**: Minimum 44x44px touch targets
-- **Gestures**: Pinch, pan, rotate, swipe
-- **Haptic Feedback**: Touch confirmation
-- **Palm Rejection**: Smart touch filtering
-
-## Accessibility Standards
-
-### WCAG 2.1 AAA Features
-- **Contrast Modes**: High contrast toggle
-- **Motion Control**: Reduced motion option
-- **Voice Control**: Speech commands
-- **Screen Reader**: Complete ARIA implementation
-- **Keyboard Only**: 100% keyboard accessible
-
-### Inclusive Design
-- **Language**: 15+ language support
-- **RTL/LTR**: Bidirectional layouts
-- **Color Blind**: Alternative color schemes
-- **Dyslexia Mode**: Font and spacing adjustments
-
-## Performance Metrics
-
-### Core Web Vitals
-- **LCP**: <2.5s (Largest Contentful Paint)
-- **FID**: <100ms (First Input Delay)
-- **CLS**: <0.1 (Cumulative Layout Shift)
-- **TTI**: <3.5s (Time to Interactive)
-
-### Real-time Sync
-- **Latency**: <50ms local, <200ms global
-- **Conflict Resolution**: <100ms
-- **Auto-save**: Every 5 seconds
-- **Offline Queue**: Up to 1000 operations
-
-## Monitoring & Analytics UI
-
-### Admin Dashboard
+### 3. Collaboration Flow
 ```
-┌─────────────────────────────────────────┐
-│  Performance Metrics    System Health    │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐│
-│  │ Users    │ │ Latency  │ │ Errors   ││
-│  │ 2,450    │ │ 45ms     │ │ 0.02%    ││
-│  └──────────┘ └──────────┘ └──────────┘│
-│                                          │
-│  Real-time Activity Feed                 │
-│  ┌────────────────────────────────────┐ │
-│  │ • User joined board (2s ago)       │ │
-│  │ • Board exported (15s ago)         │ │
-│  │ • Collaboration started (1m ago)   │ │
-│  └────────────────────────────────────┘ │
-└─────────────────────────────────────────┘
+Open Board → Share Button → Set Permissions → 
+Copy Link/Invite → Collaborator Joins → 
+See Live Cursor → Co-edit
 ```
 
-### User Analytics
-- **Usage Heatmaps**: Tool usage patterns
-- **Session Recordings**: Playback capability
-- **Funnel Analysis**: Conversion tracking
-- **Custom Reports**: Export to CSV/PDF
-
-## Error Handling UX
-
-### Graceful Degradation
-- **Offline Banner**: Clear status + queue count
-- **Partial Load**: Progressive content loading
-- **Fallback UI**: Basic functionality maintained
-- **Recovery Actions**: One-click retry/refresh
-
-### User Communication
-- **Status Page**: Public uptime dashboard
-- **In-app Notices**: Maintenance warnings
-- **Error Details**: Technical/simple toggle
-- **Support Widget**: Integrated help chat
-
-## Production-Ready Animations
-
-### Performance Budget
-- **CSS Only**: For micro-interactions
-- **GPU Accelerated**: Transform/opacity only
-- **RAF Throttled**: 60fps max
-- **Will-change**: Sparingly used
-
-### Animation Library
-```css
-/* Entrance */
-fade-in: 300ms ease-out
-slide-up: 250ms cubic-bezier(0.4, 0, 0.2, 1)
-scale-in: 200ms ease-out
-
-/* Interaction */
-hover-lift: translateY(-2px) shadow
-press-scale: scale(0.98)
-drag-ghost: opacity(0.5)
-
-/* Feedback */
-success-pulse: 400ms pulse
-error-shake: 300ms shake
-loading-spin: 1s linear infinite
+### 4. Image Upload Flow
+```
+Select Image Tool → Click Canvas/Drag File → 
+Preview → Confirm Placement → Resize/Position → 
+Apply Properties
 ```
 
-## Security UI Elements
-
-### Permission Indicators
-- **View Only**: Eye icon + gray border
-- **Can Edit**: Pencil icon + blue border
-- **Admin**: Shield icon + purple border
-- **Owner**: Crown icon + gold border
-
-### Audit Trail UI
-- **Activity Log**: Filterable timeline
-- **Change History**: Diff viewer
-- **Access Log**: Login/permission changes
-- **Export Records**: Compliance reports
-
-## Deployment-Specific UI
-
-### CDN Optimizations
-- **Image Formats**: WebP with JPEG fallback
-- **Lazy Loading**: Intersection Observer
-- **Srcset**: Responsive image delivery
-- **Preload**: Critical assets
-
-### Progressive Web App
-- **Install Prompt**: Native app-like install
-- **Offline Page**: Custom offline experience
-- **Update Banner**: New version available
-- **Push Notifications**: Permission UI
-
-## A/B Testing Framework
-
-### Feature Flags UI
-- **Toggle Interface**: Admin feature control
-- **Rollout Percentage**: Gradual deployment
-- **User Segments**: Targeted testing
-- **Metrics Dashboard**: Test performance
-
-## Internationalization
-
-### Locale Detection
-- **Auto-detect**: Browser/IP-based
-- **Manual Switch**: Language selector
-- **Persist Choice**: User preference saved
-- **Content Adaptation**: Layout adjusts
-
-### Currency & Date Formats
-- **Regional Formats**: Automatic conversion
-- **Timezone Support**: User timezone display
-- **Number Formats**: Locale-specific
-- **Calendar Types**: Gregorian/Lunar/Islamic
-
-## Mobile App Considerations
-
-### Native Bridges
-- **Camera Access**: Photo/scan features
-- **File System**: Local save/load
-- **Share API**: Native sharing
-- **Biometric Auth**: Fingerprint/Face ID
-
-### App-Specific UI
-- **Tab Bar**: iOS/Android patterns
-- **Navigation**: Platform conventions
-- **Gestures**: Native gesture support
-- **Haptics**: Platform feedback
-
-## Monitoring Integration
-
-### Sentry UI Components
-- **User Feedback**: Error report widget
-- **Session Replay**: User consent UI
-- **Performance**: Waterfall visualization
-- **Release Tracking**: Version indicator
-
-## Deployment-Specific Components
-
-### Quick Actions Bar
+### 5. Text Editing Flow
 ```
-[Fix Build] [Deploy] [Monitor] [Rollback] [Logs]
+Select Text Tool → Click Canvas → Type → 
+Format Toolbar Appears → Style Text → 
+Click Outside to Finish
 ```
 
-### Environment Switcher
+## Responsive Design
+
+### Desktop (1280px+)
+- Full layout with all panels
+- Optimal canvas space
+- All features accessible
+
+### Tablet (768px-1279px)
+- Collapsible sidebar (icon mode)
+- Properties panel as overlay
+- Touch-optimized controls
+- Larger hit targets (44px min)
+
+### Mobile (< 768px)
+- Bottom tool bar
+- Full-screen canvas
+- Gesture controls (pinch zoom, two-finger pan)
+- Simplified property sheets
+- Mobile-specific interactions
+
+## Accessibility
+
+### WCAG AA Compliance
+- **Color Contrast**: 4.5:1 minimum
+- **Focus Indicators**: Visible outlines on all interactive elements
+- **Keyboard Navigation**: Full keyboard support
+- **Screen Readers**: ARIA labels and live regions
+- **Alternative Text**: Required for all images
+
+### Keyboard Shortcuts
+- Tab navigation through UI
+- Arrow keys for fine positioning
+- Space for hand tool
+- Escape to deselect
+- Delete/Backspace to remove
+
+### Visual Accessibility
+- High contrast mode support
+- Zoom up to 200% without loss
+- Colorblind-friendly palettes
+- Motion reduction options
+
+## Loading & Progress States
+
+### Canvas Loading
+- Skeleton screens for UI
+- Progressive canvas rendering
+- "Loading..." indicator with progress
+
+### Image Upload Progress
 ```
-[Development] [Staging] [Production]
+┌────────────────────────┐
+│ Uploading image...     │
+│ ████████░░░░░░░ 75%    │
+│ [Cancel]               │
+└────────────────────────┘
 ```
 
-### Performance Metrics Display
-```
-Latency:    [====    ] 45ms
-Uptime:     [========] 99.9%
-CPU:        [===     ] 32%
-Memory:     [=====   ] 52%
-Connections:[==      ] 127
-```
+### Auto-save Indicator
+- Saving... (animated dots)
+- Saved (checkmark, fade after 2s)
+- Error: "Failed to save" with retry
 
 ## Error States
 
-### Build Failure
-```
-❌ Build Failed
-- Missing dependencies detected
-- View error log for details
-[Retry Build] [View Logs]
-```
+### Connection Lost
+- Banner: "Connection lost. Attempting to reconnect..."
+- Offline mode indicator
+- Queue changes for sync
 
-### Deployment Failure
-```
-❌ Deployment Failed to Railway
-- Connection timeout after 30s
-- Check service configuration
-[Retry] [Rollback] [Support]
-```
+### Upload Errors
+- Toast: "File too large (max 10MB)"
+- Toast: "Unsupported format"
+- Inline: "Failed to load image" with retry
 
-### Monitoring Disconnected
-```
-⚠️ Sentry Connection Lost
-- Attempting reconnection...
-- Fallback to local logging
-[Reconnect] [Configure]
-```
+### Permission Errors
+- Modal: "You don't have permission to edit"
+- Inline: "View-only mode"
 
-## Design Constraints
+## Animation & Transitions
 
-### Technical Limitations
-- No DataDog integration (removed)
-- Free tier service limits
-- WebSocket connection limits
-- Database query restrictions
+### Micro-interactions
+- Button hover: Scale 1.05, 150ms ease
+- Tool selection: Background fade, 200ms
+- Panel collapse: Slide + fade, 300ms
+- Element selection: Border animate in, 100ms
 
-### Performance Targets
-- Dashboard load <2s
-- Status update <100ms
-- Alert delivery <5s
-- Graph render <500ms
+### Canvas Animations
+- Pan: Smooth scroll, no lag
+- Zoom: Animated scale, 200ms
+- Element creation: Fade in, 150ms
+- Delete: Fade out + scale down, 200ms
 
-## Frontend Framework Recommendations
-- **React Components**: TypeScript for type safety
-- **Tailwind CSS**: Rapid UI development
-- **Framer Motion**: Smooth animations
-- **React Query**: Efficient data fetching
-- **Chart.js**: Performance visualizations
+## Performance Considerations
 
-## Production Checklist
+### Viewport Optimization
+- Render only visible elements
+- LOD system for zoom levels
+- Virtualized element lists
+- Debounced updates (16ms)
 
-### Pre-launch
-- [ ] Build verification complete
-- [ ] DataDog dependencies removed
-- [ ] Type-check script added
-- [ ] All tests passing (311/311)
-- [ ] Environment variables configured
-- [ ] SSL certificates active
-- [ ] CORS configured
-- [ ] Rate limiting enabled
+### Asset Loading
+- Lazy load images
+- Progressive image rendering
+- Cache frequently used assets
+- CDN for static resources
 
-### Post-launch
-- [ ] Sentry integration active
-- [ ] Uptime monitoring configured
-- [ ] Alert rules defined
-- [ ] Performance baseline established
-- [ ] Documentation updated
-- [ ] Team notifications configured
-- [ ] Rollback procedure tested
+### Real-time Sync
+- Optimistic UI updates
+- Debounced broadcasts (100ms)
+- Conflict resolution indicators
+- Offline queue management
+
+## Platform-Specific Features
+
+### PWA Support
+- Install prompt
+- Offline functionality
+- Push notifications
+- App-like experience
+
+### Native Features
+- Clipboard integration
+- Drag & drop from OS
+- Native file dialogs
+- System shortcuts
+
+## Success Metrics
+
+### Performance KPIs
+- Time to Interactive: < 3s
+- Frame rate: 60fps constant
+- Input latency: < 50ms
+- Save time: < 500ms
+
+### Usability Metrics
+- Task completion: > 95%
+- Error rate: < 5%
+- Time on task: Competitive
+- User satisfaction: > 4.5/5
+
+## Implementation Notes
+
+### Component Library
+- Use Radix UI primitives
+- Tailwind for styling
+- Framer Motion for animations
+- React Hook Form for forms
+
+### State Management
+- Zustand for UI state
+- Canvas state in Fabric.js
+- WebSocket for real-time
+- IndexedDB for offline
+
+### Testing Requirements
+- Component testing with RTL
+- E2E with Playwright
+- Visual regression with Percy
+- Performance with Lighthouse
+
+## Design Handoff
+
+### Assets Required
+- Icon set (24px, SVG)
+- Logo variations
+- Loading animations
+- Empty states illustrations
+
+### Documentation
+- Component usage guide
+- Design token reference
+- Pattern library
+- Accessibility checklist
+
+## Key UI/Manager Integration Points
+
+### TextEditingManager UI
+- Toolbar button with "T" icon
+- Floating formatting toolbar
+- Keyboard shortcut (T)
+- Context menu integration
+
+### GridSnappingManager UI
+- Toggle in View menu
+- Settings panel in properties
+- Visual grid overlay
+- Snap indicator on drag
+
+### ImageUploadManager UI
+- Toolbar button with image icon
+- Drag & drop zone
+- Upload progress bar
+- Recent images gallery
+
+### Template Gallery UI
+- Modal with category sidebar
+- Grid view of templates
+- Preview on hover
+- "Use Template" action
+
+## Technical Constraints
+
+### From Planning Phase
+- Managers exist but not wired to UI
+- Use existing Fabric.js integration
+- Maintain WebSocket connections
+- Respect Supabase RLS policies
+
+### Frontend Framework
+- Next.js 15 App Router
+- TypeScript strict mode
+- Tailwind CSS styling
+- Framer Motion animations
+- Zustand state management
