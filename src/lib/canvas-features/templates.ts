@@ -28,10 +28,10 @@ export enum TemplateCategory {
 
 export class TemplateManager {
   private templates: Map<string, Template> = new Map()
-  private canvas: fabric.Canvas
+  private canvas?: fabric.Canvas
   private customTemplates: Template[] = []
 
-  constructor(canvas: fabric.Canvas) {
+  constructor(canvas?: fabric.Canvas) {
     this.canvas = canvas
     this.initializeBuiltInTemplates()
   }
@@ -350,7 +350,15 @@ export class TemplateManager {
     return Array.from(this.templates.values())
   }
 
+  getBuiltInTemplates(): Template[] {
+    return Array.from(this.templates.values()).filter(t => t.category !== TemplateCategory.CUSTOM)
+  }
+
   applyTemplate(templateId: string, offset?: { x: number; y: number }): fabric.Object[] {
+    if (!this.canvas) {
+      throw new Error('Canvas is required to apply templates')
+    }
+    
     const template = this.templates.get(templateId)
     if (!template) {
       throw new Error(`Template ${templateId} not found`)
@@ -423,14 +431,58 @@ export class TemplateManager {
           break
       }
 
-      if (fabricObject) {
+      if (fabricObject && this.canvas) {
         this.canvas.add(fabricObject)
         objects.push(fabricObject)
       }
     })
 
-    this.canvas.renderAll()
+    if (this.canvas) {
+      this.canvas.renderAll()
+    }
     return objects
+  }
+
+  createCustomTemplate(objects: any[], name: string, description?: string, category?: TemplateCategory): Template {
+    const elements: TemplateElement[] = objects.map(obj => {
+      let type: TemplateElement['type'] = 'rect'
+      if (obj.type === 'circle') type = 'circle'
+      else if (obj.type === 'text' || obj.type === 'i-text') type = 'text'
+      else if (obj.type === 'line') type = 'line'
+      else if (obj.type === 'group') type = 'group'
+      
+      const element: TemplateElement = {
+        type,
+        properties: obj,
+        position: { x: obj.left || 0, y: obj.top || 0 }
+      }
+
+      if (obj.width && obj.height) {
+        element.size = { width: obj.width, height: obj.height }
+      }
+
+      return element
+    })
+
+    const template: Template = {
+      id: `custom-${Date.now()}`,
+      name,
+      description: description || '',
+      category: category || TemplateCategory.CUSTOM,
+      elements
+    }
+
+    this.customTemplates.push(template)
+    this.addTemplate(template)
+    
+    return template
+  }
+
+  saveCustomTemplate(template: Template): void {
+    // Save to localStorage
+    const existingTemplates = JSON.parse(localStorage.getItem('customTemplates') || '[]')
+    existingTemplates.push(template)
+    localStorage.setItem('customTemplates', JSON.stringify(existingTemplates))
   }
 
   saveAsCustomTemplate(name: string, description: string, objects: fabric.Object[]): Template {

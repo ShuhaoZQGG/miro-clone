@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button } from './ui/Button'
 import { TextEditingManager } from '@/lib/canvas-features/text-editing'
 
@@ -23,6 +23,37 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
   const [isUnderline, setIsUnderline] = useState(false)
   const [textAlign, setTextAlign] = useState<'left' | 'center' | 'right'>('left')
   const [textColor, setTextColor] = useState('#000000')
+
+  const toggleBold = useCallback(() => {
+    const newBold = !isBold
+    setIsBold(newBold)
+    if (selectedElement) {
+      textManager?.updateTextProperty(selectedElement, 'fontWeight', newBold ? 'bold' : 'normal')
+    }
+  }, [isBold, selectedElement, textManager])
+
+  const toggleItalic = useCallback(() => {
+    const newItalic = !isItalic
+    setIsItalic(newItalic)
+    if (selectedElement) {
+      textManager?.updateTextProperty(selectedElement, 'fontStyle', newItalic ? 'italic' : 'normal')
+    }
+  }, [isItalic, selectedElement, textManager])
+
+  const toggleUnderline = useCallback(() => {
+    const newUnderline = !isUnderline
+    setIsUnderline(newUnderline)
+    if (selectedElement) {
+      textManager?.updateTextProperty(selectedElement, 'underline', newUnderline)
+    }
+  }, [isUnderline, selectedElement, textManager])
+
+  const handleTextAlignChange = useCallback((align: 'left' | 'center' | 'right') => {
+    setTextAlign(align)
+    if (selectedElement) {
+      textManager?.updateTextProperty(selectedElement, 'textAlign', align)
+    }
+  }, [selectedElement, textManager])
 
   useEffect(() => {
     if (!textManager) return
@@ -106,36 +137,6 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
     }
   }
 
-  const toggleBold = () => {
-    const newBold = !isBold
-    setIsBold(newBold)
-    if (selectedElement) {
-      textManager.updateTextProperty(selectedElement, 'fontWeight', newBold ? 'bold' : 'normal')
-    }
-  }
-
-  const toggleItalic = () => {
-    const newItalic = !isItalic
-    setIsItalic(newItalic)
-    if (selectedElement) {
-      textManager.updateTextProperty(selectedElement, 'fontStyle', newItalic ? 'italic' : 'normal')
-    }
-  }
-
-  const toggleUnderline = () => {
-    const newUnderline = !isUnderline
-    setIsUnderline(newUnderline)
-    if (selectedElement) {
-      textManager.updateTextProperty(selectedElement, 'underline', newUnderline)
-    }
-  }
-
-  const handleTextAlignChange = (align: 'left' | 'center' | 'right') => {
-    setTextAlign(align)
-    if (selectedElement) {
-      textManager.updateTextProperty(selectedElement, 'textAlign', align)
-    }
-  }
 
   const handleColorChange = (color: string) => {
     setTextColor(color)

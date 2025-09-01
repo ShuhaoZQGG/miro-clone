@@ -100,7 +100,7 @@ export const MultipleUploadProgress: React.FC<{
       <div className="space-y-2 max-h-[300px] overflow-y-auto">
         {uploads.map(upload => (
           <div key={upload.id} className="flex items-center space-x-2">
-            {upload.status === 'uploading' && <LoadingSpinner size="xs" />}
+            {upload.status === 'uploading' && <LoadingSpinner size="sm" />}
             {upload.status === 'completed' && (
               <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
