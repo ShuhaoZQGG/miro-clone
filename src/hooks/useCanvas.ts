@@ -153,8 +153,10 @@ export const useCanvas = (options: UseCanvasOptions) => {
         newElement = elementManagerRef.current.createCircle(canvasPosition)
         break
       case 'text':
-        // For text, we'll handle it differently in the Whiteboard component
-        // to use the TextEditingManager
+        // Emit event for text creation that Whiteboard component will handle
+        window.dispatchEvent(new CustomEvent('createTextElement', { 
+          detail: { position: canvasPosition }
+        }))
         return
       case 'line':
         // For line tool, we need two clicks - start with a simple line for now

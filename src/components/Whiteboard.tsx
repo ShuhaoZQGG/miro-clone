@@ -302,6 +302,43 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     return () => document.removeEventListener('paste', handlePaste)
   }, [toast])
   
+  // Handle text element creation from text tool
+  useEffect(() => {
+    const handleCreateTextElement = (event: CustomEvent) => {
+      if (!textEditingManagerRef.current || !canvasEngine) return
+      
+      const { position } = event.detail
+      const textElement = textEditingManagerRef.current.createTextElement(position, {
+        text: 'Text',
+        fontSize: 16,
+        fontFamily: 'Arial'
+      })
+      
+      // Add to store
+      addElement(textElement)
+      
+      // Start editing immediately
+      const canvas = canvasEngine.getCanvas()
+      if (canvas) {
+        const fabricObjects = canvas.getObjects()
+        const textObject = fabricObjects.find((obj: any) => obj.elementId === textElement.id)
+        if (textObject) {
+          textEditingManagerRef.current.startEditing(textObject)
+        }
+      }
+      
+      // Send creation operation to other users
+      sendOperation({
+        type: 'create',
+        elementId: textElement.id,
+        element: textElement
+      })
+    }
+    
+    window.addEventListener('createTextElement', handleCreateTextElement as EventListener)
+    return () => window.removeEventListener('createTextElement', handleCreateTextElement as EventListener)
+  }, [addElement, sendOperation, canvasEngine])
+  
   // Connect to WebSocket on mount or when authentication changes
   useEffect(() => {
     connect(userId, displayName)
