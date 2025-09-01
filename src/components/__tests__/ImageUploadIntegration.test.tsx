@@ -26,7 +26,8 @@ jest.mock('@/hooks/useCanvas', () => ({
         addEventListener: jest.fn(),
         removeEventListener: jest.fn(),
         getWidth: jest.fn(() => 800),
-        getHeight: jest.fn(() => 600)
+        getHeight: jest.fn(() => 600),
+        getElement: jest.fn(() => document.createElement('canvas'))
       })
     }
   }))
@@ -62,7 +63,7 @@ jest.mock('@/store/useCanvasStore', () => ({
   useCanvasStore: jest.fn(() => ({
     isGridVisible: false,
     isLoading: false,
-    tool: 'select',
+    tool: { type: 'select' },
     camera: { x: 0, y: 0, zoom: 1 },
     elements: [],
     selectedElementIds: [],

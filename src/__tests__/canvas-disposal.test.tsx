@@ -41,6 +41,7 @@ describe('Canvas Disposal Safety', () => {
         upperCanvasEl: document.createElement('canvas'),
         lowerCanvasEl: document.createElement('canvas'),
         wrapperEl: document.createElement('div'),
+        getElement: jest.fn(() => document.createElement('canvas')),
       })),
       getCamera: jest.fn(() => ({ x: 0, y: 0, zoom: 1 })),
       panTo: jest.fn(),
