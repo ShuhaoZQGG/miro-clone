@@ -1,37 +1,51 @@
-// Create the mock implementation
-const mockITextImpl = jest.fn().mockImplementation((text, options) => ({
-  type: 'i-text',
-  text,
-  ...options,
-  set: jest.fn(function(this: any, prop: string, value: any) {
-    if (typeof prop === 'object') {
-      Object.assign(this, prop)
-    } else {
-      this[prop] = value
+// Mock fabric module first before any imports
+jest.mock('fabric', () => {
+  const mockITextImpl = jest.fn().mockImplementation((text, options) => ({
+    type: 'i-text',
+    text: text, // Preserve the text property including newlines
+    left: options?.left || 0,
+    top: options?.top || 0,
+    fontSize: options?.fontSize || 16,
+    fontFamily: options?.fontFamily || 'Arial',
+    fontWeight: options?.fontWeight || 'normal',
+    fontStyle: options?.fontStyle || 'normal',
+    textAlign: options?.textAlign || 'left',
+    fill: options?.fill || '#000000',
+    backgroundColor: options?.backgroundColor || 'transparent',
+    lineHeight: options?.lineHeight || 1.16,
+    charSpacing: options?.charSpacing || 0,
+    angle: 0,
+    visible: true,
+    selectable: true,
+    set: jest.fn(function(this: any, prop: string, value: any) {
+      if (typeof prop === 'object') {
+        Object.assign(this, prop)
+      } else {
+        this[prop] = value
+      }
+      return this
+    }),
+    get: jest.fn(function(this: any, prop: string) {
+      return this[prop] || options?.[prop]
+    }),
+    enterEditing: jest.fn(),
+    exitEditing: jest.fn(),
+    selectAll: jest.fn(),
+    getBoundingRect: jest.fn(() => ({ width: 200, height: 50, left: 0, top: 0 })),
+  }))
+
+  return {
+    fabric: {
+      IText: mockITextImpl,
     }
-    return this
-  }),
-  get: jest.fn((prop) => options?.[prop]),
-  enterEditing: jest.fn(),
-  exitEditing: jest.fn(),
-  selectAll: jest.fn(),
-  getBoundingRect: jest.fn(() => ({ width: 200, height: 50 })),
-}))
-
-// Set up global fabric object
-;(global as any).fabric = {
-  IText: mockITextImpl,
-}
-
-// Mock fabric module
-jest.mock('fabric', () => ({
-  fabric: (global as any).fabric,
-}))
+  }
+})
 
 import { TextEditingManager } from '../text-editing'
+import { fabric } from 'fabric'
 
 // Get reference to the mock for use in tests
-const mockIText = mockITextImpl
+const mockIText = (fabric as any).IText as jest.Mock
 
 describe('TextEditingManager', () => {
   let manager: TextEditingManager
@@ -122,43 +136,53 @@ describe('TextEditingManager', () => {
 
   describe('Text Editing', () => {
     it('should start editing mode for text element', () => {
-      // Mock fabric.IText constructor
-      const mockIText = {
+      // Mock fabric.IText constructor to return a new instance
+      const mockITextInstance = {
         type: 'i-text',
         text: 'Sample text',
         left: 100,
         top: 100,
+        fontSize: 16,
+        fontFamily: 'Arial',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textAlign: 'left',
+        fill: '#000000',
+        backgroundColor: 'transparent',
+        lineHeight: 1.16,
+        charSpacing: 0,
+        angle: 0,
+        visible: true,
+        selectable: true,
         enterEditing: jest.fn(),
         exitEditing: jest.fn(),
         selectAll: jest.fn(),
-        set: jest.fn(),
-        get: jest.fn((prop) => {
-          const props = {
-            text: 'Sample text',
-            fontSize: 16,
-            fontFamily: 'Arial',
-            fontWeight: 'normal',
-            fontStyle: 'normal',
-            textAlign: 'left',
-            fill: '#000000',
-            backgroundColor: 'transparent',
+        set: jest.fn(function(this: any, prop: string, value: any) {
+          if (typeof prop === 'object') {
+            Object.assign(this, prop)
+          } else {
+            this[prop] = value
           }
-          return props[prop]
+          return this
+        }),
+        get: jest.fn(function(this: any, prop: string) {
+          return this[prop]
         }),
         getBoundingRect: jest.fn(() => ({ left: 100, top: 100, width: 200, height: 50 })),
       }
       
-      // Reset the mock before using it
+      // Reset the IText mock constructor
       mockIText.mockClear()
+      mockIText.mockReturnValueOnce(mockITextInstance)
       
       manager.startEditing(mockTextElement)
 
       // Since mockTextElement is type 'text', it will be converted to IText
       expect(mockCanvas.remove).toHaveBeenCalledWith(mockTextElement)
-      expect(mockCanvas.add).toHaveBeenCalledWith(mockIText)
-      expect(mockCanvas.setActiveObject).toHaveBeenCalledWith(mockIText)
-      expect(mockIText.enterEditing).toHaveBeenCalled()
-      expect(mockIText.selectAll).toHaveBeenCalled()
+      expect(mockCanvas.add).toHaveBeenCalledWith(mockITextInstance)
+      expect(mockCanvas.setActiveObject).toHaveBeenCalledWith(mockITextInstance)
+      expect(mockITextInstance.enterEditing).toHaveBeenCalled()
+      expect(mockITextInstance.selectAll).toHaveBeenCalled()
     })
 
     it('should end editing mode', () => {
@@ -249,7 +273,8 @@ describe('TextEditingManager', () => {
         text: 'Line 1\nLine 2\nLine 3',
       })
 
-      expect(element.content.text).toContain('\n')
+      // The element should have multiline text
+      expect(element.content.text).toBe('Line 1\nLine 2\nLine 3')
     })
 
     it('should handle text wrapping', () => {
@@ -323,8 +348,10 @@ describe('TextEditingManager', () => {
     it('should clean up event listeners on dispose', () => {
       manager.dispose()
 
-      expect(mockCanvas.off).toHaveBeenCalledWith('mouse:dblclick')
-      expect(mockCanvas.off).toHaveBeenCalledWith('text:changed')
+      // The dispose method calls off with both event name and handler
+      expect(mockCanvas.off).toHaveBeenCalledWith('mouse:dblclick', expect.any(Function))
+      expect(mockCanvas.off).toHaveBeenCalledWith('text:changed', expect.any(Function))
+      expect(mockCanvas.off).toHaveBeenCalledWith('selection:cleared', expect.any(Function))
     })
   })
 })
