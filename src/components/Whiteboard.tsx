@@ -176,18 +176,19 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         gridSnappingManagerRef.current.setGridSize(gridSize)
         
         // Set up snapping event handlers for visual feedback
-        gridSnappingManagerRef.current.on('snap', (position: { x: number; y: number }) => {
-          setSnapIndicator({ visible: true, x: position.x, y: position.y })
-          setTimeout(() => setSnapIndicator({ visible: false, x: 0, y: 0 }), 300)
-        })
+        // TODO: Implement event handlers when GridSnappingManager supports events
+        // gridSnappingManagerRef.current.on('snap', (position: { x: number; y: number }) => {
+        //   setSnapIndicator({ visible: true, x: position.x, y: position.y })
+        //   setTimeout(() => setSnapIndicator({ visible: false, x: 0, y: 0 }), 300)
+        // })
         
-        gridSnappingManagerRef.current.on('alignmentGuides', (guides: { horizontal: number[]; vertical: number[] }) => {
-          setAlignmentGuides(guides)
-        })
+        // gridSnappingManagerRef.current.on('alignmentGuides', (guides: { horizontal: number[]; vertical: number[] }) => {
+        //   setAlignmentGuides(guides)
+        // })
         
-        gridSnappingManagerRef.current.on('clearGuides', () => {
-          setAlignmentGuides({ horizontal: [], vertical: [] })
-        })
+        // gridSnappingManagerRef.current.on('clearGuides', () => {
+        //   setAlignmentGuides({ horizontal: [], vertical: [] })
+        // })
       }
     }
     
@@ -354,13 +355,38 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     if (!canvasEngine) return
     
     // Load template elements onto canvas
-    template.elements.forEach(element => {
-      addElement(element)
+    template.elements.forEach((templateElement, index) => {
+      // Convert template element to canvas element
+      const canvasElement: any = {
+        id: `template-${Date.now()}-${index}`,
+        boardId: boardId || 'demo-board',
+        type: templateElement.type === 'rect' ? 'shape' : templateElement.type,
+        shape: templateElement.type === 'rect' ? 'rectangle' : undefined,
+        position: templateElement.position,
+        size: templateElement.size || { width: 100, height: 100 },
+        rotation: 0,
+        scale: 1,
+        opacity: 1,
+        locked: false,
+        ...templateElement.properties
+      }
+      
+      // Handle specific element types
+      if (templateElement.type === 'text') {
+        canvasElement.content = templateElement.properties.text || 'Text'
+        canvasElement.fontSize = templateElement.properties.fontSize || 16
+        canvasElement.fontFamily = templateElement.properties.fontFamily || 'Arial'
+      } else if (templateElement.type === 'circle') {
+        canvasElement.type = 'shape'
+        canvasElement.shape = 'circle'
+      }
+      
+      addElement(canvasElement)
       // Send creation operation to other users
       sendOperation({
         type: 'create',
-        elementId: element.id,
-        element: element
+        elementId: canvasElement.id,
+        element: canvasElement
       })
     })
     
@@ -380,16 +406,19 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       setSelectedTextFormats(newFormats)
       
       // Apply format to text
-      switch (format) {
-        case 'bold':
-          textEditingManagerRef.current.toggleBold()
-          break
-        case 'italic':
-          textEditingManagerRef.current.toggleItalic()
-          break
-        case 'underline':
-          textEditingManagerRef.current.toggleUnderline()
-          break
+      const activeObject = canvasEngine?.getCanvas()?.getActiveObject()
+      if (activeObject && (activeObject.type === 'text' || activeObject.type === 'i-text')) {
+        switch (format) {
+          case 'bold':
+            textEditingManagerRef.current.toggleBold(activeObject)
+            break
+          case 'italic':
+            textEditingManagerRef.current.toggleItalic(activeObject)
+            break
+          case 'underline':
+            textEditingManagerRef.current.toggleUnderline(activeObject)
+            break
+        }
       }
     } else {
       toast.info('Select text to apply formatting')
@@ -622,7 +651,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           isOpen={showTemplateGallery}
           onClose={() => setShowTemplateGallery(false)}
           onSelectTemplate={handleTemplateSelect}
-          currentBoardElements={elements}
+          currentBoardElements={[]}
         />
       )}
       

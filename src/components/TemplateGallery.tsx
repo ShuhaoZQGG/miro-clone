@@ -1,11 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { TemplateManager, Template } from '@/lib/canvas-features/templates'
+import { TemplateManager, Template, TemplateCategory } from '@/lib/canvas-features/templates'
 import { X, Grid, FileText, Map, Layout, Plus, Download, Upload, Search } from 'lucide-react'
 import { clsx } from 'clsx'
-
-type TemplateCategory = 'flowchart' | 'wireframe' | 'kanban' | 'mindmap' | 'diagram' | 'presentation' | 'custom'
 
 interface TemplateGalleryProps {
   isOpen: boolean
@@ -16,13 +14,13 @@ interface TemplateGalleryProps {
 }
 
 const categoryIcons: Record<string, React.ReactNode> = {
-  'flowchart': <Grid className="w-5 h-5" />,
-  'wireframe': <Layout className="w-5 h-5" />,
-  'kanban': <FileText className="w-5 h-5" />,
-  'mindmap': <Map className="w-5 h-5" />,
-  'diagram': <Grid className="w-5 h-5" />,
-  'presentation': <FileText className="w-5 h-5" />,
-  'custom': <Plus className="w-5 h-5" />
+  [TemplateCategory.FLOWCHART]: <Grid className="w-5 h-5" />,
+  [TemplateCategory.WIREFRAME]: <Layout className="w-5 h-5" />,
+  [TemplateCategory.KANBAN]: <FileText className="w-5 h-5" />,
+  [TemplateCategory.MINDMAP]: <Map className="w-5 h-5" />,
+  [TemplateCategory.DIAGRAM]: <Grid className="w-5 h-5" />,
+  [TemplateCategory.PRESENTATION]: <FileText className="w-5 h-5" />,
+  [TemplateCategory.CUSTOM]: <Plus className="w-5 h-5" />
 }
 
 export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
@@ -38,7 +36,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [newTemplateName, setNewTemplateName] = useState('')
   const [newTemplateDescription, setNewTemplateDescription] = useState('')
-  const [newTemplateCategory, setNewTemplateCategory] = useState<TemplateCategory>('custom')
+  const [newTemplateCategory, setNewTemplateCategory] = useState<TemplateCategory>(TemplateCategory.CUSTOM)
   const templateManager = new TemplateManager()
 
   useEffect(() => {
@@ -82,7 +80,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
     // Reset form
     setNewTemplateName('')
     setNewTemplateDescription('')
-    setNewTemplateCategory('custom')
+    setNewTemplateCategory(TemplateCategory.CUSTOM)
     setShowCreateDialog(false)
     
     if (onCreateTemplate) {
@@ -91,7 +89,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
   }
 
   const handleExportTemplate = (template: Template) => {
-    const exported = templateManager.exportTemplate(template)
+    const exported = templateManager.exportTemplate(template.id)
     const blob = new Blob([exported], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -237,10 +235,10 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                   <div className="text-xs text-gray-500">
                     {template.elements.length} elements
                   </div>
-                  {template.thumbnail && (
+                  {template.preview && (
                     <div className="mt-2 h-32 bg-gray-100 rounded flex items-center justify-center">
                       <img 
-                        src={template.thumbnail} 
+                        src={template.preview} 
                         alt={template.name}
                         className="max-w-full max-h-full object-contain"
                       />
