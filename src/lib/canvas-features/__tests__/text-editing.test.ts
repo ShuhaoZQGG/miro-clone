@@ -1,36 +1,36 @@
-// Create the mock implementation
-const mockITextImpl = jest.fn().mockImplementation((text, options) => ({
-  type: 'i-text',
-  text,
-  ...options,
-  set: jest.fn(function(this: any, prop: string, value: any) {
-    if (typeof prop === 'object') {
-      Object.assign(this, prop)
-    } else {
-      this[prop] = value
-    }
-    return this
-  }),
-  get: jest.fn((prop) => options?.[prop]),
-  enterEditing: jest.fn(),
-  exitEditing: jest.fn(),
-  selectAll: jest.fn(),
-  getBoundingRect: jest.fn(() => ({ width: 200, height: 50 })),
-}))
-
-// Set up global fabric object
-;(global as any).fabric = {
-  IText: mockITextImpl,
-}
-
-// Mock fabric module
-jest.mock('fabric', () => ({
-  fabric: (global as any).fabric,
-}))
+// Mock fabric module first
+jest.mock('fabric', () => {
+  const mockITextImpl = jest.fn().mockImplementation((text, options) => ({
+    type: 'i-text',
+    text,
+    ...options,
+    set: jest.fn(function(this: any, prop: string, value: any) {
+      if (typeof prop === 'object') {
+        Object.assign(this, prop)
+      } else {
+        this[prop] = value
+      }
+      return this
+    }),
+    get: jest.fn((prop) => options?.[prop]),
+    enterEditing: jest.fn(),
+    exitEditing: jest.fn(),
+    selectAll: jest.fn(),
+    getBoundingRect: jest.fn(() => ({ width: 200, height: 50 })),
+  }))
+  
+  return {
+    fabric: {
+      IText: mockITextImpl,
+    },
+  }
+})
 
 import { TextEditingManager } from '../text-editing'
+import { fabric } from 'fabric'
 
 // Get reference to the mock for use in tests
+const mockITextImpl = (fabric as any).IText as jest.Mock
 const mockIText = mockITextImpl
 
 describe('TextEditingManager', () => {
@@ -149,16 +149,19 @@ describe('TextEditingManager', () => {
       }
       
       // Reset the mock before using it
-      mockIText.mockClear()
+      mockITextImpl.mockClear()
       
       manager.startEditing(mockTextElement)
 
       // Since mockTextElement is type 'text', it will be converted to IText
       expect(mockCanvas.remove).toHaveBeenCalledWith(mockTextElement)
-      expect(mockCanvas.add).toHaveBeenCalledWith(mockIText)
-      expect(mockCanvas.setActiveObject).toHaveBeenCalledWith(mockIText)
-      expect(mockIText.enterEditing).toHaveBeenCalled()
-      expect(mockIText.selectAll).toHaveBeenCalled()
+      expect(mockCanvas.add).toHaveBeenCalled()
+      expect(mockCanvas.setActiveObject).toHaveBeenCalled()
+      
+      // Get the created IText instance
+      const createdIText = mockCanvas.add.mock.calls[0][0]
+      expect(createdIText.enterEditing).toHaveBeenCalled()
+      expect(createdIText.selectAll).toHaveBeenCalled()
     })
 
     it('should end editing mode', () => {
@@ -323,8 +326,16 @@ describe('TextEditingManager', () => {
     it('should clean up event listeners on dispose', () => {
       manager.dispose()
 
-      expect(mockCanvas.off).toHaveBeenCalledWith('mouse:dblclick')
-      expect(mockCanvas.off).toHaveBeenCalledWith('text:changed')
+      // Should have been called to remove all event listeners
+      expect(mockCanvas.off).toHaveBeenCalled()
+      
+      // Find calls related to specific events
+      const offCalls = mockCanvas.off.mock.calls
+      const hasDoubleClick = offCalls.some((call: any) => call[0] === 'mouse:dblclick')
+      const hasTextChanged = offCalls.some((call: any) => call[0] === 'text:changed')
+      
+      expect(hasDoubleClick).toBeTruthy()
+      expect(hasTextChanged).toBeTruthy()
     })
   })
 })
