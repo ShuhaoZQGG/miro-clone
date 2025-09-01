@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { db } from '@/lib/db'
+import { handleDatabaseError } from '@/lib/db-utils'
 import { sessionManager } from '@/server/lib/session-manager'
 
 interface LoginBody {
