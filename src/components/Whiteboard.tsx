@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useCallback, useState } from 'react'
+import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react'
 import { useCanvas } from '@/hooks/useCanvas'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useCanvasStore } from '@/store/useCanvasStore'
@@ -13,6 +13,7 @@ import { CollaborativeCursors } from './CollaborativeCursors'
 import { AuthModal } from './AuthModal'
 import { Grid } from './Grid'
 import { LoadingSpinner } from './ui/LoadingSpinner'
+import { ImageUploadManager } from '@/lib/canvas-features/image-upload'
 import { clsx } from 'clsx'
 
 interface WhiteboardProps {
@@ -21,9 +22,13 @@ interface WhiteboardProps {
 }
 
 export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) => {
-  const { isGridVisible, isLoading } = useCanvasStore()
+  const { isGridVisible, isLoading, addElement } = useCanvasStore()
   const { user, isAuthenticated } = useAuth()
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showDropZone, setShowDropZone] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const imageUploadManagerRef = useRef<ImageUploadManager | null>(null)
   
   // Use authenticated user or generate temporary ID
   const userId = useMemo(() => user?.id || `guest-${Math.random().toString(36).substr(2, 9)}`, [user])
@@ -55,7 +60,8 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     zoomOut,
     resetZoom,
     fitToScreen,
-    exportCanvas
+    exportCanvas,
+    canvasEngine
   } = useCanvas({
     boardId,
     onElementCreate: (element) => {
@@ -84,6 +90,118 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
   })
 
   useKeyboardShortcuts()
+  
+  // Initialize ImageUploadManager when canvas is ready
+  useEffect(() => {
+    if (canvasEngine && !imageUploadManagerRef.current) {
+      const canvas = canvasEngine.getCanvas()
+      imageUploadManagerRef.current = new ImageUploadManager(canvas)
+      
+      // Set up event handlers
+      imageUploadManagerRef.current.on('imageAdded', (element) => {
+        addElement(element)
+        
+        // Send creation operation to other users
+        sendOperation({
+          type: 'create',
+          elementId: element.id,
+          element: element
+        })
+      })
+      
+      imageUploadManagerRef.current.on('error', (error) => {
+        console.error('Image upload error:', error)
+        // TODO: Show error toast
+      })
+    }
+    
+    return () => {
+      if (imageUploadManagerRef.current) {
+        imageUploadManagerRef.current.dispose()
+        imageUploadManagerRef.current = null
+      }
+    }
+  }, [canvasEngine, addElement, sendOperation])
+  
+  // Handle file input
+  const handleImageUpload = useCallback(() => {
+    fileInputRef.current?.click()
+  }, [])
+  
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || !imageUploadManagerRef.current) return
+    
+    setIsUploading(true)
+    try {
+      await imageUploadManagerRef.current.handleFiles(Array.from(files))
+    } finally {
+      setIsUploading(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }, [])
+  
+  // Handle drag and drop
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.dataTransfer?.types.includes('Files')) {
+      setShowDropZone(true)
+    }
+  }, [])
+  
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Only hide if leaving the container entirely
+    if (e.currentTarget === e.target) {
+      setShowDropZone(false)
+    }
+  }, [])
+  
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }, [])
+  
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowDropZone(false)
+    
+    const files = Array.from(e.dataTransfer?.files || [])
+    if (files.length > 0 && imageUploadManagerRef.current) {
+      setIsUploading(true)
+      try {
+        await imageUploadManagerRef.current.handleFiles(files)
+      } finally {
+        setIsUploading(false)
+      }
+    }
+  }, [])
+  
+  // Handle paste
+  useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      const files = Array.from(e.clipboardData?.files || [])
+      const imageFiles = files.filter(f => f.type.startsWith('image/'))
+      
+      if (imageFiles.length > 0 && imageUploadManagerRef.current) {
+        setIsUploading(true)
+        try {
+          await imageUploadManagerRef.current.handleFiles(imageFiles)
+        } finally {
+          setIsUploading(false)
+        }
+      }
+    }
+    
+    document.addEventListener('paste', handlePaste)
+    return () => document.removeEventListener('paste', handlePaste)
+  }, [])
   
   // Connect to WebSocket on mount or when authentication changes
   useEffect(() => {
@@ -152,6 +270,17 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         padding: 0
       }}
     >
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleFileChange}
+        className="hidden"
+        data-testid="image-file-input"
+      />
+      
       {/* Main Canvas Container - Full screen base layer */}
       <div
         ref={containerRef}
@@ -162,9 +291,14 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           'bg-gray-50',
           'w-full h-full'
         )}
+        data-testid="canvas-container"
         onMouseDown={handleMouseDown}
         onMouseMove={handleEnhancedMouseMove}
         onMouseUp={handleMouseUp}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
         style={{
           position: 'fixed',
           inset: 0,
@@ -200,6 +334,29 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           </div>
         )}
         
+        {/* Drop Zone Overlay */}
+        {showDropZone && (
+          <div 
+            className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center z-40 pointer-events-none"
+            data-testid="drop-zone-overlay"
+          >
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <p className="text-2xl font-semibold text-gray-700">Drop images here</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Upload Loading Indicator */}
+        {isUploading && (
+          <div 
+            className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50"
+            data-testid="upload-loading"
+          >
+            <LoadingSpinner size="sm" />
+            <span className="ml-2 text-sm text-gray-600">Uploading...</span>
+          </div>
+        )}
+        
         {/* Canvas content will be rendered here by Fabric.js */}
       </div>
 
@@ -211,6 +368,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           onResetZoom={resetZoom}
           onFitToScreen={fitToScreen}
           onExport={exportCanvas}
+          onImageUpload={handleImageUpload}
         />
       </div>
       
