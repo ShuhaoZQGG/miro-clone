@@ -79,6 +79,8 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     onSelectionUpdate
   } = useWebSocket(boardId)
   
+  const { tool, setTool } = useCanvasStore()
+  
   const {
     containerRef,
     isInitialized,
