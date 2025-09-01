@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { securityMiddleware } from './middleware/security';
+import { updateSession } from './lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
+  // Apply Supabase auth middleware
+  const authResponse = await updateSession(request);
+  
   // Apply security middleware to API routes
   if (request.nextUrl.pathname.startsWith('/api')) {
     const securityResponse = await securityMiddleware.handle(request);
@@ -13,11 +17,9 @@ export async function middleware(request: NextRequest) {
   // Get security headers
   const headers = securityMiddleware.getSecurityHeaders();
   
-  // Create response with security headers
-  const response = NextResponse.next();
-  
+  // Apply security headers to the auth response
   headers.forEach((value, key) => {
-    response.headers.set(key, value);
+    authResponse.headers.set(key, value);
   });
 
   // Add CORS headers for allowed origins
@@ -25,11 +27,11 @@ export async function middleware(request: NextRequest) {
   const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
   
   if (origin && allowedOrigins.includes(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin);
-    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    authResponse.headers.set('Access-Control-Allow-Origin', origin);
+    authResponse.headers.set('Access-Control-Allow-Credentials', 'true');
   }
 
-  return response;
+  return authResponse;
 }
 
 export const config = {
