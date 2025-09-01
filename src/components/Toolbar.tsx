@@ -24,6 +24,8 @@ interface ToolbarProps {
   onFitToScreen: () => void
   onExport: (format: 'png' | 'jpg' | 'svg') => Promise<string | null>
   onImageUpload?: () => void
+  onGridToggle?: () => void
+  gridEnabled?: boolean
   className?: string
 }
 
@@ -34,6 +36,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onFitToScreen,
   onExport,
   onImageUpload,
+  onGridToggle,
+  gridEnabled = false,
   className
 }) => {
   const { 
@@ -149,13 +153,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           </Button>
         </Tooltip>
         
-        <Tooltip content="Toggle grid">
+        <Tooltip content={`Toggle grid${gridEnabled ? ' (snapping enabled)' : ''}`}>
           <Button
             variant="ghost"
             size="sm"
-            onClick={toggleGrid}
+            onClick={() => {
+              toggleGrid()
+              if (onGridToggle) onGridToggle()
+            }}
             className={clsx(
-              isGridVisible && 'bg-blue-50 text-blue-600'
+              isGridVisible && 'bg-blue-50 text-blue-600',
+              gridEnabled && 'ring-2 ring-blue-400'
             )}
           >
             <GridIcon className="w-4 h-4" />

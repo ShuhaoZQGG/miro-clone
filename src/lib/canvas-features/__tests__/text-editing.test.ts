@@ -106,18 +106,56 @@ describe('TextEditingManager', () => {
 
   describe('Text Editing', () => {
     it('should start editing mode for text element', () => {
+      // Mock fabric.IText constructor
+      const mockIText = {
+        type: 'i-text',
+        text: 'Sample text',
+        left: 100,
+        top: 100,
+        enterEditing: jest.fn(),
+        exitEditing: jest.fn(),
+        selectAll: jest.fn(),
+        set: jest.fn(),
+        get: jest.fn((prop) => {
+          const props = {
+            text: 'Sample text',
+            fontSize: 16,
+            fontFamily: 'Arial',
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            textAlign: 'left',
+            fill: '#000000',
+            backgroundColor: 'transparent',
+          }
+          return props[prop]
+        }),
+        getBoundingRect: jest.fn(() => ({ left: 100, top: 100, width: 200, height: 50 })),
+      }
+      
+      ;(fabric.IText as jest.Mock) = jest.fn(() => mockIText)
+      
       manager.startEditing(mockTextElement)
 
-      expect(mockCanvas.setActiveObject).toHaveBeenCalledWith(mockTextElement)
-      expect(mockTextElement.enterEditing).toHaveBeenCalled()
-      expect(mockTextElement.selectAll).toHaveBeenCalled()
+      // Since mockTextElement is type 'text', it will be converted to IText
+      expect(mockCanvas.remove).toHaveBeenCalledWith(mockTextElement)
+      expect(mockCanvas.add).toHaveBeenCalledWith(mockIText)
+      expect(mockCanvas.setActiveObject).toHaveBeenCalledWith(mockIText)
+      expect(mockIText.enterEditing).toHaveBeenCalled()
+      expect(mockIText.selectAll).toHaveBeenCalled()
     })
 
     it('should end editing mode', () => {
-      manager.startEditing(mockTextElement)
+      // Create an IText element (not plain text) to avoid conversion
+      const mockITextElement = {
+        ...mockTextElement,
+        type: 'i-text',
+        exitEditing: jest.fn(),
+      }
+      
+      manager.startEditing(mockITextElement)
       manager.endEditing()
 
-      expect(mockTextElement.exitEditing).toHaveBeenCalled()
+      expect(mockITextElement.exitEditing).toHaveBeenCalled()
       expect(mockCanvas.discardActiveObject).toHaveBeenCalled()
     })
 

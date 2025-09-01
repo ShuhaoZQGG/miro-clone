@@ -16,6 +16,8 @@ import { LoadingSpinner } from './ui/LoadingSpinner'
 import { ToastContainer } from './ui/ToastContainer'
 import { useToast, createToastHelpers } from '@/hooks/useToast'
 import { ImageUploadManager } from '@/lib/canvas-features/image-upload'
+import { TextEditingManager } from '@/lib/canvas-features/text-editing'
+import { GridSnappingManager } from '@/lib/canvas-features/grid-snapping'
 import { clsx } from 'clsx'
 
 interface WhiteboardProps {
@@ -29,8 +31,12 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showDropZone, setShowDropZone] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [gridEnabled, setGridEnabled] = useState(false)
+  const [gridSize, setGridSize] = useState(20)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageUploadManagerRef = useRef<ImageUploadManager | null>(null)
+  const textEditingManagerRef = useRef<TextEditingManager | null>(null)
+  const gridSnappingManagerRef = useRef<GridSnappingManager | null>(null)
   
   const { toasts, showToast, removeToast } = useToast()
   const toast = useMemo(() => createToastHelpers(showToast), [showToast])
@@ -96,29 +102,59 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
 
   useKeyboardShortcuts()
   
-  // Initialize ImageUploadManager when canvas is ready
+  // Initialize managers when canvas is ready
   useEffect(() => {
-    if (canvasEngine && !imageUploadManagerRef.current) {
+    if (canvasEngine) {
       const canvas = canvasEngine.getCanvas()
       const canvasElement = canvas.getElement() as HTMLCanvasElement
-      imageUploadManagerRef.current = new ImageUploadManager(canvasElement)
       
-      // Set up event handlers
-      imageUploadManagerRef.current.on('imageAdded', (element) => {
-        addElement(element)
+      // Initialize ImageUploadManager
+      if (!imageUploadManagerRef.current) {
+        imageUploadManagerRef.current = new ImageUploadManager(canvasElement)
         
-        // Send creation operation to other users
-        sendOperation({
-          type: 'create',
-          elementId: element.id,
-          element: element
+        // Set up event handlers
+        imageUploadManagerRef.current.on('imageAdded', (element) => {
+          addElement(element)
+          
+          // Send creation operation to other users
+          sendOperation({
+            type: 'create',
+            elementId: element.id,
+            element: element
+          })
         })
-      })
+        
+        imageUploadManagerRef.current.on('error', (error) => {
+          console.error('Image upload error:', error)
+          toast.error('Image upload failed', error.message || 'Please try again with a valid image file')
+        })
+      }
       
-      imageUploadManagerRef.current.on('error', (error) => {
-        console.error('Image upload error:', error)
-        toast.error('Image upload failed', error.message || 'Please try again with a valid image file')
-      })
+      // Initialize TextEditingManager
+      if (!textEditingManagerRef.current && canvas) {
+        textEditingManagerRef.current = new TextEditingManager(canvas)
+        
+        // Set up text change handler
+        textEditingManagerRef.current.onTextChanged = (element) => {
+          // Send update operation to other users
+          sendOperation({
+            type: 'update',
+            elementId: element.id,
+            newState: element
+          })
+        }
+      }
+      
+      // Initialize GridSnappingManager
+      if (!gridSnappingManagerRef.current) {
+        gridSnappingManagerRef.current = new GridSnappingManager()
+        if (gridEnabled) {
+          gridSnappingManagerRef.current.enable()
+        } else {
+          gridSnappingManagerRef.current.disable()
+        }
+        gridSnappingManagerRef.current.setGridSize(gridSize)
+      }
     }
     
     return () => {
@@ -126,8 +162,14 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         imageUploadManagerRef.current.dispose()
         imageUploadManagerRef.current = null
       }
+      if (textEditingManagerRef.current) {
+        textEditingManagerRef.current = null
+      }
+      if (gridSnappingManagerRef.current) {
+        gridSnappingManagerRef.current = null
+      }
     }
-  }, [canvasEngine, addElement, sendOperation, toast])
+  }, [canvasEngine, addElement, sendOperation, toast, gridEnabled, gridSize])
   
   // Handle file input
   const handleImageUpload = useCallback(() => {
@@ -384,6 +426,17 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           onFitToScreen={fitToScreen}
           onExport={exportCanvas}
           onImageUpload={handleImageUpload}
+          onGridToggle={() => {
+            setGridEnabled(!gridEnabled)
+            if (gridSnappingManagerRef.current) {
+              if (!gridEnabled) {
+                gridSnappingManagerRef.current.enable()
+              } else {
+                gridSnappingManagerRef.current.disable()
+              }
+            }
+          }}
+          gridEnabled={gridEnabled}
         />
       </div>
       

@@ -1,37 +1,62 @@
 # Next Cycle Tasks
 
-## Completed in Cycle 43
-- ✅ Image upload feature with drag & drop
+## Completed in Previous Cycles
+- ✅ Image upload feature with drag & drop (Cycle 42)
+- ✅ Toast notification system (Cycle 42)
+- ✅ Text editing manager implementation (Cycle 43)
+- ✅ Grid snapping manager implementation (Cycle 43)
 - ✅ Fixed TypeScript build errors
-- ✅ Achieved 99.4% test coverage
+- ✅ Achieved 87.5% test coverage
 
-## Priority 1: Canvas Feature Integration
-- [ ] Integrate ImageUploadManager with existing Whiteboard component
-- [ ] Add toolbar button for image upload
-- [ ] Create file input UI component
-- [ ] Wire up event handlers to canvas
-- [ ] Add visual feedback for drag operations
+## Priority 1: Critical Fixes
+- [ ] **Fix Test Failures**
+  - Resolve ImageUploadIntegration test failures (14 tests)
+  - Fix mocking issues in test suites
+  - Achieve 100% test pass rate
 
-## Priority 2: Continue Canvas Features
-- [ ] **Text editing improvements**
-  - Rich text support with formatting options
-  - Font family and size selection
-  - Text alignment and line spacing
-  - Inline text editing on canvas
-  
-- [ ] **Grid snapping feature**
-  - Configurable grid sizes (8px, 16px, 32px)
-  - Snap-to-grid toggle in toolbar
-  - Visual grid overlay with opacity control
-  - Smart guides for alignment
-  
+## Priority 2: Feature Integration
+- [ ] **Text Editing Integration**
+  - Integrate TextEditingManager with Whiteboard component
+  - Add text tool to toolbar
+  - Create text formatting toolbar with:
+    - Bold, italic, underline buttons
+    - Font family dropdown
+    - Font size selector
+    - Text alignment options
+    - Color picker
+
+- [ ] **Grid Snapping Integration**
+  - Integrate GridSnappingManager with Whiteboard
+  - Add grid toggle button to toolbar
+  - Add grid size selector (5px, 10px, 20px, 50px, 100px)
+  - Implement visual grid lines when enabled
+  - Add snapping indicators during drag operations
+
+- [ ] **Image Upload Integration**
+  - Complete integration of ImageUploadManager with Whiteboard
+  - Add upload button to toolbar
+  - Wire up drag/drop and paste handlers
+  - Add progress indicators
+
+## Priority 3: Continue Canvas Features
 - [ ] **Templates system**
-  - Pre-built board templates (Kanban, Mind Map, etc.)
+  - Pre-built board templates:
+    - Sprint planning board
+    - Mind map template
+    - User journey map
+    - SWOT analysis
+    - Kanban board
   - Save current board as template
   - Template gallery with preview
   - Template categories and search
 
-## Priority 3: Performance & Collaboration
+- [ ] **Shape library expansion**
+  - Add more shapes (star, hexagon, triangle, arrow)
+  - Create shape categories
+  - Implement shape search/filter
+  - Custom shape creation
+
+## Priority 4: Performance & Collaboration
 - [ ] **Conflict resolution with CRDT**
   - Implement CRDT-based merge algorithms
   - Visual conflict indicators
@@ -59,13 +84,13 @@
   - Optimize query performance
   - Add missing indexes for common queries
 
-- [ ] **Test Coverage**
-  - Fix 2 failing tests in canvas-engine.test.ts
-  - Add integration tests for image upload
-  - Performance testing with large files
-  - Mobile device testing
+- [ ] **Code Quality**
+  - Refactor ImageUploadIntegration tests
+  - Update outdated mocks
+  - Remove unused dependencies
+  - Code splitting for better performance
 
-## Priority 4: Production Deployment
+## Priority 5: Production Deployment
 - [ ] **Environment Setup**
   - Install @sentry/nextjs dependency
   - Configure Sentry DSN
@@ -78,21 +103,19 @@
   - Configure alert thresholds
   - Dashboard for metrics
 
-## Future Enhancements
-- [ ] Image editing (crop, rotate, filters)
-- [ ] Image optimization/compression on upload
-- [ ] Cloud storage integration (S3/Cloudinary)
-- [ ] Real-time collaborative image editing
-- [ ] Export boards with images (PDF/PNG/SVG)
-- [ ] Version history with image snapshots
-- [ ] AI-powered image suggestions
-
 ## Documentation Updates
-- [ ] Update user guide with image upload instructions
-- [ ] Document ImageUploadManager API
-- [ ] Add performance best practices guide
+- [ ] Document TextEditingManager API
+- [ ] Document GridSnappingManager API
+- [ ] Update user guide with new features
+- [ ] Create keyboard shortcuts documentation
+- [ ] Update README with completed features
 - [ ] Create comprehensive deployment checklist
-- [ ] Update README with new features
+
+## Known Issues to Address
+- ImageUploadIntegration test failures (14 tests)
+- E2E TypeScript errors (unrelated to features)
+- Missing UI controls for text editing and grid snapping
+- Performance with 100+ elements on canvas
 
 ## Success Metrics for Next Cycle
 - [ ] All canvas features integrated and working
@@ -102,3 +125,12 @@
 - [ ] Page load time < 2 seconds
 - [ ] Zero TypeScript errors
 - [ ] Production deployment successful
+
+## Future Enhancements
+- [ ] Image editing (crop, rotate, filters)
+- [ ] Real-time collaborative text editing
+- [ ] Advanced grid features (isometric, hexagonal)
+- [ ] Export boards with all features (PDF/PNG/SVG)
+- [ ] Version history with snapshots
+- [ ] AI-powered content suggestions
+- [ ] Mobile app development

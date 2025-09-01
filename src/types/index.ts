@@ -126,8 +126,14 @@ export interface TextElement extends BaseElement {
     fontSize: number
     fontFamily: string
     fontWeight: string
+    fontStyle?: string
     color: string
     textAlign: 'left' | 'center' | 'right'
+    backgroundColor?: string
+    lineHeight?: number
+    letterSpacing?: number
+    underline?: boolean
+    strikethrough?: boolean
   }
 }
 

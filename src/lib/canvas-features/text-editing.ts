@@ -21,7 +21,7 @@ interface TextProperties {
 export class TextEditingManager {
   private canvas: fabric.Canvas
   private editingElement: fabric.IText | null = null
-  private onTextChanged?: (element: TextElement) => void
+  public onTextChanged?: (element: TextElement) => void
   private eventHandlers: Map<string, any> = new Map()
 
   constructor(canvas: fabric.Canvas) {
@@ -228,6 +228,7 @@ export class TextEditingManager {
     return {
       id: (fabricText as any).id || generateId(),
       type: 'text',
+      boardId: '', // Will be set by the board context
       position: { x: fabricText.left || 0, y: fabricText.top || 0 },
       size: { width: bounds.width, height: bounds.height },
       content: {
@@ -245,9 +246,12 @@ export class TextEditingManager {
         strikethrough: (fabricText as any).linethrough || false,
       },
       rotation: fabricText.angle || 0,
-      opacity: fabricText.opacity || 1,
-      locked: !fabricText.selectable,
-      visible: fabricText.visible !== false,
+      layerIndex: 0, // Will be managed by the canvas
+      createdBy: '', // Will be set by the auth context
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isLocked: !fabricText.selectable,
+      isVisible: fabricText.visible !== false,
     }
   }
 
