@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { db } from '@/lib/db'
 import { sessionManager } from '@/server/lib/session-manager'
+import { handleDatabaseError } from '@/lib/db-utils'
 
 interface LoginBody {
   email: string
