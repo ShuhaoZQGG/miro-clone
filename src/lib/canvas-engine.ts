@@ -45,6 +45,8 @@ export class CanvasEngine {
   private frameCount = 0
   private currentFrameRate = 60
   private renderThrottleId: number | null = null
+  private webglEnabled = false
+  private performanceMode: 'auto' | 'performance' | 'quality' = 'auto'
   
   // Event system
   private eventListeners: Map<string, Set<(...args: any[]) => void>> = new Map()
@@ -77,6 +79,11 @@ export class CanvasEngine {
   private initializeCanvas(): fabric.Canvas {
     const rect = this.container.getBoundingClientRect()
     
+    // Detect WebGL support and element count for auto mode
+    const hasWebGLSupport = this.checkWebGLSupport()
+    const shouldUseWebGL = this.performanceMode === 'performance' || 
+                          (this.performanceMode === 'auto' && hasWebGLSupport && this.elements.length > 100)
+    
     const canvas = new fabric.Canvas(null, {
       width: rect.width,
       height: rect.height,
@@ -87,7 +94,9 @@ export class CanvasEngine {
       renderOnAddRemove: false, // Improve performance by batching renders
       skipOffscreen: true, // Skip rendering objects outside viewport
       stateful: false, // Disable state tracking for better performance
-    })
+      // Enable WebGL rendering if supported and needed
+      enableWebgl: shouldUseWebGL,
+    } as any)
     
     // Append canvas to container
     const canvasEl = canvas.getElement()
@@ -1317,6 +1326,94 @@ export class CanvasEngine {
   // Cleanup
   private isDisposed = false
   
+  // WebGL Support Methods
+  private checkWebGLSupport(): boolean {
+    try {
+      const canvas = document.createElement('canvas')
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+      return !!gl
+    } catch (e) {
+      return false
+    }
+  }
+
+  enableWebGL(): void {
+    if (this.checkWebGLSupport()) {
+      this.webglEnabled = true
+      this.performanceMode = 'performance'
+      // Reinitialize canvas with WebGL if needed
+      if (this.canvas) {
+        const state = this.exportState()
+        this.canvas.dispose()
+        this.canvas = this.initializeCanvas()
+        this.importState(state)
+      }
+    }
+  }
+
+  disableWebGL(): void {
+    this.webglEnabled = false
+    this.performanceMode = 'quality'
+    // Reinitialize canvas without WebGL
+    if (this.canvas) {
+      const state = this.exportState()
+      this.canvas.dispose()
+      this.canvas = this.initializeCanvas()
+      this.importState(state)
+    }
+  }
+
+  setPerformanceMode(mode: 'auto' | 'performance' | 'quality'): void {
+    this.performanceMode = mode
+    if (mode === 'performance') {
+      this.enableWebGL()
+      this.virtualizationEnabled = true
+    } else if (mode === 'quality') {
+      this.disableWebGL()
+      this.virtualizationEnabled = false
+    } else {
+      // Auto mode - decide based on element count
+      if (this.elements.length > 100) {
+        this.enableWebGL()
+        this.virtualizationEnabled = true
+      } else {
+        this.virtualizationEnabled = false
+      }
+    }
+  }
+
+  getPerformanceStats() {
+    return {
+      fps: this.currentFrameRate,
+      elementCount: this.elements.length,
+      webglEnabled: this.webglEnabled,
+      performanceMode: this.performanceMode,
+      virtualizationEnabled: this.virtualizationEnabled
+    }
+  }
+
+  private exportState(): any {
+    return {
+      elements: this.elements,
+      camera: this.camera,
+      selectedElementIds: this.selectedElementIds
+    }
+  }
+
+  private importState(state: any): void {
+    if (state.elements) {
+      state.elements.forEach((element: InternalCanvasElement) => {
+        this.addElement(element)
+      })
+    }
+    if (state.camera) {
+      this.setCamera(state.camera.x, state.camera.y, state.camera.zoom)
+    }
+    if (state.selectedElementIds) {
+      this.selectedElementIds = state.selectedElementIds
+    }
+  }
+
   dispose(): void {
     // Prevent multiple disposal attempts
     if (this.isDisposed) {
