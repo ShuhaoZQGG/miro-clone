@@ -87,11 +87,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const zoomPercentage = Math.round(camera.zoom * 100)
 
   return (
-    <div className={clsx(
-      'absolute top-4 left-1/2 transform -translate-x-1/2 z-40',
-      'flex items-center gap-2 bg-white shadow-lg rounded-lg border p-2',
-      className
-    )}>
+    <div 
+      role="toolbar"
+      aria-label="Canvas toolbar"
+      className={clsx(
+        'absolute top-4 left-1/2 transform -translate-x-1/2 z-40',
+        'flex items-center gap-2 bg-white shadow-lg rounded-lg border p-2',
+        className
+      )}>
       {/* Undo/Redo */}
       <div className="flex items-center gap-1">
         <Tooltip content="Undo (Ctrl+Z)">
@@ -264,6 +267,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             size="sm"
             onClick={() => handleExport('png')}
             disabled={isExporting || elements.length === 0}
+            data-testid="export-button"
+            aria-label="Export as PNG"
           >
             <ExportIcon className="w-4 h-4" />
           </Button>

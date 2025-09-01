@@ -123,10 +123,11 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-bold">Templates</h2>
+          <h2 className="text-2xl font-bold">Select a Template</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Close template gallery"
           >
             <X className="w-5 h-5" />
           </button>
