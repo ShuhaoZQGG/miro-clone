@@ -109,7 +109,7 @@ describe('ImageUploadManager', () => {
       
       // Get the handler that was registered
       const dragoverHandler = mockCanvas.addEventListener.mock.calls.find(
-        call => call[0] === 'dragover'
+        (call: any) => call[0] === 'dragover'
       )?.[1]
       
       dragoverHandler(event)
@@ -128,7 +128,7 @@ describe('ImageUploadManager', () => {
       event.clientY = 200
       
       const dropHandler = mockCanvas.addEventListener.mock.calls.find(
-        call => call[0] === 'drop'
+        (call: any) => call[0] === 'drop'
       )?.[1]
       
       await dropHandler(event)
@@ -156,7 +156,7 @@ describe('ImageUploadManager', () => {
       event.clientY = 50
       
       const dropHandler = mockCanvas.addEventListener.mock.calls.find(
-        call => call[0] === 'drop'
+        (call: any) => call[0] === 'drop'
       )?.[1]
       
       await dropHandler(event)
@@ -178,7 +178,7 @@ describe('ImageUploadManager', () => {
       } as any
       
       const pasteHandler = mockCanvas.addEventListener.mock.calls.find(
-        call => call[0] === 'paste'
+        (call: any) => call[0] === 'paste'
       )?.[1]
       
       await pasteHandler(event)
@@ -200,7 +200,7 @@ describe('ImageUploadManager', () => {
       } as any
       
       const pasteHandler = mockCanvas.addEventListener.mock.calls.find(
-        call => call[0] === 'paste'
+        (call: any) => call[0] === 'paste'
       )?.[1]
       
       await pasteHandler(event)

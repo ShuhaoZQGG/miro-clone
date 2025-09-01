@@ -109,18 +109,18 @@ test.describe('Collaboration Features', () => {
     await page1.click('[data-testid="tool-rectangle"]')
     const canvas1 = page1.locator('[data-testid="canvas"]')
     await canvas1.click({ position: { x: 150, y: 150 } })
-    await canvas1.mouse.down()
-    await canvas1.mouse.move(250, 250)
-    await canvas1.mouse.up()
+    await page1.mouse.down()
+    await page1.mouse.move(250, 250)
+    await page1.mouse.up()
     
     await page1.waitForTimeout(500)
     
     // User 1 selects and moves the rectangle
     await page1.click('[data-testid="tool-select"]')
     await canvas1.click({ position: { x: 200, y: 200 } })
-    await canvas1.mouse.down()
-    await canvas1.mouse.move(300, 300)
-    await canvas1.mouse.up()
+    await page1.mouse.down()
+    await page1.mouse.move(300, 300)
+    await page1.mouse.up()
     
     // User 2 should see the updated position
     await page2.waitForTimeout(500)
@@ -139,9 +139,9 @@ test.describe('Collaboration Features', () => {
     await page1.click('[data-testid="tool-circle"]')
     const canvas1 = page1.locator('[data-testid="canvas"]')
     await canvas1.click({ position: { x: 200, y: 200 } })
-    await canvas1.mouse.down()
-    await canvas1.mouse.move(300, 300)
-    await canvas1.mouse.up()
+    await page1.mouse.down()
+    await page1.mouse.move(300, 300)
+    await page1.mouse.up()
     
     await page1.waitForTimeout(500)
     
@@ -235,17 +235,17 @@ test.describe('Collaboration Features', () => {
         await page1.click('[data-testid="tool-rectangle"]')
         const canvas1 = page1.locator('[data-testid="canvas"]')
         await canvas1.click({ position: { x: 100, y: 100 } })
-        await canvas1.mouse.down()
-        await canvas1.mouse.move(200, 200)
-        await canvas1.mouse.up()
+        await page1.mouse.down()
+        await page1.mouse.move(200, 200)
+        await page1.mouse.up()
       })(),
       (async () => {
         await page2.click('[data-testid="tool-circle"]')
         const canvas2 = page2.locator('[data-testid="canvas"]')
         await canvas2.click({ position: { x: 300, y: 300 } })
-        await canvas2.mouse.down()
-        await canvas2.mouse.move(400, 400)
-        await canvas2.mouse.up()
+        await page2.mouse.down()
+        await page2.mouse.move(400, 400)
+        await page2.mouse.up()
       })()
     ]
     

@@ -5,7 +5,6 @@ import { AuthProvider } from '@/context/AuthContext'
 
 // Import the mock store
 import { useCanvasStore } from '@/store/useCanvasStore'
-import { AuthProvider } from '@/context/AuthContext'
 
 // Create mock store with working state updates
 const mockStoreState = {
