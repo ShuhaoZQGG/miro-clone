@@ -1,16 +1,19 @@
 # Next Cycle Tasks
 
-## Completed in Cycle 43
-- ✅ Image upload feature with drag & drop
+## Completed in Cycle 42
+- ✅ Image upload feature with drag & drop, paste, file selection
+- ✅ Toast notification system for user feedback
 - ✅ Fixed TypeScript build errors
-- ✅ Achieved 99.4% test coverage
+- ✅ Integrated ImageUploadManager with Whiteboard
+- ✅ Added toolbar button for image upload
+- ✅ Created file input UI component
+- ✅ Wired up event handlers to canvas
+- ✅ Added visual feedback for drag operations
 
-## Priority 1: Canvas Feature Integration
-- [ ] Integrate ImageUploadManager with existing Whiteboard component
-- [ ] Add toolbar button for image upload
-- [ ] Create file input UI component
-- [ ] Wire up event handlers to canvas
-- [ ] Add visual feedback for drag operations
+## Priority 1: Test Fixes
+- [ ] Fix 20 failing tests in ImageUploadIntegration.test.tsx
+- [ ] Review and improve test mocks
+- [ ] Ensure 100% test pass rate
 
 ## Priority 2: Continue Canvas Features
 - [ ] **Text editing improvements**
