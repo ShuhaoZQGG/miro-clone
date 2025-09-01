@@ -1,507 +1,393 @@
-# Miro Clone UI/UX Design Specifications
-
-## Design Focus
-Complete UI/UX specifications for all core features with focus on UI integration gaps identified in planning phase.
+# Miro Clone - UI/UX Design Specifications
 
 ## Design System
 
 ### Color Palette
-```css
---primary: #0066FF        /* Actions, links, active states */
---primary-hover: #0052CC  /* Hover states */
---secondary: #6B7280      /* Secondary actions */
---success: #10B981        /* Success states */
---warning: #F59E0B        /* Warnings */
---error: #EF4444          /* Errors */
---surface: #FFFFFF        /* Canvas, cards */
---surface-alt: #F9FAFB    /* Panels, backgrounds */
---border: #E5E7EB         /* Borders, dividers */
---text-primary: #111827   /* Primary text */
---text-secondary: #6B7280 /* Secondary text */
---text-disabled: #9CA3AF  /* Disabled text */
-```
+- **Primary**: #0066FF (Blue) - Interactive elements, CTAs
+- **Secondary**: #00D084 (Green) - Success states, collaboration indicators
+- **Accent**: #FFB800 (Yellow) - Highlights, sticky notes
+- **Error**: #FF5757 - Errors, destructive actions
+- **Warning**: #FFA500 - Warnings, pending states
+- **Neutral**:
+  - Gray-900: #1A1A1A (Text primary)
+  - Gray-700: #4A4A4A (Text secondary)
+  - Gray-500: #9B9B9B (Disabled)
+  - Gray-300: #E1E1E1 (Borders)
+  - Gray-100: #F5F5F5 (Backgrounds)
+  - White: #FFFFFF (Canvas)
 
 ### Typography
-- **Font Family**: Inter, system-ui, sans-serif
-- **Headings**: 24px/20px/16px (h1/h2/h3)
-- **Body**: 14px regular/medium
-- **Small**: 12px
-- **Button**: 14px medium
+- **Font Family**: Inter (primary), SF Mono (code)
+- **Sizes**:
+  - Heading-1: 32px/40px (bold)
+  - Heading-2: 24px/32px (semibold)
+  - Heading-3: 20px/28px (semibold)
+  - Body: 14px/20px (regular)
+  - Small: 12px/16px (regular)
+  - Micro: 10px/14px (regular)
 
 ### Spacing
 - Base unit: 4px
-- Component padding: 8px/12px/16px
-- Section spacing: 24px/32px
-- Breakpoints: 640px/768px/1024px/1280px
+- Common values: 4, 8, 12, 16, 24, 32, 48, 64px
 
-## Layout Structure
+### Elevation
+- Level-1: 0 1px 3px rgba(0,0,0,0.12)
+- Level-2: 0 4px 6px rgba(0,0,0,0.16)
+- Level-3: 0 10px 20px rgba(0,0,0,0.19)
 
-### Main Application Layout
+## Layout Architecture
+
+### Main Application Shell
 ```
-┌─────────────────────────────────────────────────────────┐
-│ Header (56px)                                           │
-├─────────┬────────────────────────────────┬─────────────┤
-│Sidebar  │       Canvas Area              │Properties   │
-│(240px)  │       (Flexible)               │Panel(320px) │
-│         │                                 │             │
-│Tools    │       Infinite Canvas          │Context      │
-│Layers   │                                 │Settings     │
-│Pages    │                                 │Comments     │
-│         │                                 │             │
-└─────────┴────────────────────────────────┴─────────────┘
-Footer Status Bar (32px)
+┌─────────────────────────────────────────────────────┐
+│ Header (56px)                                       │
+├───────────┬─────────────────────────────┬──────────┤
+│ Sidebar   │ Canvas Area                 │ Panels   │
+│ (56px)    │ (flex-1)                   │ (320px)  │
+│           │                             │          │
+│ Tools     │ Infinite Canvas            │ Context  │
+│           │                             │ Menus    │
+└───────────┴─────────────────────────────┴──────────┘
 ```
+
+### Responsive Breakpoints
+- Mobile: 320-767px (Single column, bottom toolbar)
+- Tablet: 768-1023px (Collapsible sidebar)
+- Desktop: 1024-1439px (Standard layout)
+- Wide: 1440px+ (Extended workspace)
 
 ## Component Specifications
 
-### 1. Header Bar
-**Purpose**: Primary navigation and board controls
-**Components**:
-- Logo & Board Title (left)
-- View Controls (center): Zoom slider, Fit to screen, Grid toggle
-- User Actions (right): Share, Export, Profile menu
-**Interactions**:
-- Board title: Click to edit (inline)
-- Zoom: Slider + keyboard shortcuts (Cmd/Ctrl +/-)
-- Share: Opens modal with permission controls
+### 1. Authentication Flow
 
-### 2. Tool Sidebar
-**Sections**:
+#### Login Screen
+- **Layout**: Centered card (400px width)
+- **Components**:
+  - Logo and app name
+  - Email input with validation
+  - Password input with show/hide toggle
+  - "Remember me" checkbox
+  - "Sign In" button (primary)
+  - "Forgot Password?" link
+  - OAuth buttons (Google, GitHub)
+  - "Create Account" link
+- **States**: Loading, Error, Success
+- **Validation**: Real-time field validation
 
-#### Drawing Tools
-- **Select** (V): Default cursor
-- **Hand** (H): Pan canvas
-- **Rectangle** (R): Draw rectangles
-- **Circle** (O): Draw circles
-- **Line** (L): Draw lines
-- **Arrow** (A): Draw arrows
-- **Pen** (P): Freehand drawing
-- **Text** (T): Add text
-- **Sticky Note** (N): Add sticky notes
-- **Image** (I): Upload images
-- **Eraser** (E): Remove elements
+#### Registration Screen
+- **Layout**: Multi-step wizard (3 steps)
+- **Step 1**: Account creation (email, password)
+- **Step 2**: Profile setup (name, avatar)
+- **Step 3**: Workspace creation or join
+- **Components**:
+  - Progress indicator
+  - Step navigation (back/next)
+  - Form validation messages
+  - Terms of service checkbox
 
-#### Shape Library (Expandable)
-- Basic: Square, Circle, Triangle, Diamond
-- Extended: Star, Hexagon, Pentagon, Cloud
-- Arrows: Various arrow types
-- Custom: User-saved shapes
+### 2. Dashboard
 
-#### Templates Button
-- Opens modal gallery
-- Categories: Sprint, Mind Map, SWOT, Kanban, etc.
-- Preview thumbnails with hover details
-
-### 3. Canvas Area
-**Features**:
-- Infinite scroll with virtual viewport
-- Grid overlay (toggleable, configurable 10/20/50px)
-- Minimap (bottom-right corner, 200x150px)
-- Context menu on right-click
-- Multi-select with marquee or Shift+click
-- Zoom controls (10%-500%)
-
-**Visual Indicators**:
-- Selection: Blue outline with resize handles
-- Hover: Light blue glow
-- Active editing: Dashed outline
-- Locked: Gray overlay with lock icon
-- Grouped: Purple outline
-
-### 4. Properties Panel
-**Dynamic Sections** (based on selection):
-
-#### No Selection
-- Canvas settings
-- Grid size selector
-- Background color
-- Canvas dimensions
-
-#### Shape Selected
-- Transform: X, Y, Width, Height, Rotation
-- Style: Fill color, Border color, Border width
-- Effects: Shadow, Opacity
-- Actions: Lock, Group, Duplicate, Delete
-
-#### Text Selected
-- Font family dropdown
-- Font size (8-144px)
-- Weight (Regular/Medium/Bold)
-- Alignment (Left/Center/Right/Justify)
-- Color picker
-- Line height
-- Letter spacing
-
-#### Image Selected
-- Crop tool
-- Filters (Brightness, Contrast, Saturation)
-- Replace image button
-- Alt text field
-
-### 5. Collaboration Features
-
-#### Live Cursors
-- Colored cursor with user name label
-- Smooth animation (60fps)
-- Fade out after 3s inactivity
-
-#### User Presence Bar
-- Avatar circles (max 5 visible, +N for others)
-- Online indicator (green dot)
-- Click for user list modal
-
-#### Comments System
-- Thread indicators on canvas
-- Side panel for comment threads
-- @mention autocomplete
-- Resolve/reopen actions
-- Timestamp and user info
-
-### 6. Modals & Dialogs
+#### Board Gallery
+- **Layout**: Grid view (default) / List view
+- **Card Design** (280x200px):
+  - Thumbnail preview
+  - Title (truncated)
+  - Last modified date
+  - Collaborator avatars (max 3 +n)
+  - Quick actions (duplicate, delete, share)
+  - Hover state with overlay actions
+- **Sorting**: Recent, Name, Modified, Created
+- **Filtering**: My boards, Shared, Templates, Archived
 
 #### Template Gallery Modal
-```
-┌─────────────────────────────────────┐
-│ Choose a Template            [X]    │
-├─────────────────────────────────────┤
-│ Categories │  Template Grid         │
-│ • All      │  ┌──┐ ┌──┐ ┌──┐      │
-│ • Sprint   │  │  │ │  │ │  │      │
-│ • Mind Map │  └──┘ └──┘ └──┘      │
-│ • SWOT     │  ┌──┐ ┌──┐ ┌──┐      │
-│ • Kanban   │  │  │ │  │ │  │      │
-│            │  └──┘ └──┘ └──┘      │
-├─────────────────────────────────────┤
-│        [Cancel]  [Use Template]     │
-└─────────────────────────────────────┘
-```
+- **Layout**: Full-screen modal with categories
+- **Categories**: Sidebar navigation
+  - Sprint Planning
+  - Mind Mapping
+  - SWOT Analysis
+  - User Journey
+  - Kanban Board
+  - Flowchart
+  - Custom Templates
+- **Template Preview**:
+  - Large preview (600x400px)
+  - Description text
+  - "Use Template" button
+  - Creator attribution
 
-#### Share Modal
-```
-┌─────────────────────────────────────┐
-│ Share Board                  [X]    │
-├─────────────────────────────────────┤
-│ Link Sharing: [Toggle]              │
-│ ┌─────────────────────────────┐    │
-│ │ https://app.com/board/xyz   │    │
-│ └─────────────────────────────┘    │
-│                                     │
-│ Permissions:                        │
-│ ○ View only                        │
-│ ● Can edit                         │
-│ ○ Can comment                      │
-│                                     │
-│ Invite by Email:                   │
-│ [email@example.com    ] [Send]     │
-│                                     │
-│ Members:                           │
-│ • John Doe (Owner)                 │
-│ • Jane Smith (Editor) [Remove]     │
-├─────────────────────────────────────┤
-│            [Done]                   │
-└─────────────────────────────────────┘
-```
+### 3. Canvas Workspace
 
-### 7. Priority UI Integration Components
+#### Toolbar (Left Sidebar - 56px wide)
+- **Tools** (icon buttons with tooltips):
+  - Select (V) - cursor icon
+  - Pan (H) - hand icon
+  - Rectangle (R) - square icon
+  - Circle (O) - circle icon
+  - Line (L) - line icon
+  - Arrow (A) - arrow icon
+  - Pen (P) - pen icon
+  - Text (T) - text icon
+  - Sticky Note (N) - sticky icon
+  - Image (I) - image icon
+  - Eraser (E) - eraser icon
+  - Comment (C) - comment icon
+- **Tool Groups**: Separated by dividers
+- **Active State**: Blue background, white icon
+- **Keyboard Shortcuts**: Displayed on hover
 
-#### Text Tool Integration
-```
-┌─────────────────────────────────────┐
-│ Text Formatting Toolbar             │
-├─────────────────────────────────────┤
-│ [B] [I] [U] | Font▼ | Size▼ | A°   │
-│ [≡] [≡] [≡] [≡] | Color | ▣ | ⊞   │
-└─────────────────────────────────────┘
-```
-- Appears on text selection
-- Floating above selected text
-- Auto-hide on blur
-- Keyboard shortcuts shown on hover
+#### Top Navigation Bar
+- **Left Section**:
+  - Board title (editable inline)
+  - Star/favorite toggle
+  - Share button (opens modal)
+- **Center Section**:
+  - Zoom controls (-, %, +, fit)
+  - Grid toggle (icon button)
+  - Undo/Redo buttons
+- **Right Section**:
+  - Collaborator avatars (live)
+  - Export menu (PDF, PNG, SVG)
+  - Settings gear
+  - Present mode button
 
-#### Grid Controls Panel
-```
-┌─────────────────────────────────────┐
-│ Grid Settings                       │
-├─────────────────────────────────────┤
-│ ☑ Show Grid                        │
-│ ☑ Snap to Grid                     │
-│ Grid Size: [10px ▼]                │
-│ Grid Color: [#E5E7EB]              │
-│ Opacity: [====----] 40%            │
-└─────────────────────────────────────┘
-```
-- Accessible from View menu or toolbar
-- Real-time preview on change
-- Persists per board
+#### Canvas Area
+- **Infinite Canvas**: Pan with mouse/touch
+- **Grid Overlay**: Dotted lines (optional)
+- **Minimap**: Bottom-right corner (160x120px)
+- **Zoom Levels**: 10% - 400%
+- **Selection Box**: Blue dashed border
+- **Multi-select**: Shift+click or lasso
+- **Context Menu**: Right-click on elements
 
-#### Image Upload Integration
-```
-┌─────────────────────────────────────┐
-│ Add Image                           │
-├─────────────────────────────────────┤
-│ ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐       │
-│ │   Drop files here or     │       │
-│ │   [Browse Files]          │       │
-│ └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘       │
-│                                     │
-│ Recent:                             │
-│ [📷] [📷] [📷] [📷] [📷]          │
-│                                     │
-│ From URL: [___________] [Add]      │
-└─────────────────────────────────────┘
-```
-- Drag & drop anywhere on canvas
-- Paste from clipboard (Ctrl/Cmd+V)
-- URL import support
-- Progress bar during upload
+#### Property Panel (Right - 320px)
+- **Context-Sensitive**: Changes based on selection
+- **Sections**:
+  - Transform (X, Y, Width, Height, Rotation)
+  - Appearance (Fill, Stroke, Opacity)
+  - Text Properties (Font, Size, Align)
+  - Layer Controls (Bring to front/back)
+  - Actions (Group, Lock, Delete)
+- **Number Inputs**: With increment/decrement buttons
+- **Color Pickers**: Preset swatches + custom
+
+### 4. Collaboration Features
+
+#### Live Cursors
+- **Design**: Colored cursor with user name tag
+- **Smoothing**: 60fps interpolation
+- **Visibility**: Fade at canvas edges
+- **Colors**: Assigned from palette (8 colors)
+
+#### User Presence Indicator
+- **Avatar Stack**: Max 5 visible, +n for overflow
+- **Status Dot**: Green (active), Yellow (idle)
+- **Hover Card**:
+  - User name and email
+  - Current activity
+  - Last seen time
+
+#### Comments System
+- **Thread View**:
+  - Avatar + name + timestamp
+  - Comment text with @mentions
+  - Reply input field
+  - Resolve button
+  - Edit/Delete for own comments
+- **Inline Comments**: Pin to canvas elements
+- **Notification Badge**: Red dot with count
+
+#### Voice/Video Controls
+- **Floating Bar**: Bottom center
+- **Controls**:
+  - Mic toggle with indicator
+  - Camera toggle
+  - Screen share button
+  - Participant list
+  - Leave call button
+- **Participant Videos**: Grid layout (max 4)
+
+### 5. Advanced Features
+
+#### Grid Snapping Controls
+- **Toggle Button**: In top toolbar
+- **Settings Popover**:
+  - Enable/disable checkbox
+  - Grid size slider (4-64px)
+  - Grid visibility toggle
+  - Snap strength slider
+- **Visual Feedback**: Elements snap with animation
+
+#### Text Editor Toolbar
+- **Floating Toolbar**: Above selected text
+- **Controls**:
+  - Font family dropdown
+  - Size dropdown
+  - Bold, Italic, Underline toggles
+  - Text color picker
+  - Alignment buttons
+  - List buttons (bullet, number)
+- **Rich Text Support**: Markdown shortcuts
+
+#### Image Upload Interface
+- **Drag & Drop Zone**: Dashed border on hover
+- **Upload Button**: In toolbar + context menu
+- **Progress Bar**: For large files
+- **Supported Formats**: PNG, JPG, GIF, SVG
+- **Image Controls**: Resize handles, crop tool
+
+#### Export Modal
+- **Format Selection**: Radio buttons
+  - PDF (with page size options)
+  - PNG (with resolution options)
+  - SVG (vector format)
+- **Export Area**: Full board or selection
+- **Quality Settings**: Slider for compression
+- **Download Button**: Primary action
+
+### 6. Mobile Optimization
+
+#### Touch Gestures
+- **Pan**: Single finger drag
+- **Zoom**: Pinch gesture
+- **Select**: Tap
+- **Multi-select**: Long press + drag
+- **Context Menu**: Long press
+
+#### Mobile Toolbar
+- **Position**: Bottom of screen
+- **Layout**: Horizontal scroll
+- **Tool Size**: 48x48px touch targets
+- **Collapse/Expand**: Swipe up/down
+
+#### Responsive Canvas
+- **Auto-zoom**: Fit content on load
+- **Touch-friendly**: Larger selection handles
+- **Simplified UI**: Essential tools only
 
 ## User Journeys
 
-### 1. First-Time User Flow
-```
-Landing → Sign Up → Onboarding Tour → Template Selection → 
-Canvas Introduction → Tool Tips → Create First Shape → Save
-```
+### 1. First-Time User
+1. Landing → Sign Up → Email Verification
+2. Profile Setup → Choose Template/Blank
+3. Onboarding Tour (5 steps)
+4. Create First Board → Explore Tools
+5. Invite Collaborator → Start Working
 
-### 2. Create New Board Flow
-```
-Dashboard → New Board → Choose Template/Blank → 
-Set Title → Configure Settings → Start Creating
-```
+### 2. Returning User
+1. Login → Dashboard (recent boards)
+2. Select Board → Canvas loads
+3. Continue work → Auto-save active
+4. Share/Export → Logout
 
 ### 3. Collaboration Flow
-```
-Open Board → Share Button → Set Permissions → 
-Copy Link/Invite → Collaborator Joins → 
-See Live Cursor → Co-edit
-```
+1. Receive invite link → Join board
+2. See live cursors → Start editing
+3. Add comment → @mention teammate
+4. Resolve discussion → Continue work
+5. Export final version
 
-### 4. Image Upload Flow
-```
-Select Image Tool → Click Canvas/Drag File → 
-Preview → Confirm Placement → Resize/Position → 
-Apply Properties
-```
+## Accessibility Standards
 
-### 5. Text Editing Flow
-```
-Select Text Tool → Click Canvas → Type → 
-Format Toolbar Appears → Style Text → 
-Click Outside to Finish
-```
-
-## Responsive Design
-
-### Desktop (1280px+)
-- Full layout with all panels
-- Optimal canvas space
-- All features accessible
-
-### Tablet (768px-1279px)
-- Collapsible sidebar (icon mode)
-- Properties panel as overlay
-- Touch-optimized controls
-- Larger hit targets (44px min)
-
-### Mobile (< 768px)
-- Bottom tool bar
-- Full-screen canvas
-- Gesture controls (pinch zoom, two-finger pan)
-- Simplified property sheets
-- Mobile-specific interactions
-
-## Accessibility
-
-### WCAG AA Compliance
+### WCAG 2.1 Level AA Compliance
 - **Color Contrast**: 4.5:1 minimum
-- **Focus Indicators**: Visible outlines on all interactive elements
-- **Keyboard Navigation**: Full keyboard support
-- **Screen Readers**: ARIA labels and live regions
-- **Alternative Text**: Required for all images
+- **Focus Indicators**: Visible keyboard focus
+- **Screen Reader**: ARIA labels and roles
+- **Keyboard Navigation**: All features accessible
+- **Alt Text**: For all images and icons
+- **Skip Links**: For main navigation
 
 ### Keyboard Shortcuts
-- Tab navigation through UI
-- Arrow keys for fine positioning
-- Space for hand tool
-- Escape to deselect
-- Delete/Backspace to remove
+- **Essential**:
+  - Ctrl/Cmd+Z: Undo
+  - Ctrl/Cmd+Y: Redo
+  - Ctrl/Cmd+C/V: Copy/Paste
+  - Delete: Remove selected
+  - Escape: Cancel operation
+- **Tools**: Single letter shortcuts (V, H, R, etc.)
+- **Navigation**: Arrow keys for canvas pan
 
-### Visual Accessibility
-- High contrast mode support
-- Zoom up to 200% without loss
-- Colorblind-friendly palettes
-- Motion reduction options
+## Performance Targets
 
-## Loading & Progress States
+### Loading Times
+- Initial load: < 3 seconds
+- Canvas render: < 100ms
+- Tool switch: < 50ms
+- Save operation: < 500ms
 
-### Canvas Loading
-- Skeleton screens for UI
-- Progressive canvas rendering
-- "Loading..." indicator with progress
-
-### Image Upload Progress
-```
-┌────────────────────────┐
-│ Uploading image...     │
-│ ████████░░░░░░░ 75%    │
-│ [Cancel]               │
-└────────────────────────┘
-```
-
-### Auto-save Indicator
-- Saving... (animated dots)
-- Saved (checkmark, fade after 2s)
-- Error: "Failed to save" with retry
+### Canvas Performance
+- 60 FPS for pan/zoom
+- Handle 1000+ objects
+- Smooth cursor tracking
+- Instant selection feedback
 
 ## Error States
 
-### Connection Lost
-- Banner: "Connection lost. Attempting to reconnect..."
-- Offline mode indicator
-- Queue changes for sync
+### Empty States
+- **No Boards**: Illustration + "Create your first board"
+- **No Templates**: "No templates available"
+- **No Collaborators**: "Invite team members"
 
-### Upload Errors
-- Toast: "File too large (max 10MB)"
-- Toast: "Unsupported format"
-- Inline: "Failed to load image" with retry
-
-### Permission Errors
-- Modal: "You don't have permission to edit"
-- Inline: "View-only mode"
-
-## Animation & Transitions
-
-### Micro-interactions
-- Button hover: Scale 1.05, 150ms ease
-- Tool selection: Background fade, 200ms
-- Panel collapse: Slide + fade, 300ms
-- Element selection: Border animate in, 100ms
-
-### Canvas Animations
-- Pan: Smooth scroll, no lag
-- Zoom: Animated scale, 200ms
-- Element creation: Fade in, 150ms
-- Delete: Fade out + scale down, 200ms
-
-## Performance Considerations
-
-### Viewport Optimization
-- Render only visible elements
-- LOD system for zoom levels
-- Virtualized element lists
-- Debounced updates (16ms)
-
-### Asset Loading
-- Lazy load images
-- Progressive image rendering
-- Cache frequently used assets
-- CDN for static resources
-
-### Real-time Sync
-- Optimistic UI updates
-- Debounced broadcasts (100ms)
-- Conflict resolution indicators
-- Offline queue management
-
-## Platform-Specific Features
-
-### PWA Support
-- Install prompt
-- Offline functionality
-- Push notifications
-- App-like experience
-
-### Native Features
-- Clipboard integration
-- Drag & drop from OS
-- Native file dialogs
-- System shortcuts
-
-## Success Metrics
-
-### Performance KPIs
-- Time to Interactive: < 3s
-- Frame rate: 60fps constant
-- Input latency: < 50ms
-- Save time: < 500ms
-
-### Usability Metrics
-- Task completion: > 95%
-- Error rate: < 5%
-- Time on task: Competitive
-- User satisfaction: > 4.5/5
+### Error Messages
+- **Network Error**: Toast notification with retry
+- **Save Failed**: Warning banner with manual save
+- **Permission Denied**: Modal with explanation
+- **Invalid Input**: Inline field validation
 
 ## Implementation Notes
 
-### Component Library
-- Use Radix UI primitives
-- Tailwind for styling
+### Framework Integration
+- Use Tailwind CSS classes for styling
 - Framer Motion for animations
-- React Hook Form for forms
+- Radix UI for accessible components
+- React Hook Form for form handling
+- Zustand for state management
 
-### State Management
-- Zustand for UI state
-- Canvas state in Fabric.js
-- WebSocket for real-time
-- IndexedDB for offline
+### Critical UI Components Priority
+1. **P0 - Security & Environment**:
+   - Password strength indicator
+   - MFA setup flow
+   - Environment variable config UI
 
-### Testing Requirements
-- Component testing with RTL
-- E2E with Playwright
-- Visual regression with Percy
-- Performance with Lighthouse
+2. **P1 - Core Features**:
+   - Text tool toolbar integration
+   - Grid snapping controls
+   - Image upload button
+   - Template gallery modal
 
-## Design Handoff
+3. **P2 - Performance**:
+   - Loading skeletons
+   - Virtualized lists
+   - Progressive image loading
 
-### Assets Required
-- Icon set (24px, SVG)
-- Logo variations
-- Loading animations
-- Empty states illustrations
+### Design Tokens
+```css
+:root {
+  --color-primary: #0066FF;
+  --color-secondary: #00D084;
+  --color-error: #FF5757;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.16);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+}
+```
 
-### Documentation
-- Component usage guide
-- Design token reference
-- Pattern library
-- Accessibility checklist
+## Responsive Design Matrix
 
-## Key UI/Manager Integration Points
+| Component | Mobile | Tablet | Desktop | Wide |
+|-----------|--------|--------|---------|------|
+| Toolbar | Bottom | Left | Left | Left |
+| Canvas | Full | Full | Center | Center |
+| Properties | Sheet | Panel | Panel | Panel |
+| Collaborators | Hidden | Top | Top | Top |
+| Comments | Modal | Sidebar | Sidebar | Sidebar |
 
-### TextEditingManager UI
-- Toolbar button with "T" icon
-- Floating formatting toolbar
-- Keyboard shortcut (T)
-- Context menu integration
-
-### GridSnappingManager UI
-- Toggle in View menu
-- Settings panel in properties
-- Visual grid overlay
-- Snap indicator on drag
-
-### ImageUploadManager UI
-- Toolbar button with image icon
-- Drag & drop zone
-- Upload progress bar
-- Recent images gallery
-
-### Template Gallery UI
-- Modal with category sidebar
-- Grid view of templates
-- Preview on hover
-- "Use Template" action
-
-## Technical Constraints
-
-### From Planning Phase
-- Managers exist but not wired to UI
-- Use existing Fabric.js integration
-- Maintain WebSocket connections
-- Respect Supabase RLS policies
-
-### Frontend Framework
-- Next.js 15 App Router
-- TypeScript strict mode
-- Tailwind CSS styling
-- Framer Motion animations
-- Zustand state management
+## Next Steps
+- Create component library in Storybook
+- Develop design system documentation
+- Build interactive prototypes
+- Conduct usability testing
+- Iterate based on user feedback
