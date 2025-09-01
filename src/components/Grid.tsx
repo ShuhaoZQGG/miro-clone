@@ -6,13 +6,12 @@ import { clsx } from 'clsx'
 
 interface GridProps {
   className?: string
+  gridSize?: number
 }
 
-export const Grid: React.FC<GridProps> = ({ className }) => {
+export const Grid: React.FC<GridProps> = ({ className, gridSize = 20 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { camera, isGridVisible } = useCanvasStore()
-  
-  const gridSize = 20 // Base grid size in pixels
   const minVisibleZoom = 0.5 // Minimum zoom level to show grid
   const maxVisibleZoom = 3.0 // Maximum zoom level to show grid
 
@@ -105,7 +104,7 @@ export const Grid: React.FC<GridProps> = ({ className }) => {
       }
     }
     
-  }, [camera, isGridVisible])
+  }, [camera, isGridVisible, gridSize])
 
   if (!isGridVisible) return null
 

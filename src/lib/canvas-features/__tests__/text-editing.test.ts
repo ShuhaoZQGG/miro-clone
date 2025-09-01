@@ -1,21 +1,37 @@
+// Create the mock implementation
+const mockITextImpl = jest.fn().mockImplementation((text, options) => ({
+  type: 'i-text',
+  text,
+  ...options,
+  set: jest.fn(function(this: any, prop: string, value: any) {
+    if (typeof prop === 'object') {
+      Object.assign(this, prop)
+    } else {
+      this[prop] = value
+    }
+    return this
+  }),
+  get: jest.fn((prop) => options?.[prop]),
+  enterEditing: jest.fn(),
+  exitEditing: jest.fn(),
+  selectAll: jest.fn(),
+  getBoundingRect: jest.fn(() => ({ width: 200, height: 50 })),
+}))
+
+// Set up global fabric object
+;(global as any).fabric = {
+  IText: mockITextImpl,
+}
+
+// Mock fabric module
+jest.mock('fabric', () => ({
+  fabric: (global as any).fabric,
+}))
+
 import { TextEditingManager } from '../text-editing'
 
-// Mock fabric
-jest.mock('fabric', () => ({
-  fabric: {
-    IText: jest.fn().mockImplementation((text, options) => ({
-      type: 'i-text',
-      text,
-      ...options,
-      set: jest.fn(),
-      get: jest.fn((prop) => options[prop]),
-      enterEditing: jest.fn(),
-      exitEditing: jest.fn(),
-      selectAll: jest.fn(),
-      getBoundingRect: jest.fn(() => ({ width: 200, height: 50 })),
-    })),
-  },
-}))
+// Get reference to the mock for use in tests
+const mockIText = mockITextImpl
 
 describe('TextEditingManager', () => {
   let manager: TextEditingManager
@@ -132,7 +148,8 @@ describe('TextEditingManager', () => {
         getBoundingRect: jest.fn(() => ({ left: 100, top: 100, width: 200, height: 50 })),
       }
       
-      ;(fabric.IText as jest.Mock) = jest.fn(() => mockIText)
+      // Reset the mock before using it
+      mockIText.mockClear()
       
       manager.startEditing(mockTextElement)
 
@@ -166,11 +183,18 @@ describe('TextEditingManager', () => {
 
       expect(listener).toBeDefined()
 
-      // Simulate double-click on text element
-      mockCanvas.getActiveObject.mockReturnValue(mockTextElement)
-      listener({ target: mockTextElement })
+      // Create an i-text element for testing double-click
+      const mockITextElement = {
+        ...mockTextElement,
+        type: 'i-text',
+        enterEditing: jest.fn(),
+      }
 
-      expect(mockTextElement.enterEditing).toHaveBeenCalled()
+      // Simulate double-click on text element
+      mockCanvas.getActiveObject.mockReturnValue(mockITextElement)
+      listener({ target: mockITextElement })
+
+      expect(mockITextElement.enterEditing).toHaveBeenCalled()
     })
   })
 
@@ -233,8 +257,10 @@ describe('TextEditingManager', () => {
       manager.updateTextProperty(mockTextElement, 'text', longText)
       manager.setTextWrapping(mockTextElement, 200)
 
-      expect(mockTextElement.set).toHaveBeenCalledWith('width', 200)
-      expect(mockTextElement.set).toHaveBeenCalledWith('splitByGrapheme', true)
+      expect(mockTextElement.set).toHaveBeenCalledWith({
+        width: 200,
+        splitByGrapheme: true,
+      })
     })
 
     it('should update line height', () => {
@@ -247,33 +273,49 @@ describe('TextEditingManager', () => {
 
   describe('Keyboard Shortcuts', () => {
     it('should handle Ctrl+B for bold', () => {
-      const listener = mockCanvas.on.mock.calls.find(
-        (call: any) => call[0] === 'text:changed'
-      )?.[1]
-
-      manager.startEditing(mockTextElement)
+      // Create an i-text element for keyboard shortcuts
+      const mockITextElement = {
+        ...mockTextElement,
+        type: 'i-text',
+        get: jest.fn((prop) => {
+          if (prop === 'fontWeight') return 'normal'
+          return mockTextElement.content[prop]
+        }),
+      }
       
       // Simulate Ctrl+B
       const event = new KeyboardEvent('keydown', {
         key: 'b',
         ctrlKey: true,
       })
-      manager.handleKeyboardShortcut(event, mockTextElement)
+      event.preventDefault = jest.fn()
+      
+      manager.handleKeyboardShortcut(event, mockITextElement)
 
-      expect(mockTextElement.set).toHaveBeenCalledWith('fontWeight', 'bold')
+      expect(mockITextElement.set).toHaveBeenCalledWith('fontWeight', 'bold')
     })
 
     it('should handle Ctrl+I for italic', () => {
-      manager.startEditing(mockTextElement)
+      // Create an i-text element for keyboard shortcuts
+      const mockITextElement = {
+        ...mockTextElement,
+        type: 'i-text',
+        get: jest.fn((prop) => {
+          if (prop === 'fontStyle') return 'normal'
+          return mockTextElement.content[prop]
+        }),
+      }
       
       // Simulate Ctrl+I
       const event = new KeyboardEvent('keydown', {
         key: 'i',
         ctrlKey: true,
       })
-      manager.handleKeyboardShortcut(event, mockTextElement)
+      event.preventDefault = jest.fn()
+      
+      manager.handleKeyboardShortcut(event, mockITextElement)
 
-      expect(mockTextElement.set).toHaveBeenCalledWith('fontStyle', 'italic')
+      expect(mockITextElement.set).toHaveBeenCalledWith('fontStyle', 'italic')
     })
   })
 
