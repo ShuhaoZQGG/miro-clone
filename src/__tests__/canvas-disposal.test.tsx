@@ -114,7 +114,7 @@ describe('Canvas Disposal Safety', () => {
         const error = new Error('Failed to execute removeChild on Node')
         error.name = 'NotFoundError'
         // Should catch and handle gracefully
-        consoleWarnSpy('Error disposing fabric canvas:', error)
+        expect(consoleWarnSpy).toHaveBeenCalledWith('Error disposing fabric canvas:', error)
       })
 
       expect(() => unmount()).not.toThrow()

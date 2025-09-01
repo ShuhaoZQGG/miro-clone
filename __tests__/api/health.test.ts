@@ -1,5 +1,4 @@
 import { GET } from '@/app/api/health/route';
-import { NextRequest } from 'next/server';
 
 describe('Health Check API', () => {
   beforeEach(() => {
@@ -7,8 +6,7 @@ describe('Health Check API', () => {
   });
 
   it('should return healthy status with all services operational', async () => {
-    const request = new NextRequest('http://localhost:3000/api/health');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -18,8 +16,7 @@ describe('Health Check API', () => {
   });
 
   it('should include database status when available', async () => {
-    const request = new NextRequest('http://localhost:3000/api/health');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(data.services.database).toBeDefined();
@@ -27,8 +24,7 @@ describe('Health Check API', () => {
   });
 
   it('should include Redis status when available', async () => {
-    const request = new NextRequest('http://localhost:3000/api/health');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(data.services.redis).toBeDefined();
@@ -36,8 +32,7 @@ describe('Health Check API', () => {
   });
 
   it('should include WebSocket status', async () => {
-    const request = new NextRequest('http://localhost:3000/api/health');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(data.services.websocket).toBeDefined();
@@ -45,8 +40,7 @@ describe('Health Check API', () => {
   });
 
   it('should include performance metrics', async () => {
-    const request = new NextRequest('http://localhost:3000/api/health');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(data.metrics).toBeDefined();
@@ -57,8 +51,7 @@ describe('Health Check API', () => {
   });
 
   it('should include environment information', async () => {
-    const request = new NextRequest('http://localhost:3000/api/health');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(data.environment).toBeDefined();
@@ -69,8 +62,7 @@ describe('Health Check API', () => {
     // Mock a service failure
     jest.spyOn(global, 'fetch').mockRejectedValueOnce(new Error('Connection failed'));
 
-    const request = new NextRequest('http://localhost:3000/api/health');
-    const response = await GET(request);
+    const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);

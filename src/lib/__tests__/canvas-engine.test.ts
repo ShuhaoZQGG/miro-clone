@@ -46,8 +46,8 @@ jest.mock('fabric', () => {
           scaleY: options.scaleY || 1,
           getScaledWidth: function() { return this.width * this.scaleX },
           getScaledHeight: function() { return this.height * this.scaleY },
-          scale: function(s) { this.scaleX = s; this.scaleY = s },
-          set: function(options) { Object.assign(this, options) }
+          scale: function(s: number) { this.scaleX = s; this.scaleY = s },
+          set: function(options: any) { Object.assign(this, options) }
         }
         return rect
       }),

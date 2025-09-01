@@ -143,7 +143,7 @@ describe('TextEditingManager', () => {
             fill: '#000000',
             backgroundColor: 'transparent',
           }
-          return props[prop]
+          return (props as any)[prop]
         }),
         getBoundingRect: jest.fn(() => ({ left: 100, top: 100, width: 200, height: 50 })),
       }
