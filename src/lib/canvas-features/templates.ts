@@ -23,6 +23,9 @@ export enum TemplateCategory {
   MINDMAP = 'mindmap',
   KANBAN = 'kanban',
   PRESENTATION = 'presentation',
+  SPRINT = 'sprint',
+  SWOT = 'swot',
+  USERJOURNEY = 'userjourney',
   CUSTOM = 'custom'
 }
 
@@ -329,6 +332,366 @@ export class TemplateManager {
           },
           position: { x: 550, y: 400 },
           size: { width: 80, height: 80 }
+        }
+      ]
+    })
+
+    // Sprint Planning Template
+    this.addTemplate({
+      id: 'sprint-planning',
+      name: 'Sprint Planning',
+      description: 'Agile sprint planning board',
+      category: TemplateCategory.SPRINT,
+      elements: [
+        // Sprint header
+        {
+          type: 'rect',
+          properties: {
+            fill: '#1E40AF',
+            stroke: '#1E3A8A',
+            strokeWidth: 2
+          },
+          position: { x: 50, y: 30 },
+          size: { width: 800, height: 80 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Sprint 1 - Planning',
+            fontSize: 24,
+            fill: 'white',
+            fontWeight: 'bold',
+            fontFamily: 'Arial'
+          },
+          position: { x: 400, y: 60 }
+        },
+        // User Stories column
+        {
+          type: 'rect',
+          properties: {
+            fill: '#F3F4F6',
+            stroke: '#9CA3AF',
+            strokeWidth: 1
+          },
+          position: { x: 50, y: 130 },
+          size: { width: 260, height: 450 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'User Stories',
+            fontSize: 18,
+            fill: '#111827',
+            fontWeight: 'bold'
+          },
+          position: { x: 140, y: 150 }
+        },
+        // Tasks column
+        {
+          type: 'rect',
+          properties: {
+            fill: '#FEF3C7',
+            stroke: '#FCD34D',
+            strokeWidth: 1
+          },
+          position: { x: 330, y: 130 },
+          size: { width: 260, height: 450 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Tasks',
+            fontSize: 18,
+            fill: '#78350F',
+            fontWeight: 'bold'
+          },
+          position: { x: 440, y: 150 }
+        },
+        // Sprint Goals
+        {
+          type: 'rect',
+          properties: {
+            fill: '#DCFCE7',
+            stroke: '#86EFAC',
+            strokeWidth: 1
+          },
+          position: { x: 610, y: 130 },
+          size: { width: 240, height: 200 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Sprint Goals',
+            fontSize: 18,
+            fill: '#14532D',
+            fontWeight: 'bold'
+          },
+          position: { x: 690, y: 150 }
+        }
+      ]
+    })
+
+    // SWOT Analysis Template
+    this.addTemplate({
+      id: 'swot-analysis',
+      name: 'SWOT Analysis',
+      description: 'Strategic planning SWOT matrix',
+      category: TemplateCategory.SWOT,
+      elements: [
+        // Strengths
+        {
+          type: 'rect',
+          properties: {
+            fill: '#DCFCE7',
+            stroke: '#22C55E',
+            strokeWidth: 2
+          },
+          position: { x: 100, y: 100 },
+          size: { width: 300, height: 250 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'STRENGTHS',
+            fontSize: 20,
+            fill: '#15803D',
+            fontWeight: 'bold'
+          },
+          position: { x: 220, y: 120 }
+        },
+        // Weaknesses
+        {
+          type: 'rect',
+          properties: {
+            fill: '#FEE2E2',
+            stroke: '#EF4444',
+            strokeWidth: 2
+          },
+          position: { x: 420, y: 100 },
+          size: { width: 300, height: 250 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'WEAKNESSES',
+            fontSize: 20,
+            fill: '#991B1B',
+            fontWeight: 'bold'
+          },
+          position: { x: 530, y: 120 }
+        },
+        // Opportunities
+        {
+          type: 'rect',
+          properties: {
+            fill: '#DBEAFE',
+            stroke: '#3B82F6',
+            strokeWidth: 2
+          },
+          position: { x: 100, y: 370 },
+          size: { width: 300, height: 250 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'OPPORTUNITIES',
+            fontSize: 20,
+            fill: '#1E40AF',
+            fontWeight: 'bold'
+          },
+          position: { x: 200, y: 390 }
+        },
+        // Threats
+        {
+          type: 'rect',
+          properties: {
+            fill: '#FEF3C7',
+            stroke: '#F59E0B',
+            strokeWidth: 2
+          },
+          position: { x: 420, y: 370 },
+          size: { width: 300, height: 250 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'THREATS',
+            fontSize: 20,
+            fill: '#92400E',
+            fontWeight: 'bold'
+          },
+          position: { x: 540, y: 390 }
+        }
+      ]
+    })
+
+    // User Journey Map Template
+    this.addTemplate({
+      id: 'user-journey',
+      name: 'User Journey Map',
+      description: 'Customer experience journey mapping',
+      category: TemplateCategory.USERJOURNEY,
+      elements: [
+        // Title
+        {
+          type: 'rect',
+          properties: {
+            fill: '#6366F1',
+            stroke: '#4F46E5',
+            strokeWidth: 2
+          },
+          position: { x: 50, y: 30 },
+          size: { width: 850, height: 60 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'User Journey Map',
+            fontSize: 22,
+            fill: 'white',
+            fontWeight: 'bold'
+          },
+          position: { x: 420, y: 50 }
+        },
+        // Stages
+        {
+          type: 'rect',
+          properties: {
+            fill: '#F0F9FF',
+            stroke: '#0EA5E9',
+            strokeWidth: 1
+          },
+          position: { x: 50, y: 110 },
+          size: { width: 170, height: 80 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Awareness',
+            fontSize: 16,
+            fill: '#075985'
+          },
+          position: { x: 100, y: 140 }
+        },
+        {
+          type: 'rect',
+          properties: {
+            fill: '#F0FDF4',
+            stroke: '#22C55E',
+            strokeWidth: 1
+          },
+          position: { x: 230, y: 110 },
+          size: { width: 170, height: 80 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Consideration',
+            fontSize: 16,
+            fill: '#15803D'
+          },
+          position: { x: 270, y: 140 }
+        },
+        {
+          type: 'rect',
+          properties: {
+            fill: '#FFFBEB',
+            stroke: '#F59E0B',
+            strokeWidth: 1
+          },
+          position: { x: 410, y: 110 },
+          size: { width: 170, height: 80 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Purchase',
+            fontSize: 16,
+            fill: '#92400E'
+          },
+          position: { x: 470, y: 140 }
+        },
+        {
+          type: 'rect',
+          properties: {
+            fill: '#FDF4FF',
+            stroke: '#A855F7',
+            strokeWidth: 1
+          },
+          position: { x: 590, y: 110 },
+          size: { width: 170, height: 80 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Retention',
+            fontSize: 16,
+            fill: '#6B21A8'
+          },
+          position: { x: 650, y: 140 }
+        },
+        // Touchpoints row
+        {
+          type: 'rect',
+          properties: {
+            fill: '#F9FAFB',
+            stroke: '#D1D5DB',
+            strokeWidth: 1
+          },
+          position: { x: 50, y: 200 },
+          size: { width: 850, height: 100 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Touchpoints',
+            fontSize: 14,
+            fill: '#374151',
+            fontWeight: 'bold'
+          },
+          position: { x: 60, y: 220 }
+        },
+        // Emotions row
+        {
+          type: 'rect',
+          properties: {
+            fill: '#FEF2F2',
+            stroke: '#FECACA',
+            strokeWidth: 1
+          },
+          position: { x: 50, y: 310 },
+          size: { width: 850, height: 100 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Emotions',
+            fontSize: 14,
+            fill: '#7F1D1D',
+            fontWeight: 'bold'
+          },
+          position: { x: 60, y: 330 }
+        },
+        // Opportunities row
+        {
+          type: 'rect',
+          properties: {
+            fill: '#EFF6FF',
+            stroke: '#BFDBFE',
+            strokeWidth: 1
+          },
+          position: { x: 50, y: 420 },
+          size: { width: 850, height: 100 }
+        },
+        {
+          type: 'text',
+          properties: {
+            text: 'Opportunities',
+            fontSize: 14,
+            fill: '#1E3A8A',
+            fontWeight: 'bold'
+          },
+          position: { x: 60, y: 440 }
         }
       ]
     })

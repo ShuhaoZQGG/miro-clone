@@ -1,37 +1,32 @@
-// Create the mock implementation
-const mockITextImpl = jest.fn().mockImplementation((text, options) => ({
-  type: 'i-text',
-  text,
-  ...options,
-  set: jest.fn(function(this: any, prop: string, value: any) {
-    if (typeof prop === 'object') {
-      Object.assign(this, prop)
-    } else {
-      this[prop] = value
-    }
-    return this
-  }),
-  get: jest.fn((prop) => options?.[prop]),
-  enterEditing: jest.fn(),
-  exitEditing: jest.fn(),
-  selectAll: jest.fn(),
-  getBoundingRect: jest.fn(() => ({ width: 200, height: 50 })),
-}))
-
-// Set up global fabric object
-;(global as any).fabric = {
-  IText: mockITextImpl,
-}
-
-// Mock fabric module
+// Mock fabric module before any imports
 jest.mock('fabric', () => ({
-  fabric: (global as any).fabric,
+  fabric: {
+    IText: jest.fn().mockImplementation((text, options) => ({
+      type: 'i-text',
+      text,
+      ...options,
+      set: jest.fn(function(this: any, prop: string, value: any) {
+        if (typeof prop === 'object') {
+          Object.assign(this, prop)
+        } else {
+          this[prop] = value
+        }
+        return this
+      }),
+      get: jest.fn((prop) => options?.[prop]),
+      enterEditing: jest.fn(),
+      exitEditing: jest.fn(),
+      selectAll: jest.fn(),
+      getBoundingRect: jest.fn(() => ({ width: 200, height: 50 })),
+    })),
+  },
 }))
 
 import { TextEditingManager } from '../text-editing'
+import { fabric } from 'fabric'
 
 // Get reference to the mock for use in tests
-const mockIText = mockITextImpl
+const mockIText = (fabric as any).IText
 
 describe('TextEditingManager', () => {
   let manager: TextEditingManager
