@@ -18,6 +18,10 @@ import { useToast, createToastHelpers } from '@/hooks/useToast'
 import { ImageUploadManager } from '@/lib/canvas-features/image-upload'
 import { TextEditingManager } from '@/lib/canvas-features/text-editing'
 import { GridSnappingManager } from '@/lib/canvas-features/grid-snapping'
+import { TemplateGallery } from './TemplateGallery'
+import { Template } from '@/lib/canvas-features/templates'
+import { GridSnapIndicator, GridAlignmentGuides } from './GridSnapIndicator'
+import { UploadProgress } from './UploadProgress'
 import { clsx } from 'clsx'
 
 interface WhiteboardProps {
@@ -33,6 +37,22 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
   const [isUploading, setIsUploading] = useState(false)
   const [gridEnabled, setGridEnabled] = useState(false)
   const [gridSize, setGridSize] = useState(20)
+  const [showTemplateGallery, setShowTemplateGallery] = useState(false)
+  const [selectedTextFormats, setSelectedTextFormats] = useState({
+    bold: false,
+    italic: false,
+    underline: false
+  })
+  const [snapIndicator, setSnapIndicator] = useState<{ visible: boolean; x: number; y: number }>({
+    visible: false,
+    x: 0,
+    y: 0
+  })
+  const [alignmentGuides, setAlignmentGuides] = useState<{ horizontal: number[]; vertical: number[] }>({
+    horizontal: [],
+    vertical: []
+  })
+  const [uploadFileName, setUploadFileName] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageUploadManagerRef = useRef<ImageUploadManager | null>(null)
   const textEditingManagerRef = useRef<TextEditingManager | null>(null)
@@ -154,6 +174,20 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           gridSnappingManagerRef.current.disable()
         }
         gridSnappingManagerRef.current.setGridSize(gridSize)
+        
+        // Set up snapping event handlers for visual feedback
+        gridSnappingManagerRef.current.on('snap', (position: { x: number; y: number }) => {
+          setSnapIndicator({ visible: true, x: position.x, y: position.y })
+          setTimeout(() => setSnapIndicator({ visible: false, x: 0, y: 0 }), 300)
+        })
+        
+        gridSnappingManagerRef.current.on('alignmentGuides', (guides: { horizontal: number[]; vertical: number[] }) => {
+          setAlignmentGuides(guides)
+        })
+        
+        gridSnappingManagerRef.current.on('clearGuides', () => {
+          setAlignmentGuides({ horizontal: [], vertical: [] })
+        })
       }
     }
     
@@ -180,6 +214,8 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     const files = e.target.files
     if (!files || !imageUploadManagerRef.current) return
     
+    const fileName = files[0]?.name || 'image'
+    setUploadFileName(fileName)
     setIsUploading(true)
     try {
       await imageUploadManagerRef.current.handleFiles(Array.from(files))
@@ -188,6 +224,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       toast.error('Failed to upload image', 'Please check the file format and try again')
     } finally {
       setIsUploading(false)
+      setUploadFileName('')
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
@@ -311,6 +348,87 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       })
     }
   }, [handleMouseMove, sendCursorPosition, containerRef])
+  
+  // Handle template selection
+  const handleTemplateSelect = useCallback((template: Template) => {
+    if (!canvasEngine) return
+    
+    // Load template elements onto canvas
+    template.elements.forEach(element => {
+      addElement(element)
+      // Send creation operation to other users
+      sendOperation({
+        type: 'create',
+        elementId: element.id,
+        element: element
+      })
+    })
+    
+    setShowTemplateGallery(false)
+    toast.success('Template loaded successfully')
+  }, [canvasEngine, addElement, sendOperation, toast])
+  
+  // Handle text formatting
+  const handleTextFormat = useCallback((format: 'bold' | 'italic' | 'underline') => {
+    if (!textEditingManagerRef.current) return
+    
+    const activeObject = canvasEngine?.getCanvas().getActiveObject()
+    if (activeObject && activeObject.type === 'i-text') {
+      // Toggle the format
+      const newFormats = { ...selectedTextFormats }
+      newFormats[format] = !newFormats[format]
+      setSelectedTextFormats(newFormats)
+      
+      // Apply format to text
+      switch (format) {
+        case 'bold':
+          textEditingManagerRef.current.toggleBold()
+          break
+        case 'italic':
+          textEditingManagerRef.current.toggleItalic()
+          break
+        case 'underline':
+          textEditingManagerRef.current.toggleUnderline()
+          break
+      }
+    } else {
+      toast.info('Select text to apply formatting')
+    }
+  }, [canvasEngine, selectedTextFormats, toast])
+  
+  // Update text format state when selection changes
+  useEffect(() => {
+    if (!canvasEngine || !textEditingManagerRef.current) return
+    
+    const canvas = canvasEngine.getCanvas()
+    const updateFormatState = () => {
+      const activeObject = canvas.getActiveObject()
+      if (activeObject && activeObject.type === 'i-text') {
+        const textObj = activeObject as any
+        setSelectedTextFormats({
+          bold: textObj.fontWeight === 'bold',
+          italic: textObj.fontStyle === 'italic',
+          underline: textObj.underline || false
+        })
+      } else {
+        setSelectedTextFormats({
+          bold: false,
+          italic: false,
+          underline: false
+        })
+      }
+    }
+    
+    canvas.on('selection:created', updateFormatState)
+    canvas.on('selection:updated', updateFormatState)
+    canvas.on('selection:cleared', updateFormatState)
+    
+    return () => {
+      canvas.off('selection:created', updateFormatState)
+      canvas.off('selection:updated', updateFormatState)
+      canvas.off('selection:cleared', updateFormatState)
+    }
+  }, [canvasEngine])
 
   return (
     <div 
@@ -378,6 +496,20 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         {/* Grid */}
         {isGridVisible && <Grid gridSize={gridSize} />}
         
+        {/* Grid Alignment Guides */}
+        <GridAlignmentGuides 
+          horizontal={alignmentGuides.horizontal}
+          vertical={alignmentGuides.vertical}
+          bounds={{ width: window.innerWidth, height: window.innerHeight }}
+        />
+        
+        {/* Grid Snap Indicator */}
+        <GridSnapIndicator 
+          isVisible={snapIndicator.visible}
+          position={{ x: snapIndicator.x, y: snapIndicator.y }}
+          size="md"
+        />
+        
         {/* Collaborative Cursors */}
         <CollaborativeCursors 
           users={users.filter(u => u.userId !== userId)} 
@@ -403,16 +535,12 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           </div>
         )}
         
-        {/* Upload Loading Indicator */}
-        {isUploading && (
-          <div 
-            className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50"
-            data-testid="upload-loading"
-          >
-            <LoadingSpinner size="sm" />
-            <span className="ml-2 text-sm text-gray-600">Uploading...</span>
-          </div>
-        )}
+        {/* Upload Progress Indicator */}
+        <UploadProgress 
+          isUploading={isUploading}
+          fileName={uploadFileName}
+          message="Uploading image..."
+        />
         
         {/* Canvas content will be rendered here by Fabric.js */}
       </div>
@@ -437,6 +565,9 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
             }
           }}
           gridEnabled={gridEnabled}
+          onTemplateGallery={() => setShowTemplateGallery(true)}
+          onTextFormat={handleTextFormat}
+          selectedTextFormats={selectedTextFormats}
         />
       </div>
       
@@ -484,6 +615,16 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       
       {/* Toast Notifications */}
       <ToastContainer toasts={toasts} onClose={removeToast} />
+      
+      {/* Template Gallery */}
+      {showTemplateGallery && (
+        <TemplateGallery
+          isOpen={showTemplateGallery}
+          onClose={() => setShowTemplateGallery(false)}
+          onSelectTemplate={handleTemplateSelect}
+          currentBoardElements={elements}
+        />
+      )}
       
       {/* Keyboard Shortcuts Help - Hidden for now, can be toggled */}
       <div className="sr-only">

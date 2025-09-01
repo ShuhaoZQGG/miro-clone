@@ -13,7 +13,12 @@ import {
   UndoIcon,
   RedoIcon,
   ShareIcon,
-  ImageIcon
+  ImageIcon,
+  TemplateIcon,
+  FormatBoldIcon,
+  FormatItalicIcon,
+  FormatUnderlineIcon,
+  TextIcon
 } from './ui/Icons'
 import { clsx } from 'clsx'
 
@@ -26,6 +31,13 @@ interface ToolbarProps {
   onImageUpload?: () => void
   onGridToggle?: () => void
   gridEnabled?: boolean
+  onTemplateGallery?: () => void
+  onTextFormat?: (format: 'bold' | 'italic' | 'underline') => void
+  selectedTextFormats?: {
+    bold?: boolean
+    italic?: boolean
+    underline?: boolean
+  }
   className?: string
 }
 
@@ -38,6 +50,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onImageUpload,
   onGridToggle,
   gridEnabled = false,
+  onTemplateGallery,
+  onTextFormat,
+  selectedTextFormats = {},
   className
 }) => {
   const { 
@@ -169,6 +184,74 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <GridIcon className="w-4 h-4" />
           </Button>
         </Tooltip>
+        
+        <div className="w-px h-6 bg-gray-200 mx-1" />
+      </div>
+
+      {/* Template & Text Controls */}
+      <div className="flex items-center gap-1">
+        {onTemplateGallery && (
+          <Tooltip content="Template Gallery">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onTemplateGallery}
+              data-testid="template-gallery-button"
+              aria-label="Open Template Gallery"
+            >
+              <TemplateIcon className="w-4 h-4" />
+            </Button>
+          </Tooltip>
+        )}
+        
+        {onTextFormat && (
+          <>
+            <Tooltip content="Bold (Ctrl+B)">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onTextFormat('bold')}
+                className={clsx(
+                  selectedTextFormats.bold && 'bg-blue-50 text-blue-600'
+                )}
+                data-testid="format-bold-button"
+                aria-label="Toggle Bold"
+              >
+                <FormatBoldIcon className="w-4 h-4" />
+              </Button>
+            </Tooltip>
+            
+            <Tooltip content="Italic (Ctrl+I)">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onTextFormat('italic')}
+                className={clsx(
+                  selectedTextFormats.italic && 'bg-blue-50 text-blue-600'
+                )}
+                data-testid="format-italic-button"
+                aria-label="Toggle Italic"
+              >
+                <FormatItalicIcon className="w-4 h-4" />
+              </Button>
+            </Tooltip>
+            
+            <Tooltip content="Underline (Ctrl+U)">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onTextFormat('underline')}
+                className={clsx(
+                  selectedTextFormats.underline && 'bg-blue-50 text-blue-600'
+                )}
+                data-testid="format-underline-button"
+                aria-label="Toggle Underline"
+              >
+                <FormatUnderlineIcon className="w-4 h-4" />
+              </Button>
+            </Tooltip>
+          </>
+        )}
         
         <div className="w-px h-6 bg-gray-200 mx-1" />
       </div>
