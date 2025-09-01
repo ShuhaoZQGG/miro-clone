@@ -27,7 +27,12 @@ jest.mock('@/hooks/useCanvas', () => ({
         removeEventListener: jest.fn(),
         getWidth: jest.fn(() => 800),
         getHeight: jest.fn(() => 600),
-        getElement: jest.fn(() => document.createElement('canvas'))
+        getElement: jest.fn(() => document.createElement('canvas')),
+        on: jest.fn(),
+        off: jest.fn(),
+        getActiveObject: jest.fn(),
+        setActiveObject: jest.fn(),
+        discardActiveObject: jest.fn()
       })
     }
   }))

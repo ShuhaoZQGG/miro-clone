@@ -376,7 +376,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         }}
       >
         {/* Grid */}
-        {isGridVisible && <Grid />}
+        {isGridVisible && <Grid gridSize={gridSize} />}
         
         {/* Collaborative Cursors */}
         <CollaborativeCursors 

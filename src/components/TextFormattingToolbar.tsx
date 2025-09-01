@@ -44,12 +44,51 @@ export const TextFormattingToolbar: React.FC<TextFormattingToolbarProps> = ({
       }
     }
 
+    // Keyboard shortcuts handler
+    const handleKeyboardShortcuts = (event: KeyboardEvent) => {
+      if (!selectedElement) return
+      
+      // Check for Ctrl/Cmd key
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key.toLowerCase()) {
+          case 'b':
+            event.preventDefault()
+            toggleBold()
+            break
+          case 'i':
+            event.preventDefault()
+            toggleItalic()
+            break
+          case 'u':
+            event.preventDefault()
+            toggleUnderline()
+            break
+          case 'l':
+            event.preventDefault()
+            handleTextAlignChange('left')
+            break
+          case 'e':
+            event.preventDefault()
+            handleTextAlignChange('center')
+            break
+          case 'r':
+            event.preventDefault()
+            handleTextAlignChange('right')
+            break
+        }
+      }
+    }
+
+    // Add keyboard event listener
+    document.addEventListener('keydown', handleKeyboardShortcuts)
+
     // You'd need to add this event to TextEditingManager
     // For now, we'll just show the toolbar when visible prop is true
     return () => {
       // Cleanup
+      document.removeEventListener('keydown', handleKeyboardShortcuts)
     }
-  }, [textManager])
+  }, [textManager, selectedElement, toggleBold, toggleItalic, toggleUnderline, handleTextAlignChange])
 
   if (!visible || !textManager) return null
 
