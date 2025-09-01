@@ -21,6 +21,7 @@ import { GridSnappingManager } from '@/lib/canvas-features/grid-snapping'
 import { TemplateGallery } from './TemplateGallery'
 import { Template } from '@/lib/canvas-features/templates'
 import { GridSnapIndicator, GridAlignmentGuides } from './GridSnapIndicator'
+import { GridSettings } from './GridSettings'
 import { UploadProgress } from './UploadProgress'
 import { clsx } from 'clsx'
 
@@ -37,6 +38,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
   const [isUploading, setIsUploading] = useState(false)
   const [gridEnabled, setGridEnabled] = useState(false)
   const [gridSize, setGridSize] = useState(20)
+  const [showGridSettings, setShowGridSettings] = useState(false)
   const [showTemplateGallery, setShowTemplateGallery] = useState(false)
   const [selectedTextFormats, setSelectedTextFormats] = useState({
     bold: false,
@@ -300,6 +302,43 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     return () => document.removeEventListener('paste', handlePaste)
   }, [toast])
   
+  // Handle text element creation from text tool
+  useEffect(() => {
+    const handleCreateTextElement = (event: CustomEvent) => {
+      if (!textEditingManagerRef.current || !canvasEngine) return
+      
+      const { position } = event.detail
+      const textElement = textEditingManagerRef.current.createTextElement(position, {
+        text: 'Text',
+        fontSize: 16,
+        fontFamily: 'Arial'
+      })
+      
+      // Add to store
+      addElement(textElement)
+      
+      // Start editing immediately
+      const canvas = canvasEngine.getCanvas()
+      if (canvas) {
+        const fabricObjects = canvas.getObjects()
+        const textObject = fabricObjects.find((obj: any) => obj.elementId === textElement.id)
+        if (textObject) {
+          textEditingManagerRef.current.startEditing(textObject)
+        }
+      }
+      
+      // Send creation operation to other users
+      sendOperation({
+        type: 'create',
+        elementId: textElement.id,
+        element: textElement
+      })
+    }
+    
+    window.addEventListener('createTextElement', handleCreateTextElement as EventListener)
+    return () => window.removeEventListener('createTextElement', handleCreateTextElement as EventListener)
+  }, [addElement, sendOperation, canvasEngine])
+  
   // Connect to WebSocket on mount or when authentication changes
   useEffect(() => {
     connect(userId, displayName)
@@ -460,6 +499,25 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       canvas.off('selection:cleared', updateFormatState)
     }
   }, [canvasEngine])
+  
+  // Handle grid settings changes
+  const handleGridToggle = useCallback((enabled: boolean) => {
+    setGridEnabled(enabled)
+    if (gridSnappingManagerRef.current) {
+      if (enabled) {
+        gridSnappingManagerRef.current.enable()
+      } else {
+        gridSnappingManagerRef.current.disable()
+      }
+    }
+  }, [])
+  
+  const handleGridSizeChange = useCallback((size: number) => {
+    setGridSize(size)
+    if (gridSnappingManagerRef.current) {
+      gridSnappingManagerRef.current.setGridSize(size)
+    }
+  }, [])
 
   return (
     <div 
@@ -498,7 +556,35 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           'w-full h-full'
         )}
         data-testid="canvas-container"
-        onMouseDown={handleMouseDown}
+        onMouseDown={(e) => {
+          // Handle text tool specially
+          if (tool.type === 'text' && textEditingManagerRef.current) {
+            const rect = containerRef.current?.getBoundingClientRect()
+            if (rect) {
+              const position = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+              }
+              const textElement = textEditingManagerRef.current.createTextElement(position)
+              // Start editing immediately
+              const canvas = canvasEngine?.getCanvas()
+              if (canvas) {
+                const objects = canvas.getObjects()
+                const textObject = objects.find((obj: any) => obj.elementId === textElement.id)
+                if (textObject) {
+                  canvas.setActiveObject(textObject)
+                  canvas.renderAll()
+                  if (textObject.type === 'i-text') {
+                    (textObject as any).enterEditing()
+                    (textObject as any).selectAll()
+                  }
+                }
+              }
+              return
+            }
+          }
+          handleMouseDown(e)
+        }}
         onMouseMove={handleEnhancedMouseMove}
         onMouseUp={handleMouseUp}
         onDragEnter={handleDragEnter}
@@ -585,16 +671,7 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           onFitToScreen={fitToScreen}
           onExport={exportCanvas}
           onImageUpload={handleImageUpload}
-          onGridToggle={() => {
-            setGridEnabled(!gridEnabled)
-            if (gridSnappingManagerRef.current) {
-              if (!gridEnabled) {
-                gridSnappingManagerRef.current.enable()
-              } else {
-                gridSnappingManagerRef.current.disable()
-              }
-            }
-          }}
+          onGridToggle={() => setShowGridSettings(!showGridSettings)}
           gridEnabled={gridEnabled}
           onTemplateGallery={() => setShowTemplateGallery(true)}
           onTextFormat={handleTextFormat}
@@ -611,6 +688,16 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       <div style={{ position: 'fixed', right: 16, top: 88, zIndex: 100 }}>
         <CollaborationPanel users={users} isConnected={isConnected} />
       </div>
+      
+      {/* Grid Settings Panel */}
+      <GridSettings
+        isOpen={showGridSettings}
+        onClose={() => setShowGridSettings(false)}
+        gridEnabled={gridEnabled}
+        gridSize={gridSize}
+        onGridToggle={handleGridToggle}
+        onGridSizeChange={handleGridSizeChange}
+      />
       
       {/* Status Bar */}
       <div className="absolute bottom-4 right-4 bg-white shadow-lg rounded-lg px-3 py-2 text-sm text-gray-600 border" style={{ zIndex: 100 }}>

@@ -1,142 +1,95 @@
 # Next Cycle Tasks
 
-## Completed in Previous Cycles
-- ✅ Image upload feature with drag & drop (Cycle 42)
-- ✅ Toast notification system (Cycle 42)
-- ✅ Text editing manager implementation (Cycle 43)
-- ✅ Grid snapping manager implementation (Cycle 43)
-- ✅ Authentication system (Cycle 44)
-- ✅ Comments system with mentions (Cycle 44)
-- ✅ PDF Export functionality (Cycle 44)
-- ✅ Enhanced templates - 7 templates added (Cycle 44)
-- ✅ All test failures fixed (Cycle 45)
-- ✅ RLS policies implemented for all tables (Cycle 45)
-- ✅ Build successful with zero TypeScript errors (Cycle 45)
+## Critical Issues (P0)
+1. **Environment Configuration**
+   - Fix missing DATABASE_URL in build environment
+   - Ensure all required environment variables are properly configured
+   - Create .env.example template for documentation
 
-## Priority 1: Security Fixes
-- [ ] **Supabase Auth Security**
-  - Enable leaked password protection
-  - Add TOTP MFA option
-  - Add SMS MFA option
-  - Configure password strength requirements
+2. **Security Fixes**
+   - Enable leaked password protection in Supabase Auth
+   - Configure MFA options (TOTP, SMS)
+   - Review and strengthen authentication policies
 
-## Priority 2: Feature Integration
-- [ ] **Text Editing Integration**
-  - Integrate TextEditingManager with Whiteboard component
-  - Add text tool to toolbar
-  - Create text formatting toolbar with:
-    - Bold, italic, underline buttons
-    - Font family dropdown
-    - Font size selector
-    - Text alignment options
-    - Color picker
+3. **Performance Optimization**
+   - Optimize 28 RLS policies using `(select auth.uid())` pattern
+   - Add missing indexes for foreign keys:
+     - board_templates.created_by
+     - board_versions.created_by
+     - comments.parent_id, resolved_by, user_id
+   - Remove unused indexes to improve write performance
 
-- [ ] **Grid Snapping Integration**
-  - Integrate GridSnappingManager with Whiteboard
-  - Add grid toggle button to toolbar
-  - Add grid size selector (5px, 10px, 20px, 50px, 100px)
-  - Implement visual grid lines when enabled
-  - Add snapping indicators during drag operations
+## Test Failures (P1)
+1. **UIIntegration Tests**
+   - Fix 6 failing tests in UIIntegration suite
+   - Focus on export functionality tests
+   - Ensure proper mock setup for download links
 
-- [ ] **Image Upload Integration**
-  - Complete integration of ImageUploadManager with Whiteboard
-  - Add upload button to toolbar
-  - Wire up drag/drop and paste handlers
-  - Add progress indicators
+## Feature Implementation (P1)
+1. **Performance Features**
+   - Enable WebGL renderer for Fabric.js
+   - Implement viewport culling for 1000+ objects
+   - Add level-of-detail rendering
 
-## Priority 3: Continue Canvas Features
-- [ ] **Templates system**
-  - Pre-built board templates:
-    - Sprint planning board
-    - Mind map template
-    - User journey map
-    - SWOT analysis
-    - Kanban board
-  - Save current board as template
-  - Template gallery with preview
-  - Template categories and search
+2. **Collaboration Enhancement**
+   - Implement CRDT for conflict resolution
+   - Add visual merge indicators
+   - Create collaborative selection boxes
+   - Optimize WebSocket message batching
 
-- [ ] **Shape library expansion**
-  - Add more shapes (star, hexagon, triangle, arrow)
-  - Create shape categories
-  - Implement shape search/filter
-  - Custom shape creation
+3. **Mobile Support**
+   - Create responsive layout for mobile devices
+   - Implement touch gesture handlers
+   - Design mobile-optimized controls
+   - Add PWA support
 
-## Priority 4: Performance & Collaboration
-- [ ] **Conflict resolution with CRDT**
-  - Implement CRDT-based merge algorithms
-  - Visual conflict indicators
-  - Automatic resolution strategies
-  
-- [ ] **Canvas virtualization**
-  - Viewport culling for 1000+ objects
-  - Level-of-detail (LOD) rendering
-  - Lazy loading of off-screen elements
-  
-- [ ] **WebGL acceleration**
-  - Integrate with Fabric.js WebGL renderer
-  - GPU-accelerated transformations
-  - Performance mode toggle
+## Technical Debt (P2)
+1. **Code Quality**
+   - Remove duplicate code between cycles
+   - Consolidate manager implementations
+   - Improve error handling consistency
+   - Add comprehensive logging
 
-## Technical Debt & Security
-- [ ] **Supabase Security (from advisors)**
-  - Enable leaked password protection
-  - Add more MFA options (TOTP, SMS)
-  - Fix RLS performance in analytics_events table
-  - Fix RLS performance in billing_events table
-  
-- [ ] **Database Optimization**
-  - Remove 14 unused indexes identified
-  - Optimize query performance
-  - Add missing indexes for common queries
+2. **Documentation**
+   - Document API endpoints
+   - Create developer setup guide
+   - Add architecture diagrams
+   - Write deployment instructions
 
-- [ ] **Code Quality**
-  - Refactor ImageUploadIntegration tests
-  - Update outdated mocks
-  - Remove unused dependencies
-  - Code splitting for better performance
+3. **Monitoring**
+   - Set up Sentry error tracking
+   - Implement performance monitoring
+   - Add usage analytics
+   - Create health check dashboard
 
-## Priority 5: Production Deployment
-- [ ] **Environment Setup**
-  - Install @sentry/nextjs dependency
-  - Configure Sentry DSN
-  - Set up Vercel deployment
-  - Configure Railway for WebSocket
-  
-- [ ] **Monitoring & Health**
-  - Create /api/health route
-  - Set up uptime monitoring
-  - Configure alert thresholds
-  - Dashboard for metrics
+## Process Improvements
+1. **CI/CD Pipeline**
+   - Add automated security scanning
+   - Implement performance regression tests
+   - Create staging environment
+   - Add database migration validation
 
-## Documentation Updates
-- [ ] Document TextEditingManager API
-- [ ] Document GridSnappingManager API
-- [ ] Update user guide with new features
-- [ ] Create keyboard shortcuts documentation
-- [ ] Update README with completed features
-- [ ] Create comprehensive deployment checklist
+2. **Development Workflow**
+   - Establish clear PR review process
+   - Create feature flag system
+   - Implement A/B testing framework
+   - Add automated changelog generation
 
-## Known Issues to Address
-- ImageUploadIntegration test failures (14 tests)
-- E2E TypeScript errors (unrelated to features)
-- Missing UI controls for text editing and grid snapping
-- Performance with 100+ elements on canvas
+## Deferred from Previous Cycles
+1. **Advanced Features**
+   - Video/audio embedding
+   - Advanced shape library
+   - Plugin system architecture
+   - AI-powered suggestions
 
-## Success Metrics for Next Cycle
-- [ ] All canvas features integrated and working
-- [ ] 100% test coverage maintained
-- [ ] Build time < 5 minutes
-- [ ] Bundle size < 500KB gzipped
-- [ ] Page load time < 2 seconds
-- [ ] Zero TypeScript errors
-- [ ] Production deployment successful
+2. **Enterprise Features**
+   - SSO integration
+   - Advanced permissions system
+   - Audit logging
+   - Compliance reporting
 
-## Future Enhancements
-- [ ] Image editing (crop, rotate, filters)
-- [ ] Real-time collaborative text editing
-- [ ] Advanced grid features (isometric, hexagonal)
-- [ ] Export boards with all features (PDF/PNG/SVG)
-- [ ] Version history with snapshots
-- [ ] AI-powered content suggestions
-- [ ] Mobile app development
+## Notes
+- Cycle 46 work appears to duplicate PR #49 - verify before proceeding
+- Focus on fixing critical issues before adding new features
+- Consider performance impact of all new implementations
+- Maintain backward compatibility with existing boards

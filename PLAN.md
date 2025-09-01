@@ -1,254 +1,307 @@
-# Cycle 46: Architectural Planning & Feature Integration
+# Miro Clone - Architectural Plan
 
-## Vision
-Complete the Miro board project by integrating all implemented features with UI, optimizing performance, and preparing for production deployment.
+## Project Vision
+Real-time collaborative whiteboard application with enterprise-grade features, inspired by Miro. Focus on performance, collaboration, and user experience.
 
-## Current State
-- **Build**: Clean, zero TypeScript errors
-- **Tests**: 408/410 passing (2 skipped)
-- **Features Implemented**: Text editing, grid snapping, image upload, auth, comments, PDF export
-- **UI Integration**: Partial - managers created but not wired to UI
-- **Database**: RLS policies active, migrations applied
+## Current State Analysis
+- **Infrastructure**: Next.js 15 + Supabase backend fully configured
+- **Core Features**: 80% complete (canvas tools, auth, templates, export)
+- **UI Integration**: Completed but needs performance optimization
+- **Tests**: 422/430 passing (98% success rate)
+- **Critical Issues**: Environment config, security warnings, RLS optimization needed
 
-## Requirements (from README.md Core Features)
+## Requirements Summary
 
-### P0: Critical Integration (Cycle 46)
-1. **UI/UX Integration**
-   - Wire TextEditingManager to toolbar
-   - Connect GridSnappingManager to UI controls
-   - Complete ImageUploadManager integration
-   - Template gallery modal implementation
+### Functional Requirements
+1. **Canvas Tools**: Drawing, shapes, text, images, sticky notes ✅
+2. **Real-time Collaboration**: Live cursors, presence, concurrent editing ⚠️
+3. **Content Management**: Templates, export (PDF/PNG), sharing ✅
+4. **Organization**: Layers, groups, grid snapping, search ✅
+5. **Performance**: Handle 1000+ objects, WebGL acceleration ❌
+6. **Security**: Auth, RBAC, RLS, 2FA ⚠️
 
-2. **Security Fixes**
-   - Move .env to .env.example
-   - Configure Supabase Auth MFA
-   - Enable leaked password protection
+### Non-Functional Requirements
+- **Performance**: < 3s TTI, 60fps, < 50ms input latency
+- **Scalability**: Support 100+ concurrent users per board
+- **Reliability**: 99.9% uptime, offline mode support
+- **Security**: OWASP compliance, data encryption
+- **Accessibility**: WCAG AA compliance
 
-### P1: Performance & Collaboration (Cycle 47)
-1. **Performance**
-   - WebGL renderer activation
-   - Viewport culling (1000+ objects)
-   - LOD rendering system
-   
-2. **Collaboration**
-   - CRDT conflict resolution
-   - Visual merge indicators
-   - Collaborative selection
+## Architecture Design
 
-### P2: Production Features (Cycle 48)
-1. **Extended Features**
-   - Shape library expansion
-   - Voice/video integration
-   - Advanced templates
-   - Mobile responsiveness
-
-## Architecture
-
-### System Components
+### Frontend Architecture
 ```
-┌──────────────────────────────────────────────┐
-│                   Frontend                    │
-├────────────────┬──────────────┬──────────────┤
-│    Canvas      │   Managers   │    UI/UX     │
-│  - Fabric.js   │ - TextEdit   │ - Toolbar    │
-│  - WebGL       │ - GridSnap   │ - Modals     │
-│  - Viewport    │ - ImageUp    │ - Panels     │
-└────────────────┴──────────────┴──────────────┘
-                        │
-┌──────────────────────────────────────────────┐
-│                  Real-time                    │
-├────────────────┬──────────────┬──────────────┤
-│   Socket.io    │    Redis     │     CRDT     │
-│  - Presence    │  - PubSub    │  - Merge     │
-│  - Cursors     │  - Cache     │  - Conflict  │
-└────────────────┴──────────────┴──────────────┘
-                        │
-┌──────────────────────────────────────────────┐
-│                   Backend                     │
-├────────────────┬──────────────┬──────────────┤
-│   Supabase     │   Storage    │    Auth      │
-│  - PostgreSQL  │  - Images    │  - Users     │
-│  - RLS         │  - Files     │  - Sessions  │
-└────────────────┴──────────────┴──────────────┘
+┌─────────────────────────────────────────────┐
+│           Next.js App Router                 │
+├─────────────────────────────────────────────┤
+│  Presentation Layer                          │
+│  ├── Pages (App Router)                      │
+│  ├── Components (React)                      │
+│  └── UI Library (Radix + Tailwind)          │
+├─────────────────────────────────────────────┤
+│  Business Logic Layer                        │
+│  ├── Canvas Managers                         │
+│  ├── State Management (Zustand)              │
+│  └── WebSocket Handlers                      │
+├─────────────────────────────────────────────┤
+│  Data Layer                                  │
+│  ├── Supabase Client                         │
+│  ├── WebSocket Client                        │
+│  └── IndexedDB (Offline)                     │
+└─────────────────────────────────────────────┘
+```
+
+### Backend Architecture
+```
+┌─────────────────────────────────────────────┐
+│           Supabase Platform                  │
+├─────────────────────────────────────────────┤
+│  API Layer                                   │
+│  ├── PostgREST (Auto-generated APIs)        │
+│  ├── Edge Functions (Custom logic)           │
+│  └── Realtime (WebSocket)                    │
+├─────────────────────────────────────────────┤
+│  Service Layer                               │
+│  ├── Auth Service                            │
+│  ├── Storage Service                         │
+│  └── Vector Search                           │
+├─────────────────────────────────────────────┤
+│  Data Layer                                  │
+│  ├── PostgreSQL Database                     │
+│  ├── Row Level Security                      │
+│  └── Database Functions                      │
+└─────────────────────────────────────────────┘
 ```
 
 ### Data Flow
 ```
-User Action → Canvas Event → Manager Process → 
+User Action → UI Component → Manager → 
 State Update → WebSocket Broadcast → 
-Redis Cache → Database Persist → 
-Other Clients Update
+Supabase Persistence → Other Clients
 ```
 
-## Tech Stack Decisions
+## Technology Stack
 
-### Core Libraries (Locked)
-- Next.js 15.5.2 - App Router for SSR/SSG
-- TypeScript 5.6.2 - Type safety
-- Fabric.js 6.5.1 - Canvas manipulation
-- Socket.io 4.8.1 - Real-time sync
-- Supabase - Backend as a Service
+### Frontend
+- **Framework**: Next.js 15.5.2 (App Router)
+- **Language**: TypeScript 5.6.2 (strict mode)
+- **Canvas**: Fabric.js 6.5.1
+- **Styling**: Tailwind CSS 3.4.15
+- **Animation**: Framer Motion 11.15.0
+- **State**: Zustand 5.0.2
+- **Forms**: React Hook Form
+- **UI**: Radix UI, Shadcn/ui
 
-### Integration Points
-1. **TextEditingManager** → Fabric.IText objects
-2. **GridSnappingManager** → Canvas mouse events
-3. **ImageUploadManager** → Supabase Storage
-4. **WebSocket** → Redis adapter for scaling
-5. **Auth** → Supabase RLS policies
+### Backend
+- **Platform**: Supabase
+- **Database**: PostgreSQL 15
+- **Real-time**: Supabase Realtime
+- **Storage**: Supabase Storage
+- **Auth**: Supabase Auth
+- **Edge Functions**: Deno runtime
+- **Cache**: Redis (future)
+
+### DevOps
+- **Hosting**: Vercel (frontend)
+- **CI/CD**: GitHub Actions
+- **Monitoring**: Sentry
+- **Testing**: Jest, RTL, Playwright
+- **Analytics**: PostHog (future)
+
+## Database Schema
+
+### Core Tables
+```sql
+-- Users (managed by Supabase Auth)
+
+-- Boards
+boards (
+  id, title, description, thumbnail_url,
+  created_by, created_at, updated_at,
+  is_public, settings
+)
+
+-- Board Elements
+board_elements (
+  id, board_id, type, data, position,
+  style, created_by, created_at, updated_at
+)
+
+-- Collaborators
+board_collaborators (
+  board_id, user_id, role, joined_at
+)
+
+-- Comments
+comments (
+  id, board_id, element_id, user_id,
+  content, parent_id, created_at
+)
+
+-- Templates
+board_templates (
+  id, name, description, category,
+  thumbnail_url, data, is_public
+)
+```
+
+### Security Policies
+- RLS enabled on all tables
+- Optimized auth.uid() queries needed (28 policies)
+- Role-based permissions
+- Public/private board access
 
 ## Implementation Phases
 
-### Phase 1: UI Integration (Day 1)
-```typescript
-// Priority tasks
-- [ ] Create ToolbarButton component for text tool
-- [ ] Add GridControls component (toggle, size selector)
-- [ ] Wire ImageUpload to toolbar button
-- [ ] Implement TemplateGallery modal
-- [ ] Add formatting toolbar for text editing
-```
+### Phase 1: Critical Fixes (P0) - Immediate
+1. Fix DATABASE_URL configuration
+2. Enable security features (MFA, password protection)
+3. Optimize RLS policies (28 policies need optimization)
+4. Add missing database indexes
+5. Fix failing tests (6 UIIntegration tests)
 
-### Phase 2: Manager Integration (Day 1-2)
-```typescript
-// Connect managers to Whiteboard
-- [ ] Initialize managers in useEffect
-- [ ] Setup event listeners for canvas
-- [ ] Handle tool switching logic
-- [ ] Implement state persistence
-- [ ] Add progress indicators
-```
+### Phase 2: Performance (P1) - Next Sprint
+1. WebGL renderer integration
+2. Viewport culling implementation
+3. Level-of-detail rendering
+4. WebSocket message batching
+5. Client-side caching
 
-### Phase 3: Performance (Day 2-3)
-```typescript
-// Optimization tasks
-- [ ] Enable Fabric.js WebGL backend
-- [ ] Implement viewport culling
-- [ ] Add object pooling
-- [ ] Setup lazy loading
-- [ ] Optimize bundle splitting
-```
+### Phase 3: Collaboration (P1) - Sprint 2
+1. CRDT implementation for conflict resolution
+2. Visual merge indicators
+3. Collaborative selection boxes
+4. Presence optimization
 
-### Phase 4: Testing & QA (Day 3)
-```typescript
-// Validation
-- [ ] Integration tests for managers
-- [ ] E2E tests for new features
-- [ ] Performance benchmarks
-- [ ] Security audit
-- [ ] Accessibility check
-```
+### Phase 4: Mobile (P2) - Sprint 3
+1. Responsive layouts
+2. Touch gesture handlers
+3. Mobile-optimized controls
+4. PWA implementation
 
-## Risk Mitigation
+### Phase 5: Enterprise (P3) - Future
+1. SSO integration
+2. Advanced permissions
+3. Audit logging
+4. Compliance features
 
-| Risk | Impact | Mitigation | Status |
-|------|--------|------------|--------|
-| Manager-UI disconnect | High | Create integration tests | Pending |
-| Performance degradation | High | Implement virtualization | Planned |
-| WebSocket scaling | Medium | Redis adapter ready | Ready |
-| State sync conflicts | High | CRDT implementation | Planned |
-| Bundle size growth | Medium | Code splitting | Active |
+## Risk Assessment
+
+### Technical Risks
+| Risk | Impact | Probability | Mitigation |
+|------|--------|-------------|------------|
+| WebGL compatibility | High | Medium | Fallback to Canvas 2D |
+| WebSocket scaling | High | Medium | Message queue, batching |
+| CRDT complexity | Medium | High | Use proven library (Yjs) |
+| Mobile performance | Medium | Medium | Progressive enhancement |
+| Database performance | High | High | Index optimization, caching |
+
+### Business Risks
+| Risk | Impact | Probability | Mitigation |
+|------|--------|-------------|------------|
+| Feature scope creep | High | High | Strict prioritization |
+| Performance targets | High | Medium | Early optimization |
+| Security vulnerabilities | High | Low | Regular audits |
+| User adoption | Medium | Medium | Focus on UX |
+
+## Performance Targets
+- **Initial Load**: < 3s (LCP)
+- **Interactivity**: < 100ms (FID)
+- **Frame Rate**: 60fps constant
+- **Canvas Operations**: < 16ms
+- **Save Latency**: < 500ms
+- **WebSocket Latency**: < 100ms
+
+## Security Considerations
+- **Authentication**: Supabase Auth with MFA (needs enabling)
+- **Authorization**: RBAC with RLS (needs optimization)
+- **Data Protection**: TLS encryption
+- **Input Validation**: Server-side validation
+- **XSS Prevention**: Content sanitization
+- **CSRF Protection**: Token validation
+- **Password Protection**: Leaked password check (needs enabling)
+
+## Monitoring Strategy
+- **Error Tracking**: Sentry integration
+- **Performance**: Web Vitals monitoring
+- **User Analytics**: Event tracking
+- **System Health**: Status page
+- **Database**: Query performance
+- **WebSocket**: Connection metrics
+
+## Testing Strategy
+- **Unit Tests**: 80% coverage target
+- **Integration**: API testing
+- **E2E**: Critical user journeys
+- **Performance**: Load testing
+- **Security**: Penetration testing
+- **Accessibility**: WCAG validation
+
+## Deployment Strategy
+- **Environments**: Dev → Staging → Production
+- **Rollout**: Feature flags, gradual rollout
+- **Rollback**: Automated rollback on errors
+- **Database**: Migration validation
+- **Monitoring**: Real-time alerts
 
 ## Success Metrics
+- **User Engagement**: DAU/MAU > 40%
+- **Performance**: P95 < 100ms response
+- **Reliability**: 99.9% uptime
+- **Quality**: < 1% error rate
+- **Satisfaction**: NPS > 50
 
-### Performance KPIs
-- Canvas render: <16ms (60fps)
-- Tool switch: <100ms
-- Image upload: <3s for 5MB
-- Grid snap: <10ms response
-- Bundle size: <500KB gzipped
+## Dependencies
+- Supabase platform availability
+- Fabric.js library maintenance
+- WebSocket infrastructure
+- CDN performance
+- Third-party auth providers
 
-### Quality Metrics
-- Test coverage: >90%
-- TypeScript: Zero errors
-- Lighthouse: >95 score
-- Accessibility: WCAG AA
-- Security: Zero critical issues
+## Constraints
+- Browser WebGL support
+- WebSocket connection limits
+- Database connection pooling
+- Storage quotas
+- Rate limiting
 
-## Deliverables
+## Critical Path Items
+1. **Environment Configuration**: DATABASE_URL must be fixed
+2. **Security**: MFA and password protection critical for production
+3. **Performance**: RLS optimization blocking scalability
+4. **Testing**: 6 failing tests need resolution
+5. **Duplicate Work**: Verify cycle 46 vs PR #49
 
-### This Cycle (46)
-1. ✅ README.md with core features
-2. ✅ Comprehensive PLAN.md
-3. ⏳ UI components for managers
-4. ⏳ Manager-Canvas integration
-5. ⏳ Updated tests
-
-### Documentation
-- API documentation for managers
-- User guide for new features
-- Keyboard shortcuts reference
-- Deployment checklist
-
-## Technical Decisions
-
-### Key Architecture Choices
-1. **Managers Pattern**: Separation of concerns for features
-2. **Event-Driven**: Canvas events trigger manager actions
-3. **State Machines**: Tool states managed centrally
-4. **Optimistic UI**: Immediate feedback, async persist
-5. **CRDT for Conflicts**: Automatic merge without locks
-
-### Database Schema Updates
-```sql
--- Already implemented via Supabase
-- canvas_elements (RLS enabled)
-- user_sessions (RLS enabled)
-- board_permissions (RLS enabled)
-- comments (RLS enabled)
-```
+## Supabase Integration Points
+- **Database**: 28 RLS policies need optimization
+- **Auth**: MFA and password protection disabled
+- **Storage**: Image upload integration complete
+- **Realtime**: WebSocket channels configured
+- **Edge Functions**: Available for complex operations
 
 ## Next Steps
+1. Fix critical environment and security issues
+2. Optimize database performance (indexes, RLS)
+3. Resolve test failures
+4. Implement WebGL rendering
+5. Add CRDT for collaboration
+6. Create mobile experience
 
-### Immediate (Today)
-1. Create UI components for text tool
-2. Add grid control panel
-3. Wire ImageUploadManager events
-4. Test manager initialization
+## Decision Log
+- **Canvas Library**: Fabric.js chosen for maturity and features
+- **State Management**: Zustand for simplicity and performance
+- **Database**: Supabase for integrated auth/realtime/storage
+- **Deployment**: Vercel for optimal Next.js integration
+- **Testing**: Jest + Playwright for comprehensive coverage
+- **Manager Pattern**: Separation of concerns for canvas features
+- **Event-Driven**: Canvas events trigger manager actions
 
-### Tomorrow
-1. Complete integration testing
-2. Implement WebGL renderer
-3. Add viewport culling
-4. Update documentation
-
-### This Week
-1. CRDT implementation
-2. Performance optimization
-3. Production deployment prep
-4. Security audit
-
-## Validation Checklist
-
-### Pre-deployment
-- [ ] All managers integrated with UI
-- [ ] Features accessible from toolbar
-- [ ] Tests passing (100%)
-- [ ] No TypeScript errors
-- [ ] Bundle <500KB
-- [ ] Lighthouse >95
-
-### Post-deployment
-- [ ] Monitor error rates
-- [ ] Track performance metrics
-- [ ] Gather user feedback
-- [ ] Plan mobile version
-- [ ] Scale infrastructure
-
-## Supabase Integration
-
-### Available MCP Tools
-- ✅ Database migrations
-- ✅ SQL execution
-- ✅ Edge Functions deployment
-- ✅ Branch management
-- ✅ Security advisors
-
-### Planned Usage
-1. Create indexes for performance
-2. Deploy Edge Functions for complex operations
-3. Set up database triggers for real-time
-4. Configure storage policies
-5. Implement rate limiting
+## Technical Debt
+- Duplicate code between cycles needs consolidation
+- Manager implementations need UI wiring
+- Error handling inconsistent across modules
+- Logging infrastructure incomplete
+- Documentation gaps in API and architecture
 
 ## Conclusion
-Cycle 46 focuses on completing the integration of already-implemented managers with the UI, ensuring all features are accessible and functional. The architecture is solid, with clear separation of concerns and scalable design patterns. Success depends on careful integration and thorough testing.
+The Miro clone project has solid foundations with 80% of core features complete. Critical issues around environment configuration, security, and performance optimization must be addressed before production deployment. The architecture supports scalability, but immediate focus should be on fixing P0 issues rather than adding new features.
