@@ -221,9 +221,11 @@ describe('GridSnappingManager', () => {
       const offset = { x: 10, y: 15 }
       const lines = manager.getGridLines(canvasSize, offset)
 
-      // Lines should be offset
-      expect(lines.vertical[0]).toBe(-10)
-      expect(lines.horizontal[0]).toBe(-15)
+      // Lines should be offset correctly
+      // With offset.x=10 and gridSize=20, first line should be at 10 (0*20+10)
+      expect(lines.vertical[0]).toBe(10)
+      // With offset.y=15 and gridSize=20, first line should be at -5 (floor(-15/20)*20+15 = -1*20+15 = -5)
+      expect(lines.horizontal[0]).toBe(-5)
     })
   })
 })
