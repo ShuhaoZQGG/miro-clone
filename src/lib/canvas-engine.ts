@@ -1,5 +1,8 @@
 import { fabric } from 'fabric'
 import { Position, Size, Camera, CanvasElement, Bounds, ElementType, ShapeElement, LineElement } from '@/types'
+import { WebGLRenderer } from './canvas-features/webgl-renderer'
+import { ViewportCulling } from './canvas-features/viewport-culling'
+import { CRDTManager } from './canvas-features/crdt-manager'
 
 interface CameraState {
   x: number
@@ -46,6 +49,13 @@ export class CanvasEngine {
   private currentFrameRate = 60
   private renderThrottleId: number | null = null
   
+  // Performance optimization features
+  private webglRenderer: WebGLRenderer | null = null
+  private viewportCulling: ViewportCulling | null = null
+  private crdtManager: CRDTManager | null = null
+  private webglEnabled = false
+  private cullingEnabled = true
+  
   // Event system
   private eventListeners: Map<string, Set<(...args: any[]) => void>> = new Map()
   
@@ -67,11 +77,42 @@ export class CanvasEngine {
   private resizeDebounceTimer: number | null = null
   private renderRequestId: number | null = null
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: {
+    enableWebGL?: boolean
+    enableCulling?: boolean
+    enableCRDT?: boolean
+    boardId?: string
+    userId?: string
+    websocketUrl?: string
+  }) {
     this.container = container
     this.canvas = this.initializeCanvas()
     this.setupEventListeners()
     this.startFrameRateMonitoring()
+    
+    // Initialize performance features
+    if (options?.enableWebGL && WebGLRenderer.isSupported()) {
+      this.initializeWebGL()
+    }
+    
+    if (options?.enableCulling !== false) {
+      this.viewportCulling = new ViewportCulling({
+        maxDepth: 6,
+        maxElementsPerNode: 10,
+        viewportPadding: 100,
+        dynamicLOD: true
+      })
+      this.cullingEnabled = true
+    }
+    
+    if (options?.enableCRDT && options.boardId && options.userId) {
+      this.crdtManager = new CRDTManager(
+        options.boardId,
+        options.userId,
+        options.websocketUrl
+      )
+      this.setupCRDTHandlers()
+    }
   }
 
   private initializeCanvas(): fabric.Canvas {
@@ -616,12 +657,47 @@ export class CanvasEngine {
     this.scheduleRender()
     // Immediately render for synchronous behavior in tests
     if (this.renderThrottleId) {
-      this.canvas.renderAll()
+      this.performRender()
       this.renderThrottleId = null
     }
   }
 
   render(): void {
+    this.performRender()
+  }
+
+  /**
+   * Perform optimized rendering
+   */
+  private performRender(): void {
+    // Apply viewport culling if enabled
+    let elementsToRender = this.elements
+    
+    if (this.cullingEnabled && this.viewportCulling) {
+      const viewport = this.getVisibleBounds()
+      
+      // Rebuild spatial index if needed
+      if (this.viewportCulling.hasViewportChanged(viewport)) {
+        this.viewportCulling.buildIndex(this.elements)
+      }
+      
+      // Query visible elements
+      elementsToRender = this.viewportCulling.queryViewport(viewport, this.camera.zoom)
+      
+      // Hide non-visible fabric objects
+      for (const element of this.elements) {
+        if (element.fabricObject) {
+          element.fabricObject.visible = elementsToRender.includes(element)
+        }
+      }
+    }
+    
+    // Use WebGL renderer if enabled and beneficial
+    if (this.webglEnabled && this.webglRenderer) {
+      this.webglRenderer.render(elementsToRender)
+    }
+    
+    // Always render with fabric for now (WebGL is supplementary)
     this.canvas.renderAll()
   }
 
@@ -660,6 +736,152 @@ export class CanvasEngine {
     }
     
     requestAnimationFrame(updateFrameRate)
+  }
+
+  /**
+   * Initialize WebGL renderer
+   */
+  private initializeWebGL(): void {
+    this.webglRenderer = new WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance'
+    })
+    
+    if (this.webglRenderer.initialize(this.canvas)) {
+      this.webglEnabled = true
+      console.log('WebGL renderer initialized successfully')
+    } else {
+      this.webglRenderer = null
+      this.webglEnabled = false
+      console.warn('WebGL initialization failed, falling back to Canvas 2D')
+    }
+  }
+
+  /**
+   * Setup CRDT event handlers
+   */
+  private setupCRDTHandlers(): void {
+    if (!this.crdtManager) return
+    
+    // Handle remote element changes
+    this.crdtManager.on('elements-changed', (changes: any[]) => {
+      for (const change of changes) {
+        switch (change.type) {
+          case 'add':
+            this.addElementFromCRDT(change.element)
+            break
+          case 'update':
+            this.updateElementFromCRDT(change.elementId, change.element)
+            break
+          case 'delete':
+            this.removeElementFromCRDT(change.elementId)
+            break
+        }
+      }
+    })
+    
+    // Handle awareness changes (cursors, selections)
+    this.crdtManager.on('awareness-changed', (states: any[]) => {
+      this.emit('awareness-changed', states)
+    })
+    
+    // Handle sync status
+    this.crdtManager.on('synced', (data: any) => {
+      this.emit('synced', data)
+    })
+  }
+
+  /**
+   * Add element from CRDT update
+   */
+  private addElementFromCRDT(element: CanvasElement): void {
+    // Check if element already exists
+    if (this.elements.find(e => e.id === element.id)) {
+      return
+    }
+    
+    // Create fabric object
+    const fabricObject = this.createFabricObject(element)
+    if (fabricObject) {
+      this.canvas.add(fabricObject)
+      this.elements.push({ ...element, fabricObject })
+      this.scheduleRender()
+    }
+  }
+
+  /**
+   * Update element from CRDT update
+   */
+  private updateElementFromCRDT(elementId: string, updates: Partial<CanvasElement>): void {
+    const element = this.elements.find(e => e.id === elementId)
+    if (!element) return
+    
+    // Update element properties
+    Object.assign(element, updates)
+    
+    // Update fabric object
+    if (element.fabricObject) {
+      if (updates.position) {
+        element.fabricObject.set({
+          left: updates.position.x,
+          top: updates.position.y
+        })
+      }
+      if (updates.size) {
+        element.fabricObject.set({
+          width: updates.size.width,
+          height: updates.size.height
+        })
+      }
+      element.fabricObject.setCoords()
+      this.scheduleRender()
+    }
+  }
+
+  /**
+   * Remove element from CRDT update
+   */
+  private removeElementFromCRDT(elementId: string): void {
+    const index = this.elements.findIndex(e => e.id === elementId)
+    if (index === -1) return
+    
+    const element = this.elements[index]
+    if (element.fabricObject) {
+      this.canvas.remove(element.fabricObject)
+    }
+    
+    this.elements.splice(index, 1)
+    this.scheduleRender()
+  }
+
+  /**
+   * Create fabric object from element
+   */
+  private createFabricObject(element: CanvasElement): fabric.Object | null {
+    switch (element.type) {
+      case 'rectangle':
+        return new fabric.Rect({
+          left: element.position.x,
+          top: element.position.y,
+          width: element.size.width,
+          height: element.size.height,
+          fill: (element as any).style?.fill || '#ffffff',
+          stroke: (element as any).style?.stroke || '#000000',
+          strokeWidth: (element as any).style?.strokeWidth || 1
+        })
+      case 'circle':
+        return new fabric.Circle({
+          left: element.position.x,
+          top: element.position.y,
+          radius: Math.min(element.size.width, element.size.height) / 2,
+          fill: (element as any).style?.fill || '#ffffff',
+          stroke: (element as any).style?.stroke || '#000000',
+          strokeWidth: (element as any).style?.strokeWidth || 1
+        })
+      default:
+        return null
+    }
   }
 
   // Event system
@@ -1314,6 +1536,64 @@ export class CanvasEngine {
     return this.renderQuality
   }
 
+  /**
+   * Enable or disable WebGL rendering
+   */
+  setWebGLEnabled(enabled: boolean): void {
+    if (enabled && !this.webglRenderer) {
+      this.initializeWebGL()
+    } else if (!enabled && this.webglRenderer) {
+      this.webglRenderer.dispose()
+      this.webglRenderer = null
+      this.webglEnabled = false
+    }
+  }
+
+  /**
+   * Set WebGL performance mode
+   */
+  setWebGLPerformanceMode(mode: 'auto' | 'performance' | 'quality'): void {
+    if (this.webglRenderer) {
+      this.webglRenderer.setPerformanceMode(mode)
+    }
+  }
+
+  /**
+   * Enable or disable viewport culling
+   */
+  setCullingEnabled(enabled: boolean): void {
+    this.cullingEnabled = enabled
+    if (enabled && !this.viewportCulling) {
+      this.viewportCulling = new ViewportCulling()
+    } else if (!enabled && this.viewportCulling) {
+      this.viewportCulling.clear()
+    }
+  }
+
+  /**
+   * Get performance statistics
+   */
+  getPerformanceStats(): {
+    fps: number
+    webgl: any
+    culling: any
+    crdt: any
+  } {
+    return {
+      fps: this.currentFrameRate,
+      webgl: this.webglRenderer?.getStats() || null,
+      culling: this.viewportCulling?.getStats() || null,
+      crdt: this.crdtManager?.getStats() || null
+    }
+  }
+
+  /**
+   * Check if WebGL is supported
+   */
+  static isWebGLSupported(): boolean {
+    return WebGLRenderer.isSupported()
+  }
+
   // Cleanup
   private isDisposed = false
   
@@ -1450,6 +1730,22 @@ export class CanvasEngine {
       
       // Clear bound handlers
       this.boundHandlers = {}
+      
+      // Dispose performance features
+      if (this.webglRenderer) {
+        this.webglRenderer.dispose()
+        this.webglRenderer = null
+      }
+      
+      if (this.viewportCulling) {
+        this.viewportCulling.clear()
+        this.viewportCulling = null
+      }
+      
+      if (this.crdtManager) {
+        this.crdtManager.dispose()
+        this.crdtManager = null
+      }
       
       // Clear container reference
       this.container = null as any
