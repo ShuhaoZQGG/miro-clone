@@ -1,6 +1,13 @@
 # Next Cycle Tasks
 
-## Production Readiness (High Priority)
+## Priority 1: Clean Up Open PRs (CRITICAL)
+**13 unmerged PRs need review**: #60, #58, #57, #51, #50, #45, #44, #42, #25, #24, #20, #16, #10
+- Review each PR for relevance
+- Merge valuable changes to main
+- Close stale or superseded PRs
+- Clean up associated branches
+
+## Priority 2: Production Readiness
 1. **Supabase Security Configuration**
    - Enable leaked password protection (currently disabled)
    - Configure additional MFA options (currently insufficient)
