@@ -179,9 +179,19 @@ export class ViewportCulling {
     node.elements = []
     
     for (const element of elements) {
-      for (const child of node.children) {
-        this.insertElement(child, element)
+      // Insert element into the appropriate child based on its position
+      const elementBounds = this.getElementBounds(element)
+      const center = {
+        x: elementBounds.x + elementBounds.width / 2,
+        y: elementBounds.y + elementBounds.height / 2
       }
+      
+      // Determine which quadrant the element belongs to
+      let childIndex = 0
+      if (center.x > x + halfWidth) childIndex += 1
+      if (center.y > y + halfHeight) childIndex += 2
+      
+      this.insertElement(node.children[childIndex], element)
     }
   }
 
@@ -213,6 +223,9 @@ export class ViewportCulling {
    * Query visible elements within viewport
    */
   queryViewport(viewport: Bounds, zoom: number = 1): CanvasElement[] {
+    // Store last viewport for incremental updates (without padding for comparison)
+    this.lastViewport = viewport
+    
     if (!this.quadTree) {
       return []
     }
@@ -224,9 +237,6 @@ export class ViewportCulling {
       width: viewport.width + this.viewportPadding * 2,
       height: viewport.height + this.viewportPadding * 2
     }
-    
-    // Store last viewport for incremental updates
-    this.lastViewport = paddedViewport
     
     // Reset stats
     this.cullingStats.nodesVisited = 0
@@ -365,10 +375,20 @@ export class ViewportCulling {
     if (!this.quadTree) return
     
     // Remove from old position
-    this.removeElement(this.quadTree, element, oldPosition)
+    const removed = this.removeElement(this.quadTree, element, oldPosition)
     
-    // Insert at new position
-    this.insertElement(this.quadTree, element)
+    // Check if element is outside current bounds
+    const elementBounds = this.getElementBounds(element)
+    if (!this.intersects(this.quadTree.bounds, elementBounds)) {
+      // Element moved outside bounds - rebuild the tree with expanded bounds
+      const elements: CanvasElement[] = []
+      this.collectElements(this.quadTree, elements)
+      elements.push(element) // Add the updated element
+      this.buildIndex(elements)
+    } else {
+      // Insert at new position
+      this.insertElement(this.quadTree, element)
+    }
   }
 
   /**
@@ -393,7 +413,7 @@ export class ViewportCulling {
         }
       }
     } else {
-      const index = node.elements.indexOf(element)
+      const index = node.elements.findIndex(e => e.id === element.id)
       if (index !== -1) {
         node.elements.splice(index, 1)
         return true
@@ -469,6 +489,8 @@ export class ViewportCulling {
     const dy = Math.abs(viewport.y - this.lastViewport.y)
     const dw = Math.abs(viewport.width - this.lastViewport.width)
     const dh = Math.abs(viewport.height - this.lastViewport.height)
+    
+    // console.log('hasViewportChanged:', { viewport, lastViewport: this.lastViewport, dx, dy, dw, dh, threshold })
     
     return dx > threshold || dy > threshold || dw > threshold || dh > threshold
   }

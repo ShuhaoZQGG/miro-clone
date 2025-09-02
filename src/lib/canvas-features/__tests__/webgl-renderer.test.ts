@@ -38,6 +38,8 @@ describe('WebGLRenderer', () => {
       deleteProgram: jest.fn(),
       getShaderInfoLog: jest.fn(() => ''),
       getProgramInfoLog: jest.fn(() => ''),
+      hint: jest.fn(),
+      getExtension: jest.fn(() => null),
       VERTEX_SHADER: 1,
       FRAGMENT_SHADER: 2,
       COMPILE_STATUS: 3,
@@ -50,7 +52,12 @@ describe('WebGLRenderer', () => {
       CULL_FACE: 10,
       BACK: 11,
       COLOR_BUFFER_BIT: 12,
-      DEPTH_BUFFER_BIT: 13
+      DEPTH_BUFFER_BIT: 13,
+      GENERATE_MIPMAP_HINT: 14,
+      DONT_CARE: 15,
+      FASTEST: 16,
+      NICEST: 17,
+      FRAGMENT_SHADER_DERIVATIVE_HINT: 18
     }
 
     // Mock canvas element

@@ -1571,9 +1571,9 @@ export class CanvasEngine {
   }
 
   /**
-   * Get performance statistics
+   * Get detailed performance statistics
    */
-  getPerformanceStats(): {
+  getDetailedPerformanceStats(): {
     fps: number
     webgl: any
     culling: any
