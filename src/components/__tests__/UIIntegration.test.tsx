@@ -153,16 +153,14 @@ describe('UI Integration Tests', () => {
     })
 
     it('should have grid controls available in toolbar', () => {
-      render(
+      const { container } = render(
         <AuthProvider>
           <Whiteboard boardId="test-board" />
         </AuthProvider>
       )
 
       // Check that toolbar is rendered (it contains grid controls)
-      const toolbar = screen.getByRole('toolbar', { hidden: true }) || 
-                     document.querySelector('.toolbar') ||
-                     document.querySelector('[class*="toolbar"]')
+      const toolbar = container.querySelector('.toolbar')
       
       expect(toolbar).toBeTruthy()
     })
@@ -397,9 +395,8 @@ describe('UI Integration Tests', () => {
       )
 
       // Export button is represented by ExportIcon in toolbar
-      const exportButtons = screen.getAllByRole('button')
-      const exportButton = exportButtons.find(btn => btn.querySelector('[class*="ExportIcon"]') || btn.textContent?.includes('Export'))
-      expect(exportButton).toBeTruthy()
+      const exportButton = screen.getByTestId('export-button')
+      expect(exportButton).toBeInTheDocument()
     })
 
     it('should trigger download on export', async () => {
@@ -415,9 +412,8 @@ describe('UI Integration Tests', () => {
       jest.spyOn(document, 'createElement').mockReturnValueOnce(link)
 
       // Find export button by looking for buttons with export functionality
-      const exportButtons = screen.getAllByRole('button')
-      const exportButton = exportButtons.find(btn => btn.querySelector('[class*="ExportIcon"]') || btn.textContent?.includes('Export'))
-      if (exportButton) fireEvent.click(exportButton)
+      const exportButton = screen.getByTestId('export-button')
+      fireEvent.click(exportButton)
 
       await waitFor(() => {
         expect(clickSpy).toHaveBeenCalled()
