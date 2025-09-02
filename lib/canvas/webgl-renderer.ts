@@ -1,351 +1,481 @@
-import { RenderableObject, Viewport, WebGLResources } from './types';
+import * as THREE from 'three';
+
+export interface CanvasObject {
+  id: string;
+  type: string;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  radius?: number;
+  points?: { x: number; y: number }[];
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  src?: string;
+}
+
+export interface Viewport {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  scale: number;
+}
+
+export interface PerformanceStats {
+  fps: number;
+  objectCount: number;
+  visibleObjectCount: number;
+  memoryUsage: number;
+  renderTime: number;
+  drawCalls: number;
+  instancedObjects: number;
+  textureMemory: number;
+}
+
+type RenderMode = 'normal' | 'performance' | 'wireframe';
+type LODLevel = 'high' | 'medium' | 'low';
 
 export class WebGLRenderer {
   private canvas: HTMLCanvasElement;
-  private gl: WebGL2RenderingContext | null = null;
-  private resources: WebGLResources;
-  private initialized: boolean = false;
-  private maxTextureSize: number = 0;
-  private vertexData: Float32Array | null = null;
-  private indexData: Uint16Array | null = null;
+  private renderer: THREE.WebGLRenderer;
+  private scene: THREE.Scene;
+  private camera: THREE.OrthographicCamera;
+  private objects: Map<string, THREE.Object3D>;
+  private objectData: Map<string, CanvasObject>;
+  private viewport: Viewport;
+  private renderMode: RenderMode = 'normal';
+  private initialized = false;
+  
+  // Performance tracking
+  private frameCount = 0;
+  private lastFrameTime = performance.now();
+  private fps = 60;
+  private renderTime = 0;
+  private drawCalls = 0;
+  private instancedMeshes: Map<string, THREE.InstancedMesh> = new Map();
+  
+  // Optimization thresholds
+  private readonly PERFORMANCE_MODE_THRESHOLD = 1000;
+  private readonly CULLING_MARGIN = 100;
+  private readonly LOD_SCALE_THRESHOLDS = {
+    high: 0.8,
+    medium: 0.4,
+    low: 0
+  };
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.resources = {
-      program: null,
-      vertexBuffer: null,
-      indexBuffer: null,
-      textureAtlas: null,
-      uniformLocations: new Map()
+    this.objects = new Map();
+    this.objectData = new Map();
+    this.viewport = {
+      x: 0,
+      y: 0,
+      width: canvas.width,
+      height: canvas.height,
+      scale: 1
     };
-
-    this.initialize();
+    
+    this.initializeRenderer();
+    this.initialized = true;
   }
 
-  private initialize(): void {
-    try {
-      this.gl = this.canvas.getContext('webgl2', {
-        alpha: true,
-        antialias: true,
-        preserveDrawingBuffer: false,
-        powerPreference: 'high-performance'
-      });
-
-      if (!this.gl) {
-        console.warn('WebGL2 not available, falling back to canvas rendering');
-        return;
-      }
-
-      this.maxTextureSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
-      this.setupShaders();
-      this.setupBuffers();
-      this.initialized = true;
-    } catch (error) {
-      console.error('Failed to initialize WebGL:', error);
-      this.initialized = false;
-    }
-  }
-
-  private setupShaders(): void {
-    if (!this.gl) return;
-
-    const vertexShaderSource = `#version 300 es
-      precision highp float;
-      
-      in vec2 a_position;
-      in vec2 a_texCoord;
-      in vec4 a_color;
-      
-      uniform mat3 u_matrix;
-      uniform vec2 u_resolution;
-      
-      out vec2 v_texCoord;
-      out vec4 v_color;
-      
-      void main() {
-        vec3 position = u_matrix * vec3(a_position, 1.0);
-        vec2 clipSpace = ((position.xy / u_resolution) * 2.0) - 1.0;
-        gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
-        
-        v_texCoord = a_texCoord;
-        v_color = a_color;
-      }
-    `;
-
-    const fragmentShaderSource = `#version 300 es
-      precision highp float;
-      
-      in vec2 v_texCoord;
-      in vec4 v_color;
-      
-      uniform sampler2D u_texture;
-      uniform bool u_useTexture;
-      
-      out vec4 fragColor;
-      
-      void main() {
-        if (u_useTexture) {
-          fragColor = texture(u_texture, v_texCoord) * v_color;
-        } else {
-          fragColor = v_color;
-        }
-      }
-    `;
-
-    const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentShaderSource);
-
-    if (!vertexShader || !fragmentShader) return;
-
-    const program = this.gl.createProgram();
-    if (!program) return;
-
-    this.gl.attachShader(program, vertexShader);
-    this.gl.attachShader(program, fragmentShader);
-    this.gl.linkProgram(program);
-
-    if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-      console.error('Failed to link shader program');
-      return;
-    }
-
-    this.resources.program = program;
-
-    // Store uniform locations
-    const uniforms = ['u_matrix', 'u_resolution', 'u_texture', 'u_useTexture'];
-    uniforms.forEach(name => {
-      const location = this.gl!.getUniformLocation(program, name);
-      if (location) {
-        this.resources.uniformLocations.set(name, location);
-      }
+  private initializeRenderer(): void {
+    // Create Three.js renderer
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas,
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+      powerPreference: 'high-performance'
     });
-  }
-
-  private createShader(type: number, source: string): WebGLShader | null {
-    if (!this.gl) return null;
-
-    const shader = this.gl.createShader(type);
-    if (!shader) return null;
-
-    this.gl.shaderSource(shader, source);
-    this.gl.compileShader(shader);
-
-    if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-      console.error('Shader compilation error:', this.gl.getShaderInfoLog(shader));
-      this.gl.deleteShader(shader);
-      return null;
-    }
-
-    return shader;
-  }
-
-  private setupBuffers(): void {
-    if (!this.gl) return;
-
-    this.resources.vertexBuffer = this.gl.createBuffer();
-    this.resources.indexBuffer = this.gl.createBuffer();
-
-    // Pre-allocate buffers for batch rendering
-    const maxVertices = 10000 * 4; // Support up to 10k rectangles
-    this.vertexData = new Float32Array(maxVertices * 8); // 8 floats per vertex
-    this.indexData = new Uint16Array(10000 * 6); // 6 indices per rectangle
-  }
-
-  render(objects: RenderableObject[], viewport: Viewport): number {
-    if (!this.initialized || !this.gl || !this.resources.program) {
-      return 0;
-    }
-
-    const gl = this.gl;
     
-    // Clear canvas
-    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    // Use shader program
-    gl.useProgram(this.resources.program);
-
-    // Set uniforms
-    const resolutionLoc = this.resources.uniformLocations.get('u_resolution');
-    if (resolutionLoc) {
-      gl.uniform2f(resolutionLoc, this.canvas.width, this.canvas.height);
-    }
-
-    // Create transformation matrix
-    const matrix = this.createTransformMatrix(viewport);
-    const matrixLoc = this.resources.uniformLocations.get('u_matrix');
-    if (matrixLoc) {
-      gl.uniformMatrix3fv(matrixLoc, false, matrix);
-    }
-
-    // Batch objects by type and color
-    const batches = this.batchObjects(objects);
-    let drawCalls = 0;
-
-    // Render each batch
-    for (const batch of batches) {
-      this.renderBatch(batch, viewport);
-      drawCalls++;
-    }
-
-    return drawCalls;
-  }
-
-  private batchObjects(objects: RenderableObject[]): RenderableObject[][] {
-    const batches = new Map<string, RenderableObject[]>();
-
-    objects.forEach(obj => {
-      const key = `${obj.type}-${obj.color || 'default'}`;
-      if (!batches.has(key)) {
-        batches.set(key, []);
-      }
-      batches.get(key)!.push(obj);
-    });
-
-    return Array.from(batches.values());
-  }
-
-  private renderBatch(objects: RenderableObject[], viewport: Viewport): void {
-    if (!this.gl || !this.vertexData || !this.indexData) return;
-
-    const gl = this.gl;
-    let vertexOffset = 0;
-    let indexOffset = 0;
-
-    // Build vertex data for batch
-    objects.forEach((obj, i) => {
-      const color = this.parseColor(obj.color || '#ffffff');
-      
-      // Transform coordinates
-      const x = obj.x;
-      const y = obj.y;
-      const w = obj.width;
-      const h = obj.height;
-
-      // Add 4 vertices for rectangle
-      const vertices = [
-        x, y, 0, 0, ...color,
-        x + w, y, 1, 0, ...color,
-        x + w, y + h, 1, 1, ...color,
-        x, y + h, 0, 1, ...color
-      ];
-
-      this.vertexData!.set(vertices, vertexOffset);
-      vertexOffset += vertices.length;
-
-      // Add 6 indices for 2 triangles
-      const baseIndex = i * 4;
-      const indices = [
-        baseIndex, baseIndex + 1, baseIndex + 2,
-        baseIndex, baseIndex + 2, baseIndex + 3
-      ];
-
-      this.indexData!.set(indices, indexOffset);
-      indexOffset += 6;
-    });
-
-    // Upload vertex data
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.resources.vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, this.vertexData.subarray(0, vertexOffset), gl.DYNAMIC_DRAW);
-
-    // Upload index data
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.resources.indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indexData.subarray(0, indexOffset), gl.DYNAMIC_DRAW);
-
-    // Setup attributes
-    const program = this.resources.program!;
-    const positionLoc = gl.getAttribLocation(program, 'a_position');
-    const texCoordLoc = gl.getAttribLocation(program, 'a_texCoord');
-    const colorLoc = gl.getAttribLocation(program, 'a_color');
-
-    const stride = 8 * 4; // 8 floats per vertex, 4 bytes per float
-
-    gl.enableVertexAttribArray(positionLoc);
-    gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, stride, 0);
-
-    gl.enableVertexAttribArray(texCoordLoc);
-    gl.vertexAttribPointer(texCoordLoc, 2, gl.FLOAT, false, stride, 2 * 4);
-
-    gl.enableVertexAttribArray(colorLoc);
-    gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, stride, 4 * 4);
-
-    // Disable texture for solid colors
-    const useTextureLoc = this.resources.uniformLocations.get('u_useTexture');
-    if (useTextureLoc) {
-      gl.uniform1i(useTextureLoc, 0);
-    }
-
-    // Enable blending
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    // Draw
-    gl.drawElements(gl.TRIANGLES, indexOffset, gl.UNSIGNED_SHORT, 0);
-  }
-
-  private createTransformMatrix(viewport: Viewport): Float32Array {
-    const matrix = new Float32Array(9);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(this.canvas.width, this.canvas.height);
     
-    // Translation
-    const tx = -viewport.x * viewport.scale;
-    const ty = -viewport.y * viewport.scale;
+    // Create scene
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xffffff);
     
-    // Scale
-    const sx = viewport.scale;
-    const sy = viewport.scale;
+    // Create orthographic camera for 2D rendering
+    const aspect = this.canvas.width / this.canvas.height;
+    this.camera = new THREE.OrthographicCamera(
+      -this.canvas.width / 2,
+      this.canvas.width / 2,
+      this.canvas.height / 2,
+      -this.canvas.height / 2,
+      0.1,
+      1000
+    );
+    this.camera.position.z = 10;
     
-    // Build matrix (column-major order for WebGL)
-    matrix[0] = sx;  matrix[3] = 0;   matrix[6] = tx;
-    matrix[1] = 0;   matrix[4] = sy;  matrix[7] = ty;
-    matrix[2] = 0;   matrix[5] = 0;   matrix[8] = 1;
-    
-    return matrix;
-  }
-
-  private parseColor(color: string): number[] {
-    if (color.startsWith('#')) {
-      const hex = color.slice(1);
-      const r = parseInt(hex.substr(0, 2), 16) / 255;
-      const g = parseInt(hex.substr(2, 2), 16) / 255;
-      const b = parseInt(hex.substr(4, 2), 16) / 255;
-      return [r, g, b, 1];
-    }
-    return [1, 1, 1, 1]; // Default white
+    // Enable renderer extensions for performance
+    this.renderer.getContext().getExtension('ANGLE_instanced_arrays');
+    this.renderer.getContext().getExtension('OES_element_index_uint');
   }
 
   isInitialized(): boolean {
     return this.initialized;
   }
 
+  getPerformanceStats(): PerformanceStats {
+    return {
+      fps: this.fps,
+      objectCount: this.objects.size,
+      visibleObjectCount: this.getVisibleObjectCount(),
+      memoryUsage: this.calculateMemoryUsage(),
+      renderTime: this.renderTime,
+      drawCalls: this.drawCalls,
+      instancedObjects: this.instancedMeshes.size,
+      textureMemory: this.calculateTextureMemory()
+    };
+  }
+
+  private calculateMemoryUsage(): number {
+    // Estimate memory usage in MB
+    const info = this.renderer.info;
+    const geometries = info.memory.geometries;
+    const textures = info.memory.textures;
+    
+    // Rough estimation: each geometry ~1KB, each texture ~4MB
+    return (geometries * 0.001 + textures * 4);
+  }
+
+  private calculateTextureMemory(): number {
+    const info = this.renderer.info;
+    return info.memory.textures * 4; // Rough estimate: 4MB per texture
+  }
+
+  addObject(data: CanvasObject): void {
+    const mesh = this.createMeshFromData(data);
+    this.objects.set(data.id, mesh);
+    this.objectData.set(data.id, data);
+    this.scene.add(mesh);
+    
+    // Auto-switch to performance mode if needed
+    if (this.objects.size > this.PERFORMANCE_MODE_THRESHOLD && this.renderMode === 'normal') {
+      this.setRenderMode('performance');
+    }
+  }
+
+  private createMeshFromData(data: CanvasObject): THREE.Object3D {
+    let geometry: THREE.BufferGeometry;
+    let material: THREE.Material;
+    
+    switch (data.type) {
+      case 'rectangle':
+        geometry = new THREE.PlaneGeometry(data.width || 100, data.height || 100);
+        break;
+      case 'circle':
+        geometry = new THREE.CircleGeometry(data.radius || 50, 32);
+        break;
+      case 'polygon':
+        if (data.points) {
+          const shape = new THREE.Shape();
+          data.points.forEach((point, index) => {
+            if (index === 0) {
+              shape.moveTo(point.x, point.y);
+            } else {
+              shape.lineTo(point.x, point.y);
+            }
+          });
+          geometry = new THREE.ShapeGeometry(shape);
+        } else {
+          geometry = new THREE.PlaneGeometry(100, 100);
+        }
+        break;
+      case 'image':
+        geometry = new THREE.PlaneGeometry(data.width || 100, data.height || 100);
+        // For images, we'd load texture here
+        break;
+      default:
+        geometry = new THREE.PlaneGeometry(100, 100);
+    }
+    
+    // Create material based on render mode
+    const color = new THREE.Color(data.fill || '#808080');
+    
+    if (this.renderMode === 'wireframe') {
+      material = new THREE.MeshBasicMaterial({
+        color,
+        wireframe: true
+      });
+    } else if (this.renderMode === 'performance') {
+      material = new THREE.MeshBasicMaterial({
+        color,
+        side: THREE.DoubleSide
+      });
+    } else {
+      material = new THREE.MeshStandardMaterial({
+        color,
+        side: THREE.DoubleSide,
+        metalness: 0,
+        roughness: 1
+      });
+    }
+    
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(data.x, data.y, 0);
+    mesh.userData = { id: data.id };
+    
+    return mesh;
+  }
+
+  removeObject(id: string): void {
+    const mesh = this.objects.get(id);
+    if (mesh) {
+      this.scene.remove(mesh);
+      
+      // Dispose of geometry and material
+      if (mesh instanceof THREE.Mesh) {
+        mesh.geometry.dispose();
+        if (mesh.material instanceof THREE.Material) {
+          mesh.material.dispose();
+        }
+      }
+      
+      this.objects.delete(id);
+      this.objectData.delete(id);
+    }
+  }
+
+  updateObject(id: string, updates: Partial<CanvasObject>): void {
+    const mesh = this.objects.get(id);
+    const data = this.objectData.get(id);
+    
+    if (mesh && data) {
+      // Update data
+      Object.assign(data, updates);
+      
+      // Update mesh position
+      if (updates.x !== undefined || updates.y !== undefined) {
+        mesh.position.set(
+          updates.x ?? data.x,
+          updates.y ?? data.y,
+          0
+        );
+      }
+      
+      // Update other properties as needed
+      if (updates.fill && mesh instanceof THREE.Mesh) {
+        const material = mesh.material as THREE.MeshBasicMaterial;
+        material.color = new THREE.Color(updates.fill);
+      }
+    }
+  }
+
+  getObject(id: string): CanvasObject | undefined {
+    return this.objectData.get(id);
+  }
+
+  batchAdd(objects: CanvasObject[]): void {
+    objects.forEach(obj => this.addObject(obj));
+    
+    // Optimize after batch operation
+    this.optimizeScene();
+  }
+
+  private optimizeScene(): void {
+    // Group similar objects for instancing
+    const typeGroups = new Map<string, CanvasObject[]>();
+    
+    this.objectData.forEach(data => {
+      const key = `${data.type}-${data.width}-${data.height}-${data.radius}`;
+      if (!typeGroups.has(key)) {
+        typeGroups.set(key, []);
+      }
+      typeGroups.get(key)!.push(data);
+    });
+    
+    // Create instanced meshes for large groups
+    typeGroups.forEach((group, key) => {
+      if (group.length > 50) {
+        this.createInstancedMesh(group, key);
+      }
+    });
+  }
+
+  private createInstancedMesh(objects: CanvasObject[], key: string): void {
+    // Implementation for instanced rendering
+    // This would create a single mesh with multiple instances
+    // for better performance
+  }
+
+  setViewport(viewport: Viewport): void {
+    this.viewport = viewport;
+    
+    // Update camera based on viewport
+    this.camera.left = viewport.x - viewport.width / 2;
+    this.camera.right = viewport.x + viewport.width / 2;
+    this.camera.top = viewport.y + viewport.height / 2;
+    this.camera.bottom = viewport.y - viewport.height / 2;
+    this.camera.zoom = viewport.scale;
+    this.camera.updateProjectionMatrix();
+  }
+
+  getVisibleObjectCount(): number {
+    let count = 0;
+    const frustum = new THREE.Frustum();
+    const matrix = new THREE.Matrix4().multiplyMatrices(
+      this.camera.projectionMatrix,
+      this.camera.matrixWorldInverse
+    );
+    frustum.setFromProjectionMatrix(matrix);
+    
+    this.objects.forEach(obj => {
+      if (frustum.intersectsObject(obj)) {
+        count++;
+      }
+    });
+    
+    return count;
+  }
+
+  getLODLevel(id: string): LODLevel {
+    const scale = this.viewport.scale;
+    
+    if (scale >= this.LOD_SCALE_THRESHOLDS.high) {
+      return 'high';
+    } else if (scale >= this.LOD_SCALE_THRESHOLDS.medium) {
+      return 'medium';
+    } else {
+      return 'low';
+    }
+  }
+
+  setRenderMode(mode: RenderMode): void {
+    this.renderMode = mode;
+    
+    // Update all materials based on new mode
+    this.objects.forEach(obj => {
+      if (obj instanceof THREE.Mesh) {
+        const data = this.objectData.get(obj.userData.id);
+        if (data) {
+          const color = new THREE.Color(data.fill || '#808080');
+          
+          if (mode === 'wireframe') {
+            obj.material = new THREE.MeshBasicMaterial({
+              color,
+              wireframe: true
+            });
+          } else if (mode === 'performance') {
+            obj.material = new THREE.MeshBasicMaterial({
+              color,
+              side: THREE.DoubleSide
+            });
+          } else {
+            obj.material = new THREE.MeshStandardMaterial({
+              color,
+              side: THREE.DoubleSide,
+              metalness: 0,
+              roughness: 1
+            });
+          }
+        }
+      }
+    });
+  }
+
+  getRenderMode(): RenderMode {
+    return this.renderMode;
+  }
+
+  pickObject(x: number, y: number): string | null {
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    
+    // Convert to normalized device coordinates
+    mouse.x = (x / this.canvas.width) * 2 - 1;
+    mouse.y = -(y / this.canvas.height) * 2 + 1;
+    
+    raycaster.setFromCamera(mouse, this.camera);
+    
+    const intersects = raycaster.intersectObjects(Array.from(this.objects.values()));
+    
+    if (intersects.length > 0) {
+      return intersects[0].object.userData.id;
+    }
+    
+    return null;
+  }
+
+  selectObjectsInRegion(x1: number, y1: number, x2: number, y2: number): string[] {
+    const selected: string[] = [];
+    const minX = Math.min(x1, x2);
+    const maxX = Math.max(x1, x2);
+    const minY = Math.min(y1, y2);
+    const maxY = Math.max(y1, y2);
+    
+    this.objectData.forEach((data, id) => {
+      if (data.x >= minX && data.x <= maxX && data.y >= minY && data.y <= maxY) {
+        selected.push(id);
+      }
+    });
+    
+    return selected;
+  }
+
+  render(): void {
+    const startTime = performance.now();
+    
+    // Update FPS
+    this.frameCount++;
+    const currentTime = performance.now();
+    const deltaTime = currentTime - this.lastFrameTime;
+    
+    if (deltaTime >= 1000) {
+      this.fps = Math.round((this.frameCount * 1000) / deltaTime);
+      this.frameCount = 0;
+      this.lastFrameTime = currentTime;
+    }
+    
+    // Perform culling
+    this.performViewportCulling();
+    
+    // Render scene
+    this.renderer.render(this.scene, this.camera);
+    
+    // Update stats
+    this.renderTime = performance.now() - startTime;
+    this.drawCalls = this.renderer.info.render.calls;
+  }
+
+  private performViewportCulling(): void {
+    const frustum = new THREE.Frustum();
+    const matrix = new THREE.Matrix4().multiplyMatrices(
+      this.camera.projectionMatrix,
+      this.camera.matrixWorldInverse
+    );
+    frustum.setFromProjectionMatrix(matrix);
+    
+    this.objects.forEach(obj => {
+      obj.visible = frustum.intersectsObject(obj);
+    });
+  }
+
   getMaxTextureSize(): number {
-    return this.maxTextureSize;
+    const gl = this.renderer.getContext();
+    return gl.getParameter(gl.MAX_TEXTURE_SIZE);
   }
 
   dispose(): void {
-    if (!this.gl) return;
-
-    // Clean up WebGL resources
-    if (this.resources.program) {
-      this.gl.deleteProgram(this.resources.program);
-    }
-    if (this.resources.vertexBuffer) {
-      this.gl.deleteBuffer(this.resources.vertexBuffer);
-    }
-    if (this.resources.indexBuffer) {
-      this.gl.deleteBuffer(this.resources.indexBuffer);
-    }
-    if (this.resources.textureAtlas) {
-      this.gl.deleteTexture(this.resources.textureAtlas);
-    }
-
-    this.resources = {
-      program: null,
-      vertexBuffer: null,
-      indexBuffer: null,
-      textureAtlas: null,
-      uniformLocations: new Map()
-    };
-
+    // Clean up all objects
+    this.objects.forEach(obj => {
+      if (obj instanceof THREE.Mesh) {
+        obj.geometry.dispose();
+        if (obj.material instanceof THREE.Material) {
+          obj.material.dispose();
+        }
+      }
+    });
+    
+    this.objects.clear();
+    this.objectData.clear();
+    this.instancedMeshes.clear();
+    
+    // Dispose renderer
+    this.renderer.dispose();
     this.initialized = false;
   }
 }
