@@ -1,13 +1,17 @@
-# Miro Clone - UI/UX Design Specifications
+# Miro Clone - UI/UX Design Specifications (Cycle 49)
 
 ## Design System
 
 ### Color Palette
 - **Primary**: #0066FF (Blue) - Interactive elements, CTAs
-- **Secondary**: #00D084 (Green) - Success states, collaboration indicators
-- **Accent**: #FFB800 (Yellow) - Highlights, sticky notes
+- **Secondary**: #00D084 (Green) - Success states, collaboration indicators  
+- **Accent**: #FFB800 (Yellow) - Highlights, sticky notes, conflicts
 - **Error**: #FF5757 - Errors, destructive actions
-- **Warning**: #FFA500 - Warnings, pending states
+- **Warning**: #FFA500 - Warnings, pending states, CRDT conflicts
+- **Performance**:
+  - Green: #10B981 (Good performance)
+  - Yellow: #F59E0B (Warning performance)
+  - Red: #EF4444 (Critical performance)
 - **Neutral**:
   - Gray-900: #1A1A1A (Text primary)
   - Gray-700: #4A4A4A (Text secondary)
@@ -385,9 +389,127 @@
 | Collaborators | Hidden | Top | Top | Top |
 | Comments | Modal | Sidebar | Sidebar | Sidebar |
 
+## Cycle 49 Priority Features
+
+### WebGL Rendering System
+- **Canvas Architecture**: Three.js WebGL renderer
+- **Performance HUD**: Real-time metrics overlay
+  - FPS counter with color coding
+  - Object count and memory usage
+  - Network latency indicator
+- **Level of Detail (LOD)**:
+  - Far: Bounding boxes only
+  - Medium: Simplified shapes
+  - Near: Full detail rendering
+- **Viewport Culling**: Only render visible objects
+
+### CRDT Conflict Resolution UI
+- **Conflict Indicator**: Yellow pulse animation on conflicted elements
+- **Resolution Modal**:
+  ```
+  ┌──────────────────────────────────┐
+  │ ⚠️ Merge Conflict Detected       │
+  │                                  │
+  │ Your Version    │ Their Version  │
+  │ [Preview A]     │ [Preview B]    │
+  │                                  │
+  │ [Keep Mine] [Keep Theirs] [Merge]│
+  └──────────────────────────────────┘
+  ```
+- **Visual Diff**: Side-by-side comparison
+- **Auto-merge**: For non-conflicting properties
+
+### Mobile PWA Experience
+- **Install Prompt**: Custom install banner
+- **Offline Mode**: Service worker with sync
+- **Touch Gestures**:
+  - Pinch: Zoom
+  - Two-finger rotate: Rotate selection
+  - Three-finger swipe: Undo/redo
+  - Long press: Context menu
+- **Mobile-Optimized Toolbar**:
+  - Bottom dock position
+  - Larger touch targets (48x48px min)
+  - Swipeable tool panels
+
+### Performance Monitoring Dashboard
+- **Metrics Panel** (collapsible):
+  - Real-time FPS graph
+  - Memory usage chart
+  - Network activity monitor
+  - WebSocket connection status
+- **Optimization Suggestions**:
+  - Auto-detect performance issues
+  - Suggest quality reductions
+  - Offer to switch to simplified mode
+
+## Implementation Phases
+
+### Phase 1: WebGL Integration (Week 1-2)
+- Set up Three.js renderer
+- Implement basic shape rendering
+- Add viewport culling
+- Create performance HUD
+
+### Phase 2: CRDT & Collaboration (Week 3-4)
+- Integrate Yjs library
+- Build conflict detection system
+- Design resolution UI components
+- Implement merge strategies
+
+### Phase 3: Mobile PWA (Week 5-6)
+- Configure service worker
+- Implement touch gesture handlers
+- Create responsive toolbar
+- Add offline sync
+
+### Phase 4: Polish & Optimization (Week 7)
+- Performance profiling
+- Accessibility audit
+- User testing
+- Bug fixes
+
+## Technical Design Constraints
+
+### Performance Requirements
+- **Target**: 60fps with 2000+ objects
+- **Memory**: < 500MB for large boards
+- **Load Time**: < 3s initial, < 100ms canvas
+- **Network**: Handle 200ms latency gracefully
+
+### Browser Support
+- Chrome 90+ (primary)
+- Safari 15+ (with polyfills)
+- Firefox 90+
+- Edge 90+
+- Mobile Safari (special handling)
+
+### Accessibility
+- WCAG 2.1 Level AA
+- Keyboard navigation complete
+- Screen reader support
+- High contrast mode
+
+## Framework Recommendations
+
+### Frontend Stack (Existing + New)
+- **Framework**: Next.js 15 ✓
+- **UI Components**: Radix UI + Tailwind ✓
+- **Canvas**: Fabric.js ✓ + Three.js (new)
+- **CRDT**: Yjs (new)
+- **State**: Zustand ✓
+- **PWA**: Workbox (new)
+- **Monitoring**: Web Vitals API (new)
+
+### Component Architecture
+- Atomic design pattern
+- Compound components
+- CSS variables for theming
+- Storybook for development
+
 ## Next Steps
-- Create component library in Storybook
-- Develop design system documentation
-- Build interactive prototypes
-- Conduct usability testing
-- Iterate based on user feedback
+- Implement WebGL renderer with Three.js
+- Integrate Yjs for CRDT support
+- Build conflict resolution UI
+- Create mobile-responsive layouts
+- Add performance monitoring dashboard
