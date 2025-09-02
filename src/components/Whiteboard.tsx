@@ -25,6 +25,9 @@ import { GridSnapIndicator, GridAlignmentGuides } from './GridSnapIndicator'
 import { GridSettings } from './GridSettings'
 import { UploadProgress } from './UploadProgress'
 import { clsx } from 'clsx'
+import { WebGLRenderer } from '@/lib/canvas-features/webgl-renderer'
+import { PerformanceMonitor } from './PerformanceMonitor'
+import { ConflictResolution } from './ConflictResolution'
 
 interface WhiteboardProps {
   boardId: string
@@ -56,10 +59,13 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     vertical: []
   })
   const [uploadFileName, setUploadFileName] = useState<string>('')
+  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false)
+  const [showConflictResolution, setShowConflictResolution] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const imageUploadManagerRef = useRef<ImageUploadManager | null>(null)
   const textEditingManagerRef = useRef<TextEditingManager | null>(null)
   const gridSnappingManagerRef = useRef<GridSnappingManager | null>(null)
+  const webglRendererRef = useRef<WebGLRenderer | null>(null)
   
   const { toasts, showToast, removeToast } = useToast()
   const toast = useMemo(() => createToastHelpers(showToast), [showToast])
@@ -100,6 +106,8 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
     canvasEngine
   } = useCanvas({
     boardId,
+    userId,
+    websocketUrl: process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:4000',
     onElementCreate: (element) => {
       console.log('Element created:', element)
       // Send creation operation to other users
@@ -206,6 +214,36 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
         //   setAlignmentGuides({ horizontal: [], vertical: [] })
         // })
       }
+      
+      // Initialize WebGL Renderer
+      if (!webglRendererRef.current && canvas) {
+        if (WebGLRenderer.isSupported()) {
+          webglRendererRef.current = new WebGLRenderer({
+            antialias: true,
+            powerPreference: 'high-performance'
+          })
+          
+          const initialized = webglRendererRef.current.initialize(canvas)
+          if (initialized) {
+            console.log('WebGL renderer initialized successfully')
+            
+            // Set performance mode based on element count
+            const elements = canvasEngine.getElements()
+            if (elements.length > 100) {
+              webglRendererRef.current.setPerformanceMode('performance')
+            } else {
+              webglRendererRef.current.setPerformanceMode('auto')
+            }
+          } else {
+            console.warn('Failed to initialize WebGL renderer')
+          }
+        } else {
+          console.warn('WebGL not supported in this browser')
+        }
+      }
+      
+      // Note: CRDT is now handled internally by CanvasEngine when enableCRDT is true
+      // The CanvasEngine will manage its own CRDT instance with the provided userId and websocketUrl
     }
     
     return () => {
@@ -219,8 +257,13 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       if (gridSnappingManagerRef.current) {
         gridSnappingManagerRef.current = null
       }
+      if (webglRendererRef.current) {
+        webglRendererRef.current.dispose()
+        webglRendererRef.current = null
+      }
+      // CRDT cleanup is handled by CanvasEngine disposal
     }
-  }, [canvasEngine, addElement, sendOperation, toast, gridEnabled, gridSize])
+  }, [canvasEngine, addElement, sendOperation, toast, gridEnabled, gridSize, boardId, userId])
   
   // Handle file input
   const handleImageUpload = useCallback(() => {
@@ -759,6 +802,32 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           currentBoardElements={[]}
         />
       )}
+      
+      {/* Performance Monitor */}
+      <PerformanceMonitor
+        engine={canvasEngine}
+        isVisible={showPerformanceMonitor}
+        onClose={() => setShowPerformanceMonitor(false)}
+      />
+      
+      {/* Conflict Resolution UI */}
+      <ConflictResolution
+        crdtManager={null}
+        isVisible={showConflictResolution}
+        onClose={() => setShowConflictResolution(false)}
+      />
+      
+      {/* Performance Toggle Button */}
+      <button
+        onClick={() => setShowPerformanceMonitor(!showPerformanceMonitor)}
+        className="fixed top-4 right-4 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow z-40"
+        aria-label="Toggle performance monitor"
+        title="Performance Monitor"
+      >
+        <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      </button>
       
       {/* Keyboard Shortcuts Help - Hidden for now, can be toggled */}
       <div className="sr-only">

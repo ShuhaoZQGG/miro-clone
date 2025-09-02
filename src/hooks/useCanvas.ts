@@ -6,6 +6,8 @@ import { Position, Tool } from '@/types'
 
 interface UseCanvasOptions {
   boardId: string
+  userId?: string
+  websocketUrl?: string
   onElementCreate?: (element: any) => void
   onElementUpdate?: (element: any) => void
   onSelectionChange?: (selectedIds: string[]) => void
@@ -42,7 +44,12 @@ export const useCanvas = (options: UseCanvasOptions) => {
       try {
         if (disposed) return
 
-        engine = new CanvasEngine(containerRef.current!)
+        engine = new CanvasEngine(containerRef.current!, {
+          enableCRDT: true,
+          boardId: options.boardId,
+          userId: options.userId,
+          websocketUrl: options.websocketUrl || process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:4000'
+        })
         manager = new ElementManager(engine.getCanvas(), options.boardId)
         
         if (disposed) {
