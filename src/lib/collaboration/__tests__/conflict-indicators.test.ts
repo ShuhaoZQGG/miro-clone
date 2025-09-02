@@ -1,5 +1,5 @@
 import { ConflictIndicator } from '../conflict-indicators'
-import { CanvasElement } from '@/types/canvas'
+import type { CanvasElement } from '../../../types'
 
 describe('ConflictIndicator', () => {
   let conflictIndicator: ConflictIndicator
@@ -22,7 +22,13 @@ describe('ConflictIndicator', () => {
         boardId: 'board-1',
         createdBy: 'user-1',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        style: {
+          fill: '#ffffff',
+          stroke: '#000000',
+          strokeWidth: 1,
+          opacity: 1
+        }
       }
 
       // User 1 starts editing
@@ -107,7 +113,13 @@ describe('ConflictIndicator', () => {
         boardId: 'board-1',
         createdBy: 'user-1',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        style: {
+          fill: '#ffffff',
+          stroke: '#000000',
+          strokeWidth: 1,
+          opacity: 1
+        }
       }
 
       conflictIndicator.startEditing(element.id, 'user-1')
@@ -139,7 +151,13 @@ describe('ConflictIndicator', () => {
         boardId: 'board-1',
         createdBy: 'user-1',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        style: {
+          fill: '#ffffff',
+          stroke: '#000000',
+          strokeWidth: 1,
+          opacity: 1
+        }
       }
 
       // Low severity - 2 users

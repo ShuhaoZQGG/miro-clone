@@ -73,7 +73,7 @@ describe('Canvas Full-Screen Tests', () => {
       getCanvasSize: jest.fn(() => ({ width: 1920, height: 1080 }))
     } as any
 
-    ;(CanvasEngine as jest.Mock).mockImplementation(() => mockCanvasEngine)
+    ;(CanvasEngine as unknown as jest.Mock).mockImplementation(() => mockCanvasEngine)
   })
 
   // Test helper to wrap component with required providers

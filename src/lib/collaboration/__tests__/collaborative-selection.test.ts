@@ -144,12 +144,12 @@ describe('CollaborativeSelection', () => {
       const rendered = collaborativeSelection.renderSelectionBox('user-1', 'John Doe')
       
       expect(rendered).toBeDefined()
-      expect(rendered.type).toBe('selection-box')
-      expect(rendered.bounds).toEqual(selection)
-      expect(rendered.color).toBe('#FF0000')
-      expect(rendered.userName).toBe('John Doe')
-      expect(rendered.strokeWidth).toBe(2)
-      expect(rendered.strokeDashArray).toEqual([5, 5])
+      expect(rendered!.type).toBe('selection-box')
+      expect(rendered!.bounds).toEqual(selection)
+      expect(rendered!.color).toBe('#FF0000')
+      expect(rendered!.userName).toBe('John Doe')
+      expect(rendered!.strokeWidth).toBe(2)
+      expect(rendered!.strokeDashArray).toEqual([5, 5])
     })
 
     it('should return null for non-existent user', () => {
