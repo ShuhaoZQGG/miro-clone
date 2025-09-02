@@ -1,6 +1,20 @@
 import { AdvancedTemplateManager } from '../advanced-template-manager';
 import { createClient } from '@supabase/supabase-js';
 
+// Mock fabric
+(global as any).fabric = {
+  util: {
+    enlivenObjects: jest.fn((objects, callback, namespace) => {
+      // Simulate enlivening objects by creating mock fabric objects
+      const enlivenedObjects = objects.map((obj: any) => ({
+        ...obj,
+        type: obj.type || 'rect'
+      }));
+      callback(enlivenedObjects);
+    })
+  }
+};
+
 // Mock Supabase client
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
@@ -142,16 +156,11 @@ describe('AdvancedTemplateManager', () => {
 
   describe('Template Application', () => {
     it('should apply template to canvas', async () => {
-      const template = {
-        id: 'template-123',
+      // First create the template properly
+      const template = await manager.createTemplate({
         name: 'Test Template',
-        category: 'Business' as const,
-        data: {
-          objects: [
-            { type: 'rect', left: 50, top: 50 }
-          ]
-        }
-      };
+        category: 'Business' as const
+      });
 
       await manager.applyTemplate(template.id);
 
@@ -161,14 +170,11 @@ describe('AdvancedTemplateManager', () => {
     });
 
     it('should merge template with existing canvas', async () => {
-      const template = {
-        id: 'template-456',
-        data: {
-          objects: [
-            { type: 'circle', radius: 50 }
-          ]
-        }
-      };
+      // First create the template properly
+      const template = await manager.createTemplate({
+        name: 'Merge Template',
+        category: 'Design' as const
+      });
 
       await manager.mergeTemplate(template.id);
 
@@ -177,13 +183,19 @@ describe('AdvancedTemplateManager', () => {
     });
 
     it('should apply template with custom parameters', async () => {
+      // First create the template properly
+      const template = await manager.createTemplate({
+        name: 'Parameterized Template',
+        category: 'Business' as const
+      });
+
       const parameters = {
         primaryColor: '#FF0000',
         fontSize: 18,
         companyName: 'Acme Corp'
       };
 
-      await manager.applyTemplateWithParams('template-789', parameters);
+      await manager.applyTemplateWithParams(template.id, parameters);
 
       // Verify parameters are applied to template objects
       expect(mockCanvas.loadFromJSON).toHaveBeenCalled();
@@ -235,14 +247,19 @@ describe('AdvancedTemplateManager', () => {
 
   describe('Template Management', () => {
     it('should update template metadata', async () => {
-      const templateId = 'template-123';
+      // First create the template properly
+      const template = await manager.createTemplate({
+        name: 'Original Name',
+        category: 'Design' as const
+      });
+
       const updates = {
         name: 'Updated Name',
         description: 'New description',
         tags: ['updated', 'new']
       };
 
-      const updated = await manager.updateTemplate(templateId, updates);
+      const updated = await manager.updateTemplate(template.id, updates);
       
       expect(updated.name).toBe('Updated Name');
       expect(updated.description).toBe('New description');
@@ -250,26 +267,41 @@ describe('AdvancedTemplateManager', () => {
     });
 
     it('should duplicate template', async () => {
-      const originalId = 'template-original';
-      const duplicate = await manager.duplicateTemplate(originalId, {
+      // First create the original template
+      const original = await manager.createTemplate({
+        name: 'Original Template',
+        category: 'Business' as const
+      });
+
+      const duplicate = await manager.duplicateTemplate(original.id, {
         name: 'Copy of Original'
       });
 
-      expect(duplicate.id).not.toBe(originalId);
+      expect(duplicate.id).not.toBe(original.id);
       expect(duplicate.name).toBe('Copy of Original');
       expect(duplicate.data).toEqual(expect.any(Object));
     });
 
     it('should delete template', async () => {
-      const templateId = 'template-to-delete';
-      const result = await manager.deleteTemplate(templateId);
+      // First create the template to delete
+      const template = await manager.createTemplate({
+        name: 'Template to Delete',
+        category: 'Design' as const
+      });
+
+      const result = await manager.deleteTemplate(template.id);
       
       expect(result).toBe(true);
     });
 
     it('should export template', async () => {
-      const templateId = 'template-export';
-      const exported = await manager.exportTemplate(templateId, 'json');
+      // First create the template to export
+      const template = await manager.createTemplate({
+        name: 'Template to Export',
+        category: 'Marketing' as const
+      });
+
+      const exported = await manager.exportTemplate(template.id, 'json');
       
       expect(exported).toHaveProperty('name');
       expect(exported).toHaveProperty('data');

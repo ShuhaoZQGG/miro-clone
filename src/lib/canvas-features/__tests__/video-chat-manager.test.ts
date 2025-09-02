@@ -6,14 +6,15 @@ describe('VideoChatManager', () => {
   let mockPeerConnection: RTCPeerConnection;
 
   beforeEach(() => {
+    // Create mock tracks with mutable enabled property
+    const videoTrack = { kind: 'video', enabled: true, stop: jest.fn() };
+    const audioTrack = { kind: 'audio', enabled: true, stop: jest.fn() };
+    
     // Mock MediaStream
     mockStream = {
       id: 'mock-stream-id',
       active: true,
-      getTracks: jest.fn(() => [
-        { kind: 'video', enabled: true, stop: jest.fn() },
-        { kind: 'audio', enabled: true, stop: jest.fn() }
-      ])
+      getTracks: jest.fn(() => [videoTrack, audioTrack])
     } as unknown as MediaStream;
 
     // Mock RTCPeerConnection
