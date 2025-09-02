@@ -263,7 +263,9 @@ describe('UI Integration Tests', () => {
       fireEvent.click(templateButton)
 
       // Should show template gallery
-      expect(screen.getByText(/Select a Template/i)).toBeInTheDocument()
+      expect(screen.getByText(/Templates/i)).toBeInTheDocument()
+      // Should also show search input
+      expect(screen.getByPlaceholderText(/Search templates/i)).toBeInTheDocument()
     })
 
     it('should close template gallery on close button click', async () => {
@@ -277,19 +279,22 @@ describe('UI Integration Tests', () => {
       const templateButton = screen.getByTestId('template-gallery-button')
       fireEvent.click(templateButton)
 
+      // Gallery should be open
+      expect(screen.getByText(/Templates/i)).toBeInTheDocument()
+
       // Close gallery - look for close button or X button
       const closeButtons = screen.getAllByRole('button')
-      const closeButton = closeButtons.find(btn => 
-        btn.getAttribute('aria-label')?.includes('Close') || 
-        btn.textContent === '×' ||
-        btn.textContent === 'Close'
-      )
+      const closeButton = closeButtons.find(btn => {
+        // Check for X icon button (it has a svg child with X path)
+        const hasXIcon = btn.querySelector('svg')
+        return hasXIcon && btn.parentElement?.className?.includes('border-b')
+      })
       
       if (closeButton) {
         fireEvent.click(closeButton)
         // Should not show gallery
         await waitFor(() => {
-          expect(screen.queryByText(/Select a Template/i)).not.toBeInTheDocument()
+          expect(screen.queryByText(/Templates/i)).not.toBeInTheDocument()
         })
       }
     })
@@ -359,20 +364,23 @@ describe('UI Integration Tests', () => {
 
       // Shortcuts should be in sr-only section
       expect(container.textContent).toContain('Use V for select')
-      expect(container.textContent).toContain('Use T for text')
-      expect(container.textContent).toContain('Ctrl+Plus/Minus to zoom')
+      expect(container.textContent).toContain('T for text')
+      expect(container.textContent).toContain('Use Ctrl+Plus/Minus to zoom')
     })
   })
 
   describe('Collaboration Panel', () => {
     it('should show connection status', () => {
-      render(
+      const { container } = render(
         <AuthProvider>
           <Whiteboard boardId="test-board" />
         </AuthProvider>
       )
 
-      expect(screen.getByText(/Connected/i)).toBeInTheDocument()
+      // Connection status is shown in the status bar
+      // The status bar contains "● Connected" text
+      const statusBar = container.querySelector('.absolute.bottom-4.right-4')
+      expect(statusBar?.textContent).toContain('Connected')
     })
 
     it('should show user count', () => {
@@ -400,6 +408,11 @@ describe('UI Integration Tests', () => {
     })
 
     it('should trigger download on export', async () => {
+      // Add some elements to the canvas store so export is enabled
+      useCanvasStore.setState({
+        elements: [{ id: 'test-element', type: 'shape' }]
+      })
+
       render(
         <AuthProvider>
           <Whiteboard boardId="test-board" />
@@ -408,8 +421,13 @@ describe('UI Integration Tests', () => {
 
       // Mock createElement for download link
       const link = document.createElement('a')
-      const clickSpy = jest.spyOn(link, 'click')
-      jest.spyOn(document, 'createElement').mockReturnValueOnce(link)
+      const clickSpy = jest.fn()
+      link.click = clickSpy
+      const createElementSpy = jest.spyOn(document, 'createElement')
+      createElementSpy.mockImplementation((tagName) => {
+        if (tagName === 'a') return link
+        return document.createElement(tagName)
+      })
 
       // Find export button by looking for buttons with export functionality
       const exportButton = screen.getByTestId('export-button')
@@ -418,7 +436,10 @@ describe('UI Integration Tests', () => {
       await waitFor(() => {
         expect(clickSpy).toHaveBeenCalled()
         expect(link.download).toBe('whiteboard.png')
+        expect(link.href).toBe('data:image/png;base64,test')
       })
+
+      createElementSpy.mockRestore()
     })
   })
 })

@@ -1,23 +1,28 @@
 # Next Cycle Tasks
 
-## Critical Issues (P0)
-1. **Environment Configuration**
-   - Fix missing DATABASE_URL in build environment
-   - Ensure all required environment variables are properly configured
-   - Create .env.example template for documentation
+## Update from Cycle 47 Review
+✅ **Completed in Cycle 47:**
+- Optimized 28 RLS policies using `(select auth.uid())` pattern
+- Added 5 missing indexes on foreign keys
+- Fixed UI integration test selectors
+- PR #53 merged successfully
 
-2. **Security Fixes**
+## Critical Issues (P0)
+1. **Remaining RLS Optimizations**
+   - Optimize 2 remaining RLS policies:
+     - `analytics_events` table
+     - `billing_events` table
+   - Use same `(SELECT auth.uid())` pattern
+
+2. **Security Configuration (Dashboard Required)**
    - Enable leaked password protection in Supabase Auth
    - Configure MFA options (TOTP, SMS)
-   - Review and strengthen authentication policies
+   - Note: Requires Supabase dashboard access
 
-3. **Performance Optimization**
-   - Optimize 28 RLS policies using `(select auth.uid())` pattern
-   - Add missing indexes for foreign keys:
-     - board_templates.created_by
-     - board_versions.created_by
-     - comments.parent_id, resolved_by, user_id
-   - Remove unused indexes to improve write performance
+3. **Test Failures**
+   - Fix 4 remaining test failures (export download timing)
+   - Investigate mock setup for download link clicks
+   - Ensure proper async handling in tests
 
 ## Test Failures (P1)
 1. **UIIntegration Tests**
