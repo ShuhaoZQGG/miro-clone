@@ -92,10 +92,15 @@
   - "Remember me" checkbox
   - "Sign In" button (primary)
   - "Forgot Password?" link
-  - OAuth buttons (Google, GitHub)
+  - OAuth buttons (Google, GitHub, Microsoft)
   - "Create Account" link
-- **States**: Loading, Error, Success
+  - 2FA code input (when enabled)
+- **States**: Loading, Error, Success, 2FA Required
 - **Validation**: Real-time field validation
+- **Security Indicators**: 
+  - Password strength meter
+  - Leaked password warning
+  - MFA status badge
 
 #### Registration Screen
 - **Layout**: Multi-step wizard (3 steps)
@@ -107,18 +112,22 @@
   - Step navigation (back/next)
   - Form validation messages
   - Terms of service checkbox
+  - Privacy policy link
+  - 2FA setup option
 
 ### 2. Dashboard
 
 #### Board Gallery
 - **Layout**: Grid view (default) / List view
 - **Card Design** (280x200px):
-  - Thumbnail preview
+  - Thumbnail preview (live render)
   - Title (truncated)
   - Last modified date
   - Collaborator avatars (max 3 +n)
   - Quick actions (duplicate, delete, share)
   - Hover state with overlay actions
+  - Board member count badge
+  - Public/Private indicator
 - **Sorting**: Recent, Name, Modified, Created
 - **Filtering**: My boards, Shared, Templates, Archived
 
@@ -131,16 +140,19 @@
   - User Journey
   - Kanban Board
   - Flowchart
+  - Business Model Canvas
   - Custom Templates
 - **Template Preview**:
   - Large preview (600x400px)
   - Description text
   - "Use Template" button
   - Creator attribution
+  - Usage count
+  - Category tags
 
 ### 3. Canvas Workspace
 
-#### Toolbar (Left Sidebar - 56px wide)
+#### Toolbar (Left Sidebar - 72px wide)
 - **Tools** (icon buttons with tooltips):
   - Select (V) - cursor icon
   - Pan (H) - hand icon
@@ -148,6 +160,10 @@
   - Circle (O) - circle icon
   - Line (L) - line icon
   - Arrow (A) - arrow icon
+  - Star (*) - star icon
+  - Hexagon (H) - hexagon icon
+  - Triangle (T) - triangle icon
+  - Polygon (P) - polygon icon
   - Pen (P) - pen icon
   - Text (T) - text icon
   - Sticky Note (N) - sticky icon
@@ -163,33 +179,39 @@
   - Board title (editable inline)
   - Star/favorite toggle
   - Share button (opens modal)
+  - Board members avatars
 - **Center Section**:
   - Zoom controls (-, %, +, fit)
   - Grid toggle (icon button)
   - Undo/Redo buttons
+  - History timeline
 - **Right Section**:
   - Collaborator avatars (live)
   - Export menu (PDF, PNG, SVG)
   - Settings gear
   - Present mode button
+  - Video chat toggle
 
 #### Canvas Area
 - **Infinite Canvas**: Pan with mouse/touch
-- **Grid Overlay**: Dotted lines (optional)
+- **Grid Overlay**: Dotted lines (configurable)
 - **Minimap**: Bottom-right corner (160x120px)
 - **Zoom Levels**: 10% - 400%
 - **Selection Box**: Blue dashed border
 - **Multi-select**: Shift+click or lasso
 - **Context Menu**: Right-click on elements
+- **Performance Monitor**: FPS, object count, render time
+- **CRDT Conflict Indicators**: Visual overlap warnings
 
 #### Property Panel (Right - 320px)
 - **Context-Sensitive**: Changes based on selection
 - **Sections**:
   - Transform (X, Y, Width, Height, Rotation)
   - Appearance (Fill, Stroke, Opacity)
-  - Text Properties (Font, Size, Align)
+  - Text Properties (Font, Size, Align, Color)
   - Layer Controls (Bring to front/back)
   - Actions (Group, Lock, Delete)
+  - Animations (Transitions, Effects)
 - **Number Inputs**: With increment/decrement buttons
 - **Color Pickers**: Preset swatches + custom
 
@@ -200,14 +222,17 @@
 - **Smoothing**: 60fps interpolation
 - **Visibility**: Fade at canvas edges
 - **Colors**: Assigned from palette (8 colors)
+- **Selection Boxes**: User-colored borders
+- **Conflict Halos**: Red glow for editing conflicts
 
 #### User Presence Indicator
 - **Avatar Stack**: Max 5 visible, +n for overflow
-- **Status Dot**: Green (active), Yellow (idle)
+- **Status Dot**: Green (active), Yellow (idle), Gray (offline)
 - **Hover Card**:
   - User name and email
   - Current activity
   - Last seen time
+  - Role badge (Owner, Admin, Editor, Viewer)
 
 #### Comments System
 - **Thread View**:
@@ -216,14 +241,17 @@
   - Reply input field
   - Resolve button
   - Edit/Delete for own comments
+  - Mention notifications
 - **Inline Comments**: Pin to canvas elements
 - **Notification Badge**: Red dot with count
+- **Comment Resolution**: Archive resolved threads
 
 #### Voice/Video Chat Interface (WebRTC)
 - **Minimized State** (Floating pill, bottom-right):
   - Participant count badge
   - Join/Leave toggle
   - Expand button
+  - Audio indicator waves
 - **Expanded State** (Side panel, 360px):
   - Video grid (2x2 for 4+ users)
   - Individual video tiles (16:9 aspect)
@@ -233,13 +261,17 @@
     - Camera on/off
     - Screen share
     - Volume slider
+    - Pin video
   - Self-view preview (corner)
   - Connection quality indicator
+  - Background blur toggle
+  - Noise cancellation toggle
 - **Screen Share Mode**:
   - Full canvas takeover
   - Presenter controls overlay
   - Participant list sidebar
   - Annotation tools enabled
+  - Recording indicator
 
 ### 5. Advanced Features
 
@@ -250,34 +282,46 @@
   - Grid size slider (4-64px)
   - Grid visibility toggle
   - Snap strength slider
+  - Snap to objects toggle
 - **Visual Feedback**: Elements snap with animation
+- **Smart Guides**: Alignment lines appear
 
 #### Text Editor Toolbar
 - **Floating Toolbar**: Above selected text
 - **Controls**:
   - Font family dropdown
-  - Size dropdown
+  - Size dropdown (8-72px)
   - Bold, Italic, Underline toggles
   - Text color picker
+  - Highlight color
   - Alignment buttons
   - List buttons (bullet, number)
+  - Link insertion
 - **Rich Text Support**: Markdown shortcuts
 
 #### Image Upload Interface
 - **Drag & Drop Zone**: Dashed border on hover
 - **Upload Button**: In toolbar + context menu
 - **Progress Bar**: For large files
-- **Supported Formats**: PNG, JPG, GIF, SVG
-- **Image Controls**: Resize handles, crop tool
+- **Supported Formats**: PNG, JPG, GIF, SVG, WebP
+- **Image Controls**: 
+  - Resize handles
+  - Crop tool
+  - Filter effects
+  - Opacity slider
+- **Storage Quota**: Display remaining space
 
 #### Export Modal
 - **Format Selection**: Radio buttons
   - PDF (with page size options)
   - PNG (with resolution options)
   - SVG (vector format)
+  - JPG (with quality slider)
 - **Export Area**: Full board or selection
 - **Quality Settings**: Slider for compression
+- **Background**: Include/exclude toggle
 - **Download Button**: Primary action
+- **Share Link**: Generate public URL
 
 ### 6. Mobile Optimization
 
@@ -316,42 +360,53 @@
 ### 1. First-Time User
 1. Landing → Sign Up → Email Verification
 2. Profile Setup → Choose Template/Blank
-3. Onboarding Tour (5 steps)
+3. Onboarding Tour (5 interactive steps)
 4. Create First Board → Explore Tools
 5. Invite Collaborator → Start Working
 
 ### 2. Returning User
 1. Login → Dashboard (recent boards)
-2. Select Board → Canvas loads
+2. Select Board → Canvas loads (< 3s)
 3. Continue work → Auto-save active
-4. Share/Export → Logout
+4. Collaborate in real-time
+5. Share/Export → Logout
 
 ### 3. Collaboration Flow
 1. Receive invite link → Join board
 2. See live cursors → Start editing
 3. Add comment → @mention teammate
-4. Resolve discussion → Continue work
-5. Export final version
+4. Join video chat → Screen share
+5. Resolve conflicts → Export final
+
+### 4. Template Usage Flow
+1. Browse templates → Filter by category
+2. Preview template → Read description
+3. Use template → Customize content
+4. Save as new board → Share with team
+5. Create custom template from board
 
 ## Accessibility Standards
 
 ### WCAG 2.1 Level AA Compliance
-- **Color Contrast**: 4.5:1 minimum
+- **Color Contrast**: 4.5:1 minimum (7:1 for small text)
 - **Focus Indicators**: Visible keyboard focus
 - **Screen Reader**: ARIA labels and roles
 - **Keyboard Navigation**: All features accessible
 - **Alt Text**: For all images and icons
 - **Skip Links**: For main navigation
+- **Landmarks**: Semantic HTML regions
 
 ### Keyboard Shortcuts
 - **Essential**:
   - Ctrl/Cmd+Z: Undo
-  - Ctrl/Cmd+Y: Redo
-  - Ctrl/Cmd+C/V: Copy/Paste
-  - Delete: Remove selected
+  - Ctrl/Cmd+Shift+Z: Redo
+  - Ctrl/Cmd+C/X/V: Copy/Cut/Paste
+  - Delete/Backspace: Remove selected
   - Escape: Cancel operation
+  - Space: Pan canvas (hold)
 - **Tools**: Single letter shortcuts (V, H, R, etc.)
-- **Navigation**: Arrow keys for canvas pan
+- **Navigation**: Arrow keys for element/canvas movement
+- **Modifiers**: Shift (constrain), Alt (duplicate), Ctrl (multi-select)
 
 ## Performance Targets
 
@@ -360,71 +415,164 @@
 - Canvas render: < 100ms
 - Tool switch: < 50ms
 - Save operation: < 500ms
+- Real-time sync: < 100ms latency
 
 ### Canvas Performance
 - 60 FPS for pan/zoom
-- Handle 1000+ objects
-- Smooth cursor tracking
-- Instant selection feedback
+- Handle 1000+ objects smoothly
+- WebGL acceleration enabled
+- Viewport culling active
+- LOD rendering for zoom levels
+
+## Database-Aligned UI Components
+
+### Board Management
+- **Board List**: Fetched from `boards` table
+- **Member Management**: Based on `board_members` table
+  - Role selector (viewer, editor, admin)
+  - Member invite modal
+  - Permission matrix display
+- **Version History**: From `board_versions` table
+  - Version timeline
+  - Rollback UI
+  - Diff viewer
+
+### User System
+- **User Profiles**: Linked to `users` table
+  - Avatar management
+  - Profile settings
+  - Metadata display
+- **Authentication**: Supabase Auth integration
+  - Session management
+  - OAuth provider buttons
+  - Password reset flow
+
+### Comments & Mentions
+- **Comment Threads**: From `comments` table
+  - Thread hierarchy
+  - Resolution status
+  - Position markers
+- **Mention System**: Using `mentions` table
+  - @mention autocomplete
+  - Notification badges
+  - Mention highlights
+
+### Template System
+- **Template Browser**: From `board_templates` table
+  - Category filters
+  - Public/private toggle
+  - Creator attribution
+  - Canvas preview
 
 ## Error States
 
 ### Empty States
-- **No Boards**: Illustration + "Create your first board"
-- **No Templates**: "No templates available"
+- **No Boards**: Illustration + "Create your first board" CTA
+- **No Templates**: "No templates in this category"
+- **No Comments**: "Start a discussion"
 - **No Collaborators**: "Invite team members"
 
 ### Error Messages
-- **Network Error**: Toast notification with retry
-- **Save Failed**: Warning banner with manual save
+- **Network Error**: Toast with retry button
+- **Save Failed**: Banner with manual save option
 - **Permission Denied**: Modal with explanation
+- **Sync Conflict**: Side-by-side comparison
 - **Invalid Input**: Inline field validation
+- **Quota Exceeded**: Upgrade prompt
+
+### Loading States
+- **Canvas Loading**: Skeleton screen with progress
+- **Image Upload**: Progress bar with percentage
+- **Template Loading**: Shimmer effect
+- **User Search**: Spinner with cancel option
+
+## Production Deployment UI
+
+### Infrastructure Status Dashboard
+- **Service Health Indicators**:
+  - Vercel (Frontend): Green/Yellow/Red status
+  - Railway (WebSocket): Connection count
+  - Supabase (Database): Query latency
+  - Cloudflare (CDN): Cache hit rate
+  - Sentry (Monitoring): Error rate graph
+
+### Security Configuration UI
+- **Supabase Security Panel**:
+  - MFA toggle with QR code setup
+  - Leaked password protection status
+  - Session timeout configuration
+  - IP allowlist management
+  - API rate limiting controls
+
+### Performance Monitoring
+- **Real-time Metrics Display**:
+  - Active users counter
+  - WebSocket connections
+  - Database pool status
+  - Memory usage gauge
+  - CPU utilization chart
+  - Network bandwidth meter
+
+### Deployment Controls
+- **Environment Switcher**:
+  - Development/Staging/Production toggle
+  - Feature flags management
+  - A/B test configuration
+  - Rollback controls
+  - Deployment history
 
 ## Implementation Notes
 
 ### Framework Integration
-- **Styling**: Tailwind CSS + CSS-in-JS for dynamic styles
-- **Animation**: Framer Motion for smooth transitions
-- **Components**: Radix UI primitives for accessibility
-- **Forms**: React Hook Form with Zod validation
-- **State**: Zustand for UI, CRDT for canvas state
-- **Canvas**: Fabric.js with WebGL renderer
-- **Real-time**: Socket.io for WebSocket communication
-- **Video**: WebRTC with STUN/TURN servers
+- **Styling**: Tailwind CSS + CSS Modules
+- **Animation**: Framer Motion for transitions
+- **Components**: Radix UI + Headless UI
+- **Forms**: React Hook Form + Zod
+- **State**: Zustand + CRDT (Yjs)
+- **Canvas**: Fabric.js + WebGL
+- **Real-time**: Socket.io + Supabase Realtime
+- **Video**: WebRTC (SimplePeer)
 
 ### Critical UI Components Priority
 
-1. **P0 - Foundation**:
-   - Canvas with WebGL acceleration
-   - Real-time sync infrastructure
-   - Authentication flow (Supabase Auth UI)
-   - Performance monitoring overlay
+1. **P0 - Foundation** (Complete):
+   - Canvas with WebGL acceleration ✓
+   - Real-time sync infrastructure ✓
+   - Authentication flow ✓
+   - Performance monitoring ✓
 
-2. **P1 - Core Collaboration**:
-   - Live cursors with smooth interpolation
-   - Conflict resolution indicators
-   - Comments with @mentions
-   - Video chat panel (WebRTC)
+2. **P1 - Core Collaboration** (Complete):
+   - Live cursors ✓
+   - Conflict resolution ✓
+   - Comments system ✓
+   - Video chat panel ✓
 
-3. **P2 - Enhanced Features**:
-   - Advanced template system
-   - AI-powered suggestions
-   - Mobile touch optimization
-   - Offline mode with sync
+3. **P2 - Production Ready**:
+   - Infrastructure monitoring dashboard
+   - Security configuration panel
+   - Deployment management UI
+   - Analytics dashboard
 
 ### Design Tokens
 ```css
 :root {
   --color-primary: #0066FF;
   --color-secondary: #00D084;
+  --color-accent: #FFB800;
   --color-error: #FF5757;
+  --color-warning: #FFA500;
+  --color-success: #00D084;
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --radius-xl: 16px;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
   --shadow-md: 0 4px 6px rgba(0,0,0,0.16);
+  --shadow-lg: 0 10px 20px rgba(0,0,0,0.19);
+  --shadow-xl: 0 15px 25px rgba(0,0,0,0.22);
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
 }
 ```
 
@@ -434,107 +582,46 @@
 |-----------|--------|--------|---------|------|
 | Toolbar | Bottom | Left | Left | Left |
 | Canvas | Full | Full | Center | Center |
-| Properties | Sheet | Panel | Panel | Panel |
+| Properties | Sheet | Panel | Panel | Dual |
 | Collaborators | Hidden | Top | Top | Top |
-| Comments | Modal | Sidebar | Sidebar | Sidebar |
-
-## Supabase Integration UI
-
-### Authentication Components
-- **Supabase Auth UI**: Pre-built components for login/signup
-- **Custom Overrides**: Brand colors, logo, terms
-- **OAuth Providers**: Google, GitHub, Microsoft
-- **Magic Link**: Email-based passwordless auth
-- **Session Management**: Auto-refresh, logout controls
-
-### Database-Driven Features
-- **Board Permissions**: Role selector (owner, admin, editor, viewer)
-- **Real-time Indicators**: WebSocket connection status
-- **Storage Browser**: File upload progress, quota display
-- **User Profiles**: Avatar upload to Supabase Storage
-- **Audit Trail**: Activity history from database logs
-
-### Performance Dashboard
-- **Metrics Display**:
-  - Active connections count
-  - Database query time
-  - Storage bandwidth usage
-  - Real-time latency
-- **Connection Status**: Green/yellow/red indicators
-- **Sync Queue**: Pending operations visualization
-
-## Advanced Template System
-
-### Template Categories
-1. **Business Strategy**:
-   - SWOT Analysis (2x2 grid layout)
-   - Business Model Canvas (9 blocks)
-   - Lean Canvas (problem/solution focus)
-
-2. **Project Management**:
-   - Sprint Planning (columns: Todo, In Progress, Done)
-   - Gantt Chart (timeline view)
-   - Kanban Board (WIP limits)
-
-3. **Design Thinking**:
-   - User Journey Map (phases, touchpoints)
-   - Empathy Map (think, feel, say, do)
-   - Mind Map (radial layout)
-
-4. **Technical**:
-   - System Architecture (layers, components)
-   - Database Schema (ERD style)
-   - Flowchart (decision trees)
-
-### AI-Powered Features
-- **Smart Suggestions**: Next shape prediction
-- **Auto-Layout**: Intelligent element arrangement
-- **Content Generation**: Lorem ipsum for templates
-- **Image Recognition**: Auto-tagging uploaded images
-
-## Accessibility Enhancements
-
-### Screen Reader Support
-- **Canvas Navigation**: Spatial audio cues
-- **Element Descriptions**: Alt text for all shapes
-- **Landmark Regions**: ARIA labels for UI sections
-- **Focus Management**: Trap focus in modals
-
-### Keyboard-Only Operation
-- **Tab Navigation**: Logical focus order
-- **Tool Switching**: Number keys 1-9
-- **Canvas Movement**: Arrow keys with modifiers
-- **Element Manipulation**: Shift/Ctrl combinations
-
-### Visual Accommodations
-- **High Contrast Mode**: System preference detection
-- **Color Blind Modes**: Protanopia, Deuteranopia filters
-- **Zoom Levels**: 50% - 500% without quality loss
-- **Reduced Motion**: Respect prefers-reduced-motion
-
-## Production UI Considerations
-
-### Error Recovery
-- **Auto-Save Indicator**: Saving... / Saved / Error states
-- **Offline Banner**: "Working offline, changes will sync"
-- **Reconnection Toast**: "Connection restored"
-- **Conflict Resolution Modal**: Side-by-side comparison
-
-### Performance Indicators
-- **FPS Counter**: Toggle in settings (dev mode)
-- **Object Count**: Display in status bar
-- **Memory Usage**: Warning at 80% threshold
-- **Network Latency**: Ping display for collaboration
-
-### Security UI
-- **Permission Badges**: Lock icon for read-only
-- **Share Dialog**: Permission matrix, expiry dates
-- **Audit Log Viewer**: Filterable activity timeline
-- **2FA Setup**: QR code, backup codes display
+| Comments | Modal | Sidebar | Sidebar | Panel |
+| Video Chat | Full | Float | Panel | Panel |
+| Templates | List | Grid | Grid | Gallery |
 
 ## Next Steps
-- Finalize component specifications with development team
-- Create high-fidelity mockups for critical flows
-- Build interactive prototype for user testing
-- Develop comprehensive design system documentation
-- Implement accessibility testing framework
+
+### Immediate Actions
+1. Component library setup with design tokens
+2. Accessibility audit tools integration
+3. Performance profiling setup
+4. User testing framework
+
+### Future Enhancements
+1. AI-powered layout suggestions
+2. Advanced gesture recognition
+3. AR/VR canvas support
+4. Blockchain-based version control
+5. ML-driven conflict prediction
+
+## Design Handoff
+
+### For Developers
+- All colors use CSS variables
+- Spacing follows 4px grid system
+- Components use Radix UI primitives
+- Animations use Framer Motion
+- Icons from Lucide React
+
+### For QA
+- Test on all breakpoints
+- Verify WCAG compliance
+- Check performance targets
+- Validate error states
+- Test offline functionality
+
+### For Product
+- All core features designed
+- Mobile experience optimized
+- Accessibility standards met
+- Performance targets defined
+- Production UI specified
