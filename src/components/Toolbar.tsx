@@ -264,6 +264,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             size="sm"
             onClick={() => handleExport('png')}
             disabled={isExporting || elements.length === 0}
+            data-testid="export-button"
           >
             <ExportIcon className="w-4 h-4" />
           </Button>
