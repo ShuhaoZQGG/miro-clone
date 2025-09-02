@@ -3,11 +3,20 @@
 ## Design System
 
 ### Color Palette
-- **Primary**: #0066FF (Blue) - Interactive elements, CTAs
-- **Secondary**: #00D084 (Green) - Success states, collaboration indicators
-- **Accent**: #FFB800 (Yellow) - Highlights, sticky notes
-- **Error**: #FF5757 - Errors, destructive actions
-- **Warning**: #FFA500 - Warnings, pending states
+- **Primary**: #0066FF (Blue) - Interactive elements, CTAs, selection
+- **Secondary**: #00D084 (Green) - Success, online status, active users
+- **Accent**: #FFB800 (Yellow) - Highlights, sticky notes, warnings
+- **Error**: #FF5757 - Errors, destructive actions, conflicts
+- **Warning**: #FFA500 - Pending states, sync issues
+- **Collaboration**:
+  - User-1: #FF6B6B (Red)
+  - User-2: #4ECDC4 (Teal)
+  - User-3: #45B7D1 (Sky)
+  - User-4: #96CEB4 (Mint)
+  - User-5: #FFEAA7 (Cream)
+  - User-6: #DDA0DD (Plum)
+  - User-7: #98D8C8 (Seafoam)
+  - User-8: #FFB6C1 (Pink)
 - **Neutral**:
   - Gray-900: #1A1A1A (Text primary)
   - Gray-700: #4A4A4A (Text secondary)
@@ -17,44 +26,58 @@
   - White: #FFFFFF (Canvas)
 
 ### Typography
-- **Font Family**: Inter (primary), SF Mono (code)
+- **Font Family**: Inter (primary), JetBrains Mono (code)
 - **Sizes**:
-  - Heading-1: 32px/40px (bold)
+  - Display: 48px/56px (bold)
+  - Heading-1: 32px/40px (semibold)
   - Heading-2: 24px/32px (semibold)
-  - Heading-3: 20px/28px (semibold)
+  - Heading-3: 20px/28px (medium)
   - Body: 14px/20px (regular)
   - Small: 12px/16px (regular)
   - Micro: 10px/14px (regular)
 
 ### Spacing
 - Base unit: 4px
-- Common values: 4, 8, 12, 16, 24, 32, 48, 64px
+- Scale: 0, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96px
 
 ### Elevation
-- Level-1: 0 1px 3px rgba(0,0,0,0.12)
-- Level-2: 0 4px 6px rgba(0,0,0,0.16)
-- Level-3: 0 10px 20px rgba(0,0,0,0.19)
+- Level-0: none (flat)
+- Level-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)
+- Level-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12)
+- Level-3: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10)
+- Level-4: 0 15px 25px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05)
+- Level-5: 0 20px 40px rgba(0,0,0,0.20) (modals)
 
 ## Layout Architecture
 
 ### Main Application Shell
 ```
 ┌─────────────────────────────────────────────────────┐
-│ Header (56px)                                       │
+│ Header (56px) - Board title, Share, Export         │
 ├───────────┬─────────────────────────────┬──────────┤
 │ Sidebar   │ Canvas Area                 │ Panels   │
-│ (56px)    │ (flex-1)                   │ (320px)  │
-│           │                             │          │
-│ Tools     │ Infinite Canvas            │ Context  │
-│           │                             │ Menus    │
+│ (72px)    │ (flex-1)                   │ (360px)  │
+│           │ ┌────────────────────────┐ │          │
+│ [Select]  │ │ Performance Monitor   │ │ Properties│
+│ [Hand]    │ │ FPS: 60 | Objects: 0  │ │ Layer     │
+│ [─────]   │ └────────────────────────┘ │ Comments  │
+│ [Rect]    │                             │ History   │
+│ [Circle]  │     Infinite Canvas        │          │
+│ [Line]    │     (WebGL Accelerated)   │ ┌──────┐ │
+│ [Arrow]   │                             │ │Video │ │
+│ [─────]   │                             │ │Chat  │ │
+│ [Pen]     │ ┌────────────┐             │ │Panel │ │
+│ [Text]    │ │  Minimap   │             │ └──────┘ │
+│ [Note]    │ └────────────┘             │          │
+│ [Image]   │                             │          │
 └───────────┴─────────────────────────────┴──────────┘
 ```
 
 ### Responsive Breakpoints
-- Mobile: 320-767px (Single column, bottom toolbar)
-- Tablet: 768-1023px (Collapsible sidebar)
-- Desktop: 1024-1439px (Standard layout)
-- Wide: 1440px+ (Extended workspace)
+- Mobile: 320-767px (Bottom sheet UI, touch optimized)
+- Tablet: 768-1279px (Collapsible panels, floating toolbar)
+- Desktop: 1280-1919px (Full feature set)
+- Wide: 1920px+ (Multi-board view, extended panels)
 
 ## Component Specifications
 
@@ -196,15 +219,27 @@
 - **Inline Comments**: Pin to canvas elements
 - **Notification Badge**: Red dot with count
 
-#### Voice/Video Controls
-- **Floating Bar**: Bottom center
-- **Controls**:
-  - Mic toggle with indicator
-  - Camera toggle
-  - Screen share button
-  - Participant list
-  - Leave call button
-- **Participant Videos**: Grid layout (max 4)
+#### Voice/Video Chat Interface (WebRTC)
+- **Minimized State** (Floating pill, bottom-right):
+  - Participant count badge
+  - Join/Leave toggle
+  - Expand button
+- **Expanded State** (Side panel, 360px):
+  - Video grid (2x2 for 4+ users)
+  - Individual video tiles (16:9 aspect)
+  - Audio waveform visualizer
+  - Controls per participant:
+    - Mute/unmute mic
+    - Camera on/off
+    - Screen share
+    - Volume slider
+  - Self-view preview (corner)
+  - Connection quality indicator
+- **Screen Share Mode**:
+  - Full canvas takeover
+  - Presenter controls overlay
+  - Participant list sidebar
+  - Annotation tools enabled
 
 ### 5. Advanced Features
 
@@ -248,21 +283,33 @@
 
 #### Touch Gestures
 - **Pan**: Single finger drag
-- **Zoom**: Pinch gesture
-- **Select**: Tap
-- **Multi-select**: Long press + drag
-- **Context Menu**: Long press
+- **Zoom**: Pinch gesture (two fingers)
+- **Rotate**: Two finger twist
+- **Select**: Single tap
+- **Multi-select**: Two finger tap or lasso
+- **Context Menu**: Long press (haptic feedback)
+- **Undo**: Three finger swipe left
+- **Redo**: Three finger swipe right
+- **Quick Zoom**: Double tap (zoom to element)
 
-#### Mobile Toolbar
-- **Position**: Bottom of screen
-- **Layout**: Horizontal scroll
-- **Tool Size**: 48x48px touch targets
-- **Collapse/Expand**: Swipe up/down
+#### Mobile Toolbar (Bottom Sheet)
+- **Collapsed State**: 64px height, swipe up to expand
+- **Expanded State**: 280px height, tool grid
+- **Layout**: 
+  - Primary tools (first row, always visible)
+  - Secondary tools (grid layout when expanded)
+  - Active tool indicator (blue background)
+- **Tool Size**: 48x48px minimum touch target
+- **Tool Groups**: Swipeable carousel
+- **Quick Actions Bar**: Undo, Redo, Delete (floating)
 
 #### Responsive Canvas
-- **Auto-zoom**: Fit content on load
-- **Touch-friendly**: Larger selection handles
-- **Simplified UI**: Essential tools only
+- **Auto Layout**: Content reflows for viewport
+- **Smart Zoom**: Auto-zoom to selection
+- **Touch Handles**: 44x44px minimum (WCAG)
+- **Gesture Hints**: First-time user overlays
+- **Simplified Properties**: Bottom sheet with essentials
+- **Performance Mode**: Reduced quality for smooth interaction
 
 ## User Journeys
 
@@ -336,28 +383,34 @@
 ## Implementation Notes
 
 ### Framework Integration
-- Use Tailwind CSS classes for styling
-- Framer Motion for animations
-- Radix UI for accessible components
-- React Hook Form for form handling
-- Zustand for state management
+- **Styling**: Tailwind CSS + CSS-in-JS for dynamic styles
+- **Animation**: Framer Motion for smooth transitions
+- **Components**: Radix UI primitives for accessibility
+- **Forms**: React Hook Form with Zod validation
+- **State**: Zustand for UI, CRDT for canvas state
+- **Canvas**: Fabric.js with WebGL renderer
+- **Real-time**: Socket.io for WebSocket communication
+- **Video**: WebRTC with STUN/TURN servers
 
 ### Critical UI Components Priority
-1. **P0 - Security & Environment**:
-   - Password strength indicator
-   - MFA setup flow
-   - Environment variable config UI
 
-2. **P1 - Core Features**:
-   - Text tool toolbar integration
-   - Grid snapping controls
-   - Image upload button
-   - Template gallery modal
+1. **P0 - Foundation**:
+   - Canvas with WebGL acceleration
+   - Real-time sync infrastructure
+   - Authentication flow (Supabase Auth UI)
+   - Performance monitoring overlay
 
-3. **P2 - Performance**:
-   - Loading skeletons
-   - Virtualized lists
-   - Progressive image loading
+2. **P1 - Core Collaboration**:
+   - Live cursors with smooth interpolation
+   - Conflict resolution indicators
+   - Comments with @mentions
+   - Video chat panel (WebRTC)
+
+3. **P2 - Enhanced Features**:
+   - Advanced template system
+   - AI-powered suggestions
+   - Mobile touch optimization
+   - Offline mode with sync
 
 ### Design Tokens
 ```css
@@ -385,9 +438,103 @@
 | Collaborators | Hidden | Top | Top | Top |
 | Comments | Modal | Sidebar | Sidebar | Sidebar |
 
+## Supabase Integration UI
+
+### Authentication Components
+- **Supabase Auth UI**: Pre-built components for login/signup
+- **Custom Overrides**: Brand colors, logo, terms
+- **OAuth Providers**: Google, GitHub, Microsoft
+- **Magic Link**: Email-based passwordless auth
+- **Session Management**: Auto-refresh, logout controls
+
+### Database-Driven Features
+- **Board Permissions**: Role selector (owner, admin, editor, viewer)
+- **Real-time Indicators**: WebSocket connection status
+- **Storage Browser**: File upload progress, quota display
+- **User Profiles**: Avatar upload to Supabase Storage
+- **Audit Trail**: Activity history from database logs
+
+### Performance Dashboard
+- **Metrics Display**:
+  - Active connections count
+  - Database query time
+  - Storage bandwidth usage
+  - Real-time latency
+- **Connection Status**: Green/yellow/red indicators
+- **Sync Queue**: Pending operations visualization
+
+## Advanced Template System
+
+### Template Categories
+1. **Business Strategy**:
+   - SWOT Analysis (2x2 grid layout)
+   - Business Model Canvas (9 blocks)
+   - Lean Canvas (problem/solution focus)
+
+2. **Project Management**:
+   - Sprint Planning (columns: Todo, In Progress, Done)
+   - Gantt Chart (timeline view)
+   - Kanban Board (WIP limits)
+
+3. **Design Thinking**:
+   - User Journey Map (phases, touchpoints)
+   - Empathy Map (think, feel, say, do)
+   - Mind Map (radial layout)
+
+4. **Technical**:
+   - System Architecture (layers, components)
+   - Database Schema (ERD style)
+   - Flowchart (decision trees)
+
+### AI-Powered Features
+- **Smart Suggestions**: Next shape prediction
+- **Auto-Layout**: Intelligent element arrangement
+- **Content Generation**: Lorem ipsum for templates
+- **Image Recognition**: Auto-tagging uploaded images
+
+## Accessibility Enhancements
+
+### Screen Reader Support
+- **Canvas Navigation**: Spatial audio cues
+- **Element Descriptions**: Alt text for all shapes
+- **Landmark Regions**: ARIA labels for UI sections
+- **Focus Management**: Trap focus in modals
+
+### Keyboard-Only Operation
+- **Tab Navigation**: Logical focus order
+- **Tool Switching**: Number keys 1-9
+- **Canvas Movement**: Arrow keys with modifiers
+- **Element Manipulation**: Shift/Ctrl combinations
+
+### Visual Accommodations
+- **High Contrast Mode**: System preference detection
+- **Color Blind Modes**: Protanopia, Deuteranopia filters
+- **Zoom Levels**: 50% - 500% without quality loss
+- **Reduced Motion**: Respect prefers-reduced-motion
+
+## Production UI Considerations
+
+### Error Recovery
+- **Auto-Save Indicator**: Saving... / Saved / Error states
+- **Offline Banner**: "Working offline, changes will sync"
+- **Reconnection Toast**: "Connection restored"
+- **Conflict Resolution Modal**: Side-by-side comparison
+
+### Performance Indicators
+- **FPS Counter**: Toggle in settings (dev mode)
+- **Object Count**: Display in status bar
+- **Memory Usage**: Warning at 80% threshold
+- **Network Latency**: Ping display for collaboration
+
+### Security UI
+- **Permission Badges**: Lock icon for read-only
+- **Share Dialog**: Permission matrix, expiry dates
+- **Audit Log Viewer**: Filterable activity timeline
+- **2FA Setup**: QR code, backup codes display
+
 ## Next Steps
-- Create component library in Storybook
-- Develop design system documentation
-- Build interactive prototypes
-- Conduct usability testing
-- Iterate based on user feedback
+- Finalize component specifications with development team
+- Create high-fidelity mockups for critical flows
+- Build interactive prototype for user testing
+- Develop comprehensive design system documentation
+- Implement accessibility testing framework
