@@ -312,14 +312,19 @@ describe('VideoChatManager', () => {
       
       await manager.createPeerConnection(peerId);
       
+      // Store the handler set by the manager
+      const stateChangeHandler = mockPeerConnection.onconnectionstatechange;
+      
       // Simulate connection state change
-      mockPeerConnection.onconnectionstatechange = jest.fn();
       Object.defineProperty(mockPeerConnection, 'connectionState', {
         value: 'connected',
         writable: true
       });
       
-      mockPeerConnection.onconnectionstatechange!({} as Event);
+      // Call the stored handler
+      if (stateChangeHandler) {
+        stateChangeHandler({} as Event);
+      }
       
       expect(onConnectionStateChange).toHaveBeenCalledWith({
         peerId,

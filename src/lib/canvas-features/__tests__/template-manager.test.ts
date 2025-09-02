@@ -1,19 +1,21 @@
 import { AdvancedTemplateManager } from '../advanced-template-manager';
 import { createClient } from '@supabase/supabase-js';
 
-// Mock fabric
-(global as any).fabric = {
-  util: {
-    enlivenObjects: jest.fn((objects, callback, namespace) => {
-      // Simulate enlivening objects by creating mock fabric objects
-      const enlivenedObjects = objects.map((obj: any) => ({
-        ...obj,
-        type: obj.type || 'rect'
-      }));
-      callback(enlivenedObjects);
-    })
+// Mock fabric module
+jest.mock('fabric', () => ({
+  fabric: {
+    util: {
+      enlivenObjects: jest.fn((objects, callback, namespace) => {
+        // Simulate enlivening objects by creating mock fabric objects
+        const enlivenedObjects = objects.map((obj: any) => ({
+          ...obj,
+          type: obj.type || 'rect'
+        }));
+        callback(enlivenedObjects);
+      })
+    }
   }
-};
+}));
 
 // Mock Supabase client
 jest.mock('@supabase/supabase-js', () => ({

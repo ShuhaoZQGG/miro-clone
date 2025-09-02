@@ -3,12 +3,14 @@ import { MobileManager } from '../mobile-manager';
 describe('MobileManager', () => {
   let manager: MobileManager;
   let mockCanvas: any;
-  let global.window: any;
+  let originalWindow: any;
 
   beforeEach(() => {
     mockCanvas = {
       setWidth: jest.fn(),
       setHeight: jest.fn(),
+      getWidth: jest.fn(() => 1024),
+      getHeight: jest.fn(() => 768),
       setZoom: jest.fn(),
       getZoom: jest.fn(() => 1),
       renderAll: jest.fn(),
@@ -27,6 +29,7 @@ describe('MobileManager', () => {
       upperCanvasEl: document.createElement('canvas')
     };
 
+    originalWindow = global.window;
     global.window = {
       innerWidth: 1024,
       innerHeight: 768,
@@ -37,9 +40,7 @@ describe('MobileManager', () => {
         addListener: jest.fn(),
         removeListener: jest.fn()
       }))
-    };
-
-    global.window = global.window as any;
+    } as any;
     global.navigator = {
       maxTouchPoints: 0,
       userAgent: 'Mozilla/5.0'
@@ -50,6 +51,7 @@ describe('MobileManager', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    global.window = originalWindow;
   });
 
   describe('Device Detection', () => {
@@ -172,13 +174,18 @@ describe('MobileManager', () => {
 
   describe('Touch Gestures', () => {
     it('should handle single touch tap', () => {
-      const touchEvent = {
+      const touchStartEvent = {
         touches: [{ clientX: 100, clientY: 100, identifier: 0 }],
         preventDefault: jest.fn()
       };
       
-      manager.handleTouchStart(touchEvent as any);
-      manager.handleTouchEnd(touchEvent as any);
+      const touchEndEvent = {
+        changedTouches: [{ clientX: 100, clientY: 100, identifier: 0 }],
+        preventDefault: jest.fn()
+      };
+      
+      manager.handleTouchStart(touchStartEvent as any);
+      manager.handleTouchEnd(touchEndEvent as any);
       
       expect(mockCanvas.getPointer).toHaveBeenCalled();
       expect(mockCanvas.findTarget).toHaveBeenCalled();
