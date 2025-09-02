@@ -16,7 +16,13 @@ describe('ViewportCulling', () => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isLocked: false,
-    isVisible: true
+    isVisible: true,
+    style: {
+      fill: '#ffffff',
+      stroke: '#000000',
+      strokeWidth: 1,
+      opacity: 1
+    }
   })
 
   beforeEach(() => {

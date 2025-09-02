@@ -31,9 +31,13 @@ describe('VideoChatManager', () => {
     } as unknown as RTCPeerConnection;
 
     // Mock getUserMedia
-    global.navigator.mediaDevices = {
-      getUserMedia: jest.fn(() => Promise.resolve(mockStream))
-    } as any;
+    Object.defineProperty(global.navigator, 'mediaDevices', {
+      value: {
+        getUserMedia: jest.fn(() => Promise.resolve(mockStream))
+      },
+      writable: true,
+      configurable: true
+    });
 
     // Mock RTCPeerConnection constructor
     global.RTCPeerConnection = jest.fn(() => mockPeerConnection) as any;
@@ -290,7 +294,7 @@ describe('VideoChatManager', () => {
         })
       };
       
-      mockPeerConnection.getStats = jest.fn(() => Promise.resolve(mockStats));
+      mockPeerConnection.getStats = jest.fn(() => Promise.resolve(mockStats)) as any;
       
       const stats = await manager.getConnectionStats(peerId);
       

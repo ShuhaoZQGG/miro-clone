@@ -22,7 +22,9 @@ describe('MobileManager', () => {
       relativePan: jest.fn(),
       on: jest.fn(),
       off: jest.fn(),
-      fire: jest.fn()
+      fire: jest.fn(),
+      getElement: jest.fn(() => document.createElement('canvas')),
+      upperCanvasEl: document.createElement('canvas')
     };
 
     mockWindow = {
@@ -52,7 +54,11 @@ describe('MobileManager', () => {
 
   describe('Device Detection', () => {
     it('should detect mobile devices', () => {
-      global.navigator.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)';
+      Object.defineProperty(global.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)',
+        writable: true,
+        configurable: true
+      });
       manager = new MobileManager(mockCanvas);
       
       expect(manager.isMobile()).toBe(true);
@@ -61,7 +67,11 @@ describe('MobileManager', () => {
     });
 
     it('should detect tablet devices', () => {
-      global.navigator.userAgent = 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X)';
+      Object.defineProperty(global.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X)',
+        writable: true,
+        configurable: true
+      });
       manager = new MobileManager(mockCanvas);
       
       expect(manager.isMobile()).toBe(false);
@@ -70,7 +80,11 @@ describe('MobileManager', () => {
     });
 
     it('should detect desktop devices', () => {
-      global.navigator.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+      Object.defineProperty(global.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        writable: true,
+        configurable: true
+      });
       manager = new MobileManager(mockCanvas);
       
       expect(manager.isMobile()).toBe(false);
@@ -79,7 +93,11 @@ describe('MobileManager', () => {
     });
 
     it('should detect touch capability', () => {
-      global.navigator.maxTouchPoints = 5;
+      Object.defineProperty(global.navigator, 'maxTouchPoints', {
+        value: 5,
+        writable: true,
+        configurable: true
+      });
       manager = new MobileManager(mockCanvas);
       
       expect(manager.hasTouch()).toBe(true);
@@ -354,7 +372,11 @@ describe('MobileManager', () => {
     });
 
     it('should optimize rendering for mobile', () => {
-      global.navigator.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)';
+      Object.defineProperty(global.navigator, 'userAgent', {
+        value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)',
+        writable: true,
+        configurable: true
+      });
       manager = new MobileManager(mockCanvas);
       
       manager.optimizeForMobile();

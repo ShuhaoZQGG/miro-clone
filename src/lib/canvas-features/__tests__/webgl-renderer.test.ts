@@ -61,7 +61,7 @@ describe('WebGLRenderer', () => {
     }
 
     // Mock canvas element
-    HTMLCanvasElement.prototype.getContext = jest.fn(() => mockGL)
+    HTMLCanvasElement.prototype.getContext = jest.fn(() => mockGL) as any
     
     renderer = new WebGLRenderer()
   })
@@ -112,7 +112,13 @@ describe('WebGLRenderer', () => {
           createdBy: 'user',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          isLocked: false
+          isLocked: false,
+          style: {
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeWidth: 1,
+            opacity: 1
+          }
         }
       ]
       
@@ -137,7 +143,13 @@ describe('WebGLRenderer', () => {
           createdBy: 'user',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          isLocked: false
+          isLocked: false,
+          style: {
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeWidth: 1,
+            opacity: 1
+          }
         }
       ]
       

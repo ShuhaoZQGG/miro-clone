@@ -305,7 +305,7 @@ describe('AdvancedTemplateManager', () => {
       });
 
       expect(smartTemplate.placeholders).toBeDefined();
-      expect(smartTemplate.placeholders.companyName).toBeDefined();
+      expect(smartTemplate.placeholders?.companyName).toBeDefined();
     });
 
     it('should apply smart template with user data', async () => {
