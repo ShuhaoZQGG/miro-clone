@@ -408,7 +408,7 @@ export class AdvancedTemplateManager {
     const duplicate: Template = {
       ...original,
       ...overrides,
-      id: `template-${Date.now()}`,
+      id: `template-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date(),
       updatedAt: new Date(),
       usageCount: 0

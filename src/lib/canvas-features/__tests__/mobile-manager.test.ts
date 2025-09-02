@@ -3,7 +3,7 @@ import { MobileManager } from '../mobile-manager';
 describe('MobileManager', () => {
   let manager: MobileManager;
   let mockCanvas: any;
-  let mockWindow: any;
+  let global.window: any;
 
   beforeEach(() => {
     mockCanvas = {
@@ -27,7 +27,7 @@ describe('MobileManager', () => {
       upperCanvasEl: document.createElement('canvas')
     };
 
-    mockWindow = {
+    global.window = {
       innerWidth: 1024,
       innerHeight: 768,
       addEventListener: jest.fn(),
@@ -39,7 +39,7 @@ describe('MobileManager', () => {
       }))
     };
 
-    global.window = mockWindow as any;
+    global.window = global.window as any;
     global.navigator = {
       maxTouchPoints: 0,
       userAgent: 'Mozilla/5.0'
@@ -104,13 +104,15 @@ describe('MobileManager', () => {
     });
 
     it('should detect orientation', () => {
-      mockWindow.innerWidth = 768;
-      mockWindow.innerHeight = 1024;
+      // Test portrait orientation
+      global.window.innerWidth = 768;
+      global.window.innerHeight = 1024;
       
       expect(manager.getOrientation()).toBe('portrait');
       
-      mockWindow.innerWidth = 1024;
-      mockWindow.innerHeight = 768;
+      // Test landscape orientation
+      global.window.innerWidth = 1024;
+      global.window.innerHeight = 768;
       
       expect(manager.getOrientation()).toBe('landscape');
     });
@@ -118,8 +120,8 @@ describe('MobileManager', () => {
 
   describe('Responsive Canvas', () => {
     it('should resize canvas on window resize', () => {
-      mockWindow.innerWidth = 375;
-      mockWindow.innerHeight = 667;
+      global.window.innerWidth = 375;
+      global.window.innerHeight = 667;
       
       manager.handleResize();
       
@@ -131,8 +133,8 @@ describe('MobileManager', () => {
     it('should maintain aspect ratio when resizing', () => {
       manager.setMaintainAspectRatio(true);
       
-      mockWindow.innerWidth = 375;
-      mockWindow.innerHeight = 812;
+      global.window.innerWidth = 375;
+      global.window.innerHeight = 812;
       
       manager.handleResize();
       
@@ -143,7 +145,7 @@ describe('MobileManager', () => {
 
     it('should apply breakpoint-specific settings', () => {
       // Mobile breakpoint
-      mockWindow.innerWidth = 375;
+      global.window.innerWidth = 375;
       manager.handleResize();
       
       const mobileSettings = manager.getCurrentBreakpointSettings();
@@ -151,7 +153,7 @@ describe('MobileManager', () => {
       expect(mobileSettings.showSidebar).toBe(false);
       
       // Tablet breakpoint
-      mockWindow.innerWidth = 768;
+      global.window.innerWidth = 768;
       manager.handleResize();
       
       const tabletSettings = manager.getCurrentBreakpointSettings();
@@ -159,7 +161,7 @@ describe('MobileManager', () => {
       expect(tabletSettings.showSidebar).toBe(false);
       
       // Desktop breakpoint
-      mockWindow.innerWidth = 1920;
+      global.window.innerWidth = 1920;
       manager.handleResize();
       
       const desktopSettings = manager.getCurrentBreakpointSettings();
@@ -321,7 +323,7 @@ describe('MobileManager', () => {
 
     it('should adapt UI for different screen sizes', () => {
       // Small mobile
-      mockWindow.innerWidth = 320;
+      global.window.innerWidth = 320;
       manager.adaptUIForScreenSize();
       
       let ui = manager.getUIConfiguration();
@@ -329,7 +331,7 @@ describe('MobileManager', () => {
       expect(ui.toolbarSize).toBe('compact');
       
       // Large mobile
-      mockWindow.innerWidth = 414;
+      global.window.innerWidth = 414;
       manager.adaptUIForScreenSize();
       
       ui = manager.getUIConfiguration();
@@ -337,7 +339,7 @@ describe('MobileManager', () => {
       expect(ui.toolbarSize).toBe('normal');
       
       // Tablet
-      mockWindow.innerWidth = 768;
+      global.window.innerWidth = 768;
       manager.adaptUIForScreenSize();
       
       ui = manager.getUIConfiguration();
@@ -424,8 +426,8 @@ describe('MobileManager', () => {
       manager.on('orientationchange', onOrientationChange);
       
       // Simulate orientation change
-      mockWindow.innerWidth = 812;
-      mockWindow.innerHeight = 375;
+      global.window.innerWidth = 812;
+      global.window.innerHeight = 375;
       
       const event = new Event('orientationchange');
       window.dispatchEvent(event);
@@ -477,8 +479,8 @@ describe('MobileManager', () => {
       });
       
       // Menu should be repositioned to fit on screen
-      expect(menu.x).toBeLessThanOrEqual(mockWindow.innerWidth - 150);
-      expect(menu.y).toBeLessThanOrEqual(mockWindow.innerHeight - 200);
+      expect(menu.x).toBeLessThanOrEqual(global.window.innerWidth - 150);
+      expect(menu.y).toBeLessThanOrEqual(global.window.innerHeight - 200);
     });
   });
 
@@ -486,7 +488,7 @@ describe('MobileManager', () => {
     it('should remove all event listeners on destroy', () => {
       manager.destroy();
       
-      expect(mockWindow.removeEventListener).toHaveBeenCalled();
+      expect(global.window.removeEventListener).toHaveBeenCalled();
       expect(mockCanvas.off).toHaveBeenCalled();
     });
   });
