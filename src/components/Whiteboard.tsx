@@ -6,6 +6,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useCanvasStore } from '@/store/useCanvasStore'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import { useAuth } from '@/context/AuthContext'
+import { useHistory } from '@/hooks/useHistory'
 import { Toolbar } from './Toolbar'
 import { ToolPanel } from './ToolPanel'
 import { CollaborationPanel } from './CollaborationPanel'
@@ -123,6 +124,17 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
       sendSelection(selectedIds)
     }
   })
+
+  // Initialize history management
+  const { 
+    undo, 
+    redo, 
+    canUndo, 
+    canRedo,
+    trackElementCreation,
+    trackElementUpdate,
+    trackElementDeletion
+  } = useHistory()
 
   useKeyboardShortcuts()
   
@@ -676,6 +688,10 @@ export const Whiteboard: React.FC<WhiteboardProps> = ({ boardId, className }) =>
           onTemplateGallery={() => setShowTemplateGallery(true)}
           onTextFormat={handleTextFormat}
           selectedTextFormats={selectedTextFormats}
+          onUndo={undo}
+          onRedo={redo}
+          canUndo={canUndo()}
+          canRedo={canRedo()}
         />
       </div>
       

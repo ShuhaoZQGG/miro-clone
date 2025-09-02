@@ -38,6 +38,10 @@ interface ToolbarProps {
     italic?: boolean
     underline?: boolean
   }
+  onUndo?: () => void
+  onRedo?: () => void
+  canUndo?: boolean
+  canRedo?: boolean
   className?: string
 }
 
@@ -53,6 +57,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onTemplateGallery,
   onTextFormat,
   selectedTextFormats = {},
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
   className
 }) => {
   const { 
@@ -98,7 +106,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            disabled // TODO: Implement undo/redo
+            disabled={!canUndo}
+            onClick={onUndo}
+            data-testid="undo-button"
+            aria-label="Undo"
           >
             <UndoIcon className="w-4 h-4" />
           </Button>
@@ -108,7 +119,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            disabled // TODO: Implement undo/redo
+            disabled={!canRedo}
+            onClick={onRedo}
+            data-testid="redo-button"
+            aria-label="Redo"
           >
             <RedoIcon className="w-4 h-4" />
           </Button>
