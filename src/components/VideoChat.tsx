@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { VideoChatManager } from '@/lib/canvas-features/video-chat-manager';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { 
   Video, 
   VideoOff, 
@@ -16,7 +16,7 @@ import {
   Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 
 interface VideoChatProps {
   roomId: string;
@@ -38,7 +38,7 @@ export const VideoChat: React.FC<VideoChatProps> = ({
   className,
   onClose
 }) => {
-  const { toast } = useToast();
+  const { showToast } = useToast();
   const [isConnected, setIsConnected] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
@@ -79,16 +79,17 @@ export const VideoChat: React.FC<VideoChatProps> = ({
         // Start monitoring connection quality
         startQualityMonitoring();
 
-        toast({
+        showToast({
+          type: 'success',
           title: 'Connected',
-          description: 'You have joined the video chat',
+          message: 'You have joined the video chat',
         });
       } catch (error) {
         console.error('Failed to initialize video chat:', error);
-        toast({
+        showToast({
+          type: 'error',
           title: 'Connection Failed',
-          description: 'Failed to start video chat. Please check your camera and microphone permissions.',
-          variant: 'destructive',
+          message: 'Failed to start video chat. Please check your camera and microphone permissions.',
         });
       }
     };
@@ -128,10 +129,12 @@ export const VideoChat: React.FC<VideoChatProps> = ({
   }, []);
 
   const handlePeerJoined = useCallback(({ peerId }: { peerId: string }) => {
-    toast({
-      description: `User ${peerId.slice(0, 8)} joined the call`,
+    showToast({
+      type: 'info',
+      title: 'User Joined',
+      message: `User ${peerId.slice(0, 8)} joined the call`,
     });
-  }, [toast]);
+  }, [showToast]);
 
   const handlePeerLeft = useCallback(({ peerId }: { peerId: string }) => {
     setParticipants(prev => {
@@ -140,29 +143,31 @@ export const VideoChat: React.FC<VideoChatProps> = ({
       return updated;
     });
     
-    toast({
-      description: `User ${peerId.slice(0, 8)} left the call`,
+    showToast({
+      type: 'info',
+      title: 'User Left',
+      message: `User ${peerId.slice(0, 8)} left the call`,
     });
-  }, [toast]);
+  }, [showToast]);
 
   const handleConnectionStateChange = useCallback(({ peerId, state }: { peerId: string; state: string }) => {
     if (state === 'failed') {
-      toast({
+      showToast({
+        type: 'error',
         title: 'Connection Lost',
-        description: `Lost connection to user ${peerId.slice(0, 8)}`,
-        variant: 'destructive',
+        message: `Lost connection to user ${peerId.slice(0, 8)}`,
       });
     }
-  }, [toast]);
+  }, [showToast]);
 
   const handleError = useCallback((error: Error) => {
     console.error('Video chat error:', error);
-    toast({
+    showToast({
+      type: 'error',
       title: 'Error',
-      description: error.message,
-      variant: 'destructive',
+      message: error.message,
     });
-  }, [toast]);
+  }, [showToast]);
 
   const startQualityMonitoring = useCallback(() => {
     if (!videoChatManagerRef.current) return;
@@ -223,10 +228,12 @@ export const VideoChat: React.FC<VideoChatProps> = ({
     cleanup();
     onClose?.();
     
-    toast({
-      description: 'You have left the video chat',
+    showToast({
+      type: 'info',
+      title: 'Call Ended',
+      message: 'You have left the video chat',
     });
-  }, [cleanup, onClose, toast]);
+  }, [cleanup, onClose, showToast]);
 
   const getQualityIndicator = () => {
     switch (connectionQuality) {
@@ -305,7 +312,7 @@ export const VideoChat: React.FC<VideoChatProps> = ({
         <div className="flex items-center justify-center gap-4">
           <Button
             variant={isAudioEnabled ? 'secondary' : 'destructive'}
-            size="icon"
+            size="sm"
             onClick={toggleAudio}
             className="rounded-full w-12 h-12"
           >
@@ -314,7 +321,7 @@ export const VideoChat: React.FC<VideoChatProps> = ({
 
           <Button
             variant={isVideoEnabled ? 'secondary' : 'destructive'}
-            size="icon"
+            size="sm"
             onClick={toggleVideo}
             className="rounded-full w-12 h-12"
           >
@@ -323,7 +330,7 @@ export const VideoChat: React.FC<VideoChatProps> = ({
 
           <Button
             variant="destructive"
-            size="icon"
+            size="sm"
             onClick={endCall}
             className="rounded-full w-14 h-14"
           >
@@ -332,7 +339,7 @@ export const VideoChat: React.FC<VideoChatProps> = ({
 
           <Button
             variant="secondary"
-            size="icon"
+            size="sm"
             onClick={toggleFullscreen}
             className="rounded-full w-12 h-12"
           >
@@ -341,7 +348,7 @@ export const VideoChat: React.FC<VideoChatProps> = ({
 
           <Button
             variant="secondary"
-            size="icon"
+            size="sm"
             className="rounded-full w-12 h-12"
           >
             <Settings className="w-5 h-5" />

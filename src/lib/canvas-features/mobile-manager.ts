@@ -81,11 +81,12 @@ export class MobileManager extends EventEmitter {
   }
 
   private setupEventListeners(): void {
-    // Touch events
-    this.canvas.wrapperEl.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
-    this.canvas.wrapperEl.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
-    this.canvas.wrapperEl.addEventListener('touchend', this.onTouchEnd.bind(this), { passive: false });
-    this.canvas.wrapperEl.addEventListener('touchcancel', this.onTouchCancel.bind(this), { passive: false });
+    // Touch events - use the canvas element for touch interactions
+    const canvasEl = (this.canvas as any).upperCanvasEl || this.canvas.getElement();
+    canvasEl.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
+    canvasEl.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
+    canvasEl.addEventListener('touchend', this.onTouchEnd.bind(this), { passive: false });
+    canvasEl.addEventListener('touchcancel', this.onTouchCancel.bind(this), { passive: false });
     
     // Window events
     window.addEventListener('resize', this.onResize.bind(this));
@@ -343,8 +344,9 @@ export class MobileManager extends EventEmitter {
   }
 
   private handleTap(touch: TouchPoint): void {
-    const pointer = this.canvas.getPointer({ clientX: touch.x, clientY: touch.y } as any);
-    const target = this.canvas.findTarget({ clientX: touch.x, clientY: touch.y } as any);
+    const event = { clientX: touch.x, clientY: touch.y } as any;
+    const pointer = this.canvas.getPointer(event);
+    const target = this.canvas.findTarget(event, false);
     
     if (target) {
       this.canvas.setActiveObject(target);
@@ -414,7 +416,7 @@ export class MobileManager extends EventEmitter {
 
   handleLongPress(e: TouchEvent): void {
     const touch = e.touches[0];
-    const target = this.canvas.findTarget({ clientX: touch.clientX, clientY: touch.clientY } as any);
+    const target = this.canvas.findTarget({ clientX: touch.clientX, clientY: touch.clientY } as any, false);
     
     this.emit('contextmenu', {
       x: touch.clientX,
@@ -551,7 +553,8 @@ export class MobileManager extends EventEmitter {
     if (this.focusableElement) {
       this.focusableElement.focus();
     } else {
-      this.canvas.wrapperEl.focus();
+      const canvasEl = (this.canvas as any).upperCanvasEl || this.canvas.getElement();
+      canvasEl.focus();
     }
   }
 
@@ -604,10 +607,11 @@ export class MobileManager extends EventEmitter {
 
   destroy(): void {
     // Remove event listeners
-    this.canvas.wrapperEl.removeEventListener('touchstart', this.onTouchStart.bind(this));
-    this.canvas.wrapperEl.removeEventListener('touchmove', this.onTouchMove.bind(this));
-    this.canvas.wrapperEl.removeEventListener('touchend', this.onTouchEnd.bind(this));
-    this.canvas.wrapperEl.removeEventListener('touchcancel', this.onTouchCancel.bind(this));
+    const canvasEl = (this.canvas as any).upperCanvasEl || this.canvas.getElement();
+    canvasEl.removeEventListener('touchstart', this.onTouchStart.bind(this));
+    canvasEl.removeEventListener('touchmove', this.onTouchMove.bind(this));
+    canvasEl.removeEventListener('touchend', this.onTouchEnd.bind(this));
+    canvasEl.removeEventListener('touchcancel', this.onTouchCancel.bind(this));
     
     window.removeEventListener('resize', this.onResize.bind(this));
     window.removeEventListener('orientationchange', this.onOrientationChange.bind(this));

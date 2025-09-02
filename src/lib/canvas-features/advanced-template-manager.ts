@@ -156,7 +156,9 @@ export class AdvancedTemplateManager {
     if (this.supabase) {
       const { data: savedTemplate, error } = await this.supabase
         .from('board_templates')
-        .insert(template);
+        .insert(template)
+        .select()
+        .single();
       
       if (!error && savedTemplate) {
         template.id = savedTemplate.id;
@@ -258,13 +260,16 @@ export class AdvancedTemplateManager {
     }
     
     const objects = template.data.objects || [];
-    objects.forEach((objData: any) => {
-      fabric.util.enlivenObjects([objData], (objects: fabric.Object[]) => {
-        objects.forEach(obj => this.canvas.add(obj));
-      });
-    });
+    if (objects && objects.length > 0) {
+      // In fabric.js 5.x, enlivenObjects needs namespace and reviver
+      fabric.util.enlivenObjects(objects, (enlivenedObjects: fabric.Object[]) => {
+        enlivenedObjects.forEach((obj: fabric.Object) => this.canvas.add(obj));
+        this.canvas.renderAll();
+      }, 'fabric');
+    } else {
+      this.canvas.renderAll();
+    }
     
-    this.canvas.renderAll();
     this.trackUsage(templateId, 'current-user');
   }
 
