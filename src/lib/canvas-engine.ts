@@ -26,6 +26,8 @@ interface CanvasEngineEvents {
   pan: { position: Position; delta: Position }
   zoom: { zoom: number; previousZoom: number; center: Position }
   stateChange: { type: string; camera?: Camera; [key: string]: any }
+  'awareness-changed': any[]
+  'synced': any
 }
 
 // Internal type that adds fabric object reference to CanvasElement

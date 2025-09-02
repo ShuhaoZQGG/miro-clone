@@ -1,4 +1,4 @@
-import { CanvasElement } from '@/types/canvas'
+import { CanvasElement } from '@/types'
 
 interface ConflictOptions {
   timeout?: number // Auto-clear timeout in milliseconds
