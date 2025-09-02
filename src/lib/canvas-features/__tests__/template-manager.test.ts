@@ -343,6 +343,25 @@ describe('AdvancedTemplateManager', () => {
     });
 
     it('should apply smart template with user data', async () => {
+      // First create the smart template
+      const smartTemplate = await manager.createTemplate({
+        id: 'smart-template-123',
+        name: 'Smart Template',
+        category: 'business',
+        data: {
+          objects: [
+            { type: 'text', text: '{{companyName}}' },
+            { type: 'image', src: '{{logo}}' }
+          ]
+        },
+        tags: ['smart'],
+        placeholders: {
+          companyName: { type: 'text', required: true },
+          logo: { type: 'image', required: false },
+          primaryColor: { type: 'color', required: false }
+        }
+      });
+
       const userData = {
         companyName: 'Tech Corp',
         logo: 'https://example.com/logo.png',
