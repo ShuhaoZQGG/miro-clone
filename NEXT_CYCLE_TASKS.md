@@ -1,72 +1,67 @@
-# Next Cycle Tasks
+# Next Cycle Tasks - CRITICAL PRIORITY
 
-## Production Readiness (High Priority)
-1. **Supabase Security Configuration**
-   - Enable leaked password protection (currently disabled)
-   - Configure additional MFA options (currently insufficient)
-   - Review and enable all security advisors recommendations
+## ⚠️ STOP: No New Features Until PR Crisis Resolved
 
-2. **Infrastructure Setup**
-   - Configure WebRTC STUN/TURN servers for production
-   - Set up HTTPS for WebRTC requirements
-   - Configure CDN for asset delivery
-   - Set up monitoring and alerting systems
+### Phase 1: Security First (IMMEDIATE)
+- [ ] Merge PR #24 - JWT security vulnerability fixes
+- [ ] Merge PR #25 - Production security hardening  
+- [ ] Verify Supabase RLS policies are active
+- [ ] Enable leaked password protection in Supabase Auth
+- [ ] Configure MFA options for enhanced security
 
-## Database Integration Tasks
-1. **Template System Database Features**
-   - Implement smart template application with user data
-   - Add template usage tracking and analytics
-   - Create template rating system
-   - Enable team sharing functionality
-   - Implement template versioning and rollback
-   *Note: These 9 failing tests require proper database integration*
+### Phase 2: Architecture Decision (CRITICAL)
+**Must choose ONE WebGL implementation:**
+- [ ] Review PR #57 (Three.js WebGL) vs PR #58 (Native WebGL)
+- [ ] Make final decision on WebGL approach
+- [ ] Document decision rationale
+- [ ] Close the rejected PR
 
-2. **Testing & Quality Assurance**
-   - Integration testing between new features and existing canvas
-   - Manual testing on actual mobile devices
-   - Cross-browser compatibility testing
-   - Performance testing with multiple concurrent users
+### Phase 3: Feature Integration
+- [ ] Merge PR #45 - Core auth, comments, PDF export
+- [ ] Merge PR #51 - UI integration for core features
+- [ ] Resolve conflicts in PR #60 - Video chat, templates, mobile
+- [ ] Test integrated features on main branch
 
-3. **Documentation**
-   - Document WebRTC server configuration requirements
-   - Create user guides for new features
-   - Update API documentation for template system
+### Phase 4: Cleanup
+- [ ] Close superseded PRs (#10, #16, #20, #42, #44)
+- [ ] Update all documentation to reflect merged state
+- [ ] Run full test suite and fix any failures
+- [ ] Create comprehensive integration test
 
-## Technical Debt
-1. **Code Quality Improvements**
-   - Fix minor variable naming inconsistency in mobile-manager.test.ts (global.window)
-   - Consider extracting common test utilities
-   - Review and consolidate mock implementations
-   - Add integration test suite for feature interactions
+## Technical Debt Items
 
-2. **Performance Optimization**
-   - Monitor WebGL renderer performance with large datasets
-   - Optimize mobile gesture handling based on device testing
-   - Review and optimize WebRTC connection handling
+### Code Quality
+- [ ] Fix 13 failing tests in mobile-manager and webgl-renderer
+- [ ] Remove duplicate CRDT implementations
+- [ ] Consolidate conflicting mobile handlers
+- [ ] Update TypeScript types for merged features
 
-## Feature Enhancements (Future)
-1. **WebRTC Enhancements**
-   - Screen sharing implementation
-   - Recording capabilities
-   - Bandwidth optimization
+### Documentation
+- [ ] Update README.md with all merged features
+- [ ] Create architecture decision record (ADR) for WebGL choice
+- [ ] Document PR management policy
+- [ ] Update API documentation
 
-2. **Template System**
-   - Template marketplace integration
-   - Custom template builder UI
-   - Template sharing between teams
+### Process Improvements
+- [ ] Implement 3-PR maximum policy
+- [ ] Set up automated PR conflict detection
+- [ ] Create merge checklist template
+- [ ] Establish code ownership map
 
-3. **Mobile Experience**
-   - Native mobile app consideration
-   - Offline mode enhancements
-   - Progressive Web App (PWA) features
+## DO NOT PROCEED WITH:
+- ❌ New feature development
+- ❌ Creating new PRs
+- ❌ Starting new cycles
+- ❌ Any work not related to PR consolidation
 
-## Infrastructure
-1. **Monitoring & Analytics**
-   - Set up performance monitoring for new features
-   - Add analytics for template usage
-   - Monitor WebRTC connection quality metrics
+## Success Criteria
+- All 13 PRs resolved (merged or closed)
+- Zero security vulnerabilities
+- Single WebGL implementation chosen
+- All tests passing (100%)
+- Clean main branch with no conflicts
 
-2. **Security**
-   - Security audit for WebRTC implementation
-   - Review template system for injection vulnerabilities
-   - Penetration testing for new endpoints
+---
+**Priority Level: ARCHITECTURAL INTERVENTION REQUIRED**
+
+The next cycle MUST focus exclusively on consolidating the 13 open PRs. No progress is possible until this technical debt is resolved.
