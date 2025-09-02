@@ -410,7 +410,24 @@ describe('UI Integration Tests', () => {
     it('should trigger download on export', async () => {
       // Add some elements to the canvas store so export is enabled
       useCanvasStore.setState({
-        elements: [{ id: 'test-element', type: 'shape' }]
+        elements: [{
+          id: 'test-element',
+          type: 'rectangle' as const,
+          boardId: 'test-board',
+          position: { x: 0, y: 0 },
+          size: { width: 100, height: 100 },
+          rotation: 0,
+          layerIndex: 0,
+          createdBy: 'test-user',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          style: {
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeWidth: 1,
+            opacity: 1
+          }
+        }]
       })
 
       render(
