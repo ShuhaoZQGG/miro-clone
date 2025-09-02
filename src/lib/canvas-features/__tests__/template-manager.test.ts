@@ -400,6 +400,14 @@ describe('AdvancedTemplateManager', () => {
   describe('Template Analytics', () => {
     it('should track template usage', async () => {
       const templateId = 'template-123';
+      // First create the template
+      await manager.createTemplate({
+        id: templateId,
+        name: 'Test Template',
+        category: 'test',
+        data: { objects: [] }
+      });
+      
       await manager.trackUsage(templateId, 'user-456');
       
       const stats = await manager.getTemplateStats(templateId);
@@ -408,6 +416,14 @@ describe('AdvancedTemplateManager', () => {
 
     it('should get template analytics', async () => {
       const templateId = 'template-789';
+      // First create the template
+      await manager.createTemplate({
+        id: templateId,
+        name: 'Analytics Template',
+        category: 'test',
+        data: { objects: [] }
+      });
+      
       const analytics = await manager.getTemplateAnalytics(templateId);
       
       expect(analytics).toHaveProperty('totalUses');
@@ -418,6 +434,14 @@ describe('AdvancedTemplateManager', () => {
 
     it('should rate template', async () => {
       const templateId = 'template-456';
+      // First create the template
+      await manager.createTemplate({
+        id: templateId,
+        name: 'Rate Template',
+        category: 'test',
+        data: { objects: [] }
+      });
+      
       const rating = await manager.rateTemplate(templateId, 'user-123', 5);
       
       expect(rating).toBe(true);
@@ -432,6 +456,14 @@ describe('AdvancedTemplateManager', () => {
     it('should share template with team', async () => {
       const templateId = 'template-123';
       const teamId = 'team-456';
+      
+      // First create the template
+      await manager.createTemplate({
+        id: templateId,
+        name: 'Share Template',
+        category: 'test',
+        data: { objects: [] }
+      });
       
       const shared = await manager.shareWithTeam(templateId, teamId, {
         canEdit: false,
@@ -468,6 +500,14 @@ describe('AdvancedTemplateManager', () => {
   describe('Template Versioning', () => {
     it('should create template version', async () => {
       const templateId = 'template-123';
+      // First create the template
+      await manager.createTemplate({
+        id: templateId,
+        name: 'Version Template',
+        category: 'test',
+        data: { objects: [] }
+      });
+      
       const version = await manager.createVersion(templateId, {
         versionNotes: 'Updated colors and layout'
       });
@@ -490,7 +530,19 @@ describe('AdvancedTemplateManager', () => {
 
     it('should revert to previous version', async () => {
       const templateId = 'template-789';
-      const versionNumber = 2;
+      // First create the template
+      await manager.createTemplate({
+        id: templateId,
+        name: 'Revert Template',
+        category: 'test',
+        data: { objects: [] }
+      });
+      
+      // Create some versions
+      await manager.createVersion(templateId, { versionNotes: 'Version 1' });
+      await manager.createVersion(templateId, { versionNotes: 'Version 2' });
+      
+      const versionNumber = 1;
       
       const reverted = await manager.revertToVersion(templateId, versionNumber);
       
