@@ -1,5 +1,8 @@
 import { fabric } from 'fabric'
 import { Position, Size, Camera, CanvasElement, Bounds, ElementType, ShapeElement, LineElement } from '@/types'
+import { WebGLRenderer } from '../../lib/canvas/webgl-renderer'
+import { CRDTManager } from '../../lib/crdt/crdt-manager'
+import { OperationType } from '../../lib/crdt/types'
 
 interface CameraState {
   x: number
@@ -23,6 +26,8 @@ interface CanvasEngineEvents {
   pan: { position: Position; delta: Position }
   zoom: { zoom: number; previousZoom: number; center: Position }
   stateChange: { type: string; camera?: Camera; [key: string]: any }
+  'crdt-operation': { operation: any }
+  'awareness-changed': { awareness: any }
 }
 
 // Internal type that adds fabric object reference to CanvasElement
@@ -46,6 +51,12 @@ export class CanvasEngine {
   private currentFrameRate = 60
   private renderThrottleId: number | null = null
   
+  // WebGL and CRDT integration
+  private webglRenderer: WebGLRenderer | null = null
+  private crdtManager: CRDTManager | null = null
+  private webglEnabled = false
+  private crdtEnabled = false
+  
   // Event system
   private eventListeners: Map<string, Set<(...args: any[]) => void>> = new Map()
   
@@ -67,11 +78,25 @@ export class CanvasEngine {
   private resizeDebounceTimer: number | null = null
   private renderRequestId: number | null = null
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options?: { 
+    enableWebGL?: boolean; 
+    enableCRDT?: boolean;
+    siteId?: string 
+  }) {
     this.container = container
     this.canvas = this.initializeCanvas()
     this.setupEventListeners()
     this.startFrameRateMonitoring()
+    
+    // Initialize WebGL if enabled
+    if (options?.enableWebGL) {
+      this.initializeWebGL()
+    }
+    
+    // Initialize CRDT if enabled
+    if (options?.enableCRDT) {
+      this.initializeCRDT(options.siteId || `site-${Date.now()}`)
+    }
   }
 
   private initializeCanvas(): fabric.Canvas {
@@ -1317,10 +1342,200 @@ export class CanvasEngine {
   // Cleanup
   private isDisposed = false
   
+  // Add element method
+  addElement(type: string, options: any): void {
+    let fabricObject: fabric.Object | null = null
+    
+    switch (type) {
+      case 'rectangle':
+        fabricObject = new fabric.Rect({
+          left: options.x || 0,
+          top: options.y || 0,
+          width: options.width || 100,
+          height: options.height || 100,
+          fill: options.fill || '#000000',
+          stroke: options.stroke || '#000000',
+          strokeWidth: options.strokeWidth || 1
+        })
+        break
+      case 'circle':
+        fabricObject = new fabric.Circle({
+          left: options.x || 0,
+          top: options.y || 0,
+          radius: options.radius || 50,
+          fill: options.fill || '#000000',
+          stroke: options.stroke || '#000000',
+          strokeWidth: options.strokeWidth || 1
+        })
+        break
+    }
+    
+    if (fabricObject) {
+      this.canvas.add(fabricObject)
+      const now = new Date().toISOString()
+      const element = {
+        id: options.id || `element-${Date.now()}`,
+        boardId: 'default-board',
+        type: type as ElementType,
+        position: { x: options.x || 0, y: options.y || 0 },
+        size: { width: options.width || 100, height: options.height || 100 },
+        rotation: 0,
+        layerIndex: this.elements.length,
+        createdBy: 'user',
+        createdAt: now,
+        updatedAt: now,
+        isLocked: false,
+        isVisible: true,
+        fabricObject
+      } as InternalCanvasElement
+      this.elements.push(element)
+      this.scheduleRender()
+    }
+  }
+  
+  // Remove element method
+  removeElement(elementId: string): void {
+    const index = this.elements.findIndex(e => e.id === elementId)
+    if (index !== -1) {
+      const element = this.elements[index]
+      if (element.fabricObject) {
+        this.canvas.remove(element.fabricObject)
+      }
+      this.elements.splice(index, 1)
+      this.scheduleRender()
+    }
+  }
+  
+  // WebGL Integration Methods
+  private initializeWebGL(): void {
+    try {
+      const canvasEl = this.canvas.getElement()
+      if (!canvasEl) return
+      
+      // Create a WebGL canvas overlay
+      const webglCanvas = document.createElement('canvas')
+      webglCanvas.width = canvasEl.width
+      webglCanvas.height = canvasEl.height
+      webglCanvas.style.position = 'absolute'
+      webglCanvas.style.top = '0'
+      webglCanvas.style.left = '0'
+      webglCanvas.style.pointerEvents = 'none'
+      webglCanvas.style.zIndex = '1'
+      
+      this.container.appendChild(webglCanvas)
+      this.webglRenderer = new WebGLRenderer(webglCanvas)
+      this.webglEnabled = true
+      
+      console.log('WebGL renderer initialized successfully')
+    } catch (error) {
+      console.error('Failed to initialize WebGL:', error)
+      this.webglEnabled = false
+    }
+  }
+  
+  enableWebGLRendering(enable: boolean): void {
+    this.webglEnabled = enable && this.webglRenderer !== null
+    if (this.webglEnabled) {
+      this.scheduleRender()
+    }
+  }
+  
+  isWebGLEnabled(): boolean {
+    return this.webglEnabled
+  }
+  
+  // CRDT Integration Methods
+  private initializeCRDT(siteId: string): void {
+    try {
+      this.crdtManager = new CRDTManager(siteId)
+      this.crdtEnabled = true
+      
+      // Listen for CRDT operations
+      this.on('crdt-operation', (event) => {
+        if (this.crdtManager) {
+          // Apply remote operations
+          const result = this.crdtManager.applyRemoteOperation(event.operation)
+          if (result.success) {
+            this.applyOperationToCanvas(event.operation)
+          }
+        }
+      })
+      
+      console.log('CRDT manager initialized with site ID:', siteId)
+    } catch (error) {
+      console.error('Failed to initialize CRDT:', error)
+      this.crdtEnabled = false
+    }
+  }
+  
+  enableCRDT(enable: boolean): void {
+    this.crdtEnabled = enable && this.crdtManager !== null
+  }
+  
+  isCRDTEnabled(): boolean {
+    return this.crdtEnabled
+  }
+  
+  getCRDTManager(): CRDTManager | null {
+    return this.crdtManager
+  }
+  
+  // Apply CRDT operation to canvas
+  private applyOperationToCanvas(operation: any): void {
+    switch (operation.type) {
+      case 'INSERT':
+        // Add element to canvas
+        if (operation.data.element) {
+          this.addElement(operation.data.element.type, operation.data.element)
+        }
+        break
+      case 'UPDATE':
+        // Update element on canvas
+        if (operation.data.objectId && operation.data.properties) {
+          const element = this.elements.find(el => el.id === operation.data.objectId)
+          if (element && element.fabricObject) {
+            element.fabricObject.set(operation.data.properties)
+            this.scheduleRender()
+          }
+        }
+        break
+      case 'DELETE':
+        // Remove element from canvas
+        if (operation.data.objectId) {
+          this.removeElement(operation.data.objectId)
+        }
+        break
+    }
+  }
+  
+  // Create CRDT operation for local changes
+  createLocalOperation(type: OperationType, data: any): void {
+    if (!this.crdtManager || !this.crdtEnabled) return
+    
+    const operation = this.crdtManager.createOperation(type, data)
+    
+    // Apply locally
+    this.applyOperationToCanvas(operation)
+    
+    // Emit operation for synchronization
+    this.emit('crdt-operation', { operation })
+  }
+
   dispose(): void {
     // Prevent multiple disposal attempts
     if (this.isDisposed) {
       return
+    }
+    
+    // Dispose WebGL renderer
+    if (this.webglRenderer) {
+      this.webglRenderer.dispose()
+      this.webglRenderer = null
+    }
+    
+    // Clear CRDT manager
+    if (this.crdtManager) {
+      this.crdtManager = null
     }
     
     try {
